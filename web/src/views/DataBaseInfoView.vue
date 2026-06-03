@@ -79,6 +79,14 @@
                   <FileUp :size="14" />
                   <span>上传</span>
                 </button>
+                <button
+                  type="button"
+                  class="lucide-icon-btn extension-panel-action extension-panel-action-secondary"
+                  @click="showCreateFolderModal"
+                >
+                  <FolderPlus :size="14" />
+                  <span>新建文件夹</span>
+                </button>
               </div>
             </div>
             <div class="file-panel-status">
@@ -134,20 +142,7 @@
               </div>
             </div>
           </div>
-          <FileTable ref="fileTableRef">
-            <template #toolbar-extra>
-              <div class="file-panel-actions">
-                <button
-                  type="button"
-                  class="lucide-icon-btn extension-panel-action extension-panel-action-secondary"
-                  @click="showCreateFolderModal"
-                >
-                  <FolderPlus :size="14" />
-                  <span>新建文件夹</span>
-                </button>
-              </div>
-            </template>
-          </FileTable>
+          <FileTable ref="fileTableRef" />
         </div>
 
         <div v-show="activeTab === 'query'" class="tab-panel query-config-panel">
@@ -1036,14 +1031,6 @@ onMounted(() => {
   white-space: nowrap;
 }
 
-.file-panel-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
 .file-management-info {
   display: flex;
   flex-wrap: wrap;
@@ -1236,11 +1223,6 @@ onMounted(() => {
   .file-panel-toolbar {
     align-items: flex-start;
     flex-direction: column;
-  }
-
-  .file-panel-actions {
-    width: 100%;
-    justify-content: flex-start;
   }
 }
 </style>

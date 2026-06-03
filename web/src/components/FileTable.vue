@@ -2,21 +2,20 @@
   <div class="file-table-container">
     <div class="panel-header">
       <div class="panel-actions">
-        <slot name="toolbar-extra" />
-        <div class="panel-actions-default">
-          <a-input
-            v-model:value="filenameFilter"
-            placeholder="搜索"
-            size="small"
-            class="action-searcher"
-            allow-clear
-            @change="onFilterChange"
-          >
-            <template #prefix>
-              <Search size="14" style="color: var(--gray-400)" />
-            </template>
-          </a-input>
+        <a-input
+          v-model:value="filenameFilter"
+          placeholder="搜索"
+          size="small"
+          class="action-searcher"
+          allow-clear
+          @change="onFilterChange"
+        >
+          <template #prefix>
+            <Search size="14" style="color: var(--gray-400)" />
+          </template>
+        </a-input>
 
+        <div class="panel-actions-default">
           <a-dropdown trigger="click">
             <a-button
               type="text"
@@ -1215,7 +1214,6 @@ import ChunkParamsConfig from '@/components/ChunkParamsConfig.vue'
 
   .action-searcher {
     width: 120px;
-    margin-right: 8px;
     border-radius: 6px;
     padding: 4px 8px;
     border: none;
@@ -1225,6 +1223,7 @@ import ChunkParamsConfig from '@/components/ChunkParamsConfig.vue'
 
 @container file-table (max-width: 480px) {
   .panel-actions {
+    .action-searcher,
     .panel-actions-default {
       display: none;
     }
@@ -1405,9 +1404,11 @@ import ChunkParamsConfig from '@/components/ChunkParamsConfig.vue'
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 4px;
   color: var(--gray-600);
+  background-color: var(--gray-0);
+  box-shadow: 0 0 0 1px var(--shadow-1);
   transition: all 0.1s ease;
   font-size: 12px;
   width: auto;
@@ -1436,9 +1437,9 @@ import ChunkParamsConfig from '@/components/ChunkParamsConfig.vue'
 
 .panel-action-btn.active {
   color: var(--main-color);
-  background-color: var(--gray-100);
+  background-color: var(--main-10);
   font-weight: 600;
-  box-shadow: 0 0 0 1px var(--shadow-1);
+  box-shadow: 0 0 0 1px var(--main-200);
 }
 
 .action-trigger-btn {

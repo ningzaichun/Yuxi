@@ -2465,6 +2465,7 @@ watch(currentChatId, (threadId, oldThreadId) => {
   margin: 0 auto;
   flex-grow: 1;
   padding: 1rem var(--page-padding);
+  padding-right: 30px;
   display: flex;
   flex-direction: column;
 }
