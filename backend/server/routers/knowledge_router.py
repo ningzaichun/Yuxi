@@ -1326,7 +1326,7 @@ async def import_workspace_files(
 
         filename = target.name
         ext = os.path.splitext(filename)[1].lower()
-        if ext == ".jsonl" or not (is_supported_file_extension(filename) or ext == ".zip"):
+        if not is_supported_file_extension(filename):
             raise HTTPException(status_code=400, detail=f"Unsupported file type: {ext}")
 
         size = target.stat().st_size
@@ -1374,7 +1374,6 @@ async def import_workspace_files(
 async def upload_file(
     file: UploadFile = File(...),
     kb_id: str | None = Query(None),
-    allow_jsonl: bool = Query(False),
     current_user: User = Depends(get_admin_user),
 ):
     """上传文件"""
@@ -1385,10 +1384,7 @@ async def upload_file(
 
     ext = os.path.splitext(file.filename)[1].lower()
 
-    if ext == ".jsonl":
-        if allow_jsonl is not True or kb_id is not None:
-            raise HTTPException(status_code=400, detail=f"Unsupported file type: {ext}")
-    elif not (is_supported_file_extension(file.filename) or ext == ".zip"):
+    if not is_supported_file_extension(file.filename):
         raise HTTPException(status_code=400, detail=f"Unsupported file type: {ext}")
 
     basename, ext = os.path.splitext(file.filename)
