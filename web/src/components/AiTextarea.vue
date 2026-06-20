@@ -101,7 +101,9 @@ const generateDescription = async () => {
     z-index: 1;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
+    min-width: 54px;
     padding: 2px 6px;
     height: 24px;
     color: var(--main-color);
@@ -119,6 +121,11 @@ const generateDescription = async () => {
     .ai-text {
       font-weight: 500;
     }
+
+    :deep(.ant-btn-loading-icon) {
+      display: inline-flex;
+      margin-inline-end: 0;
+    }
   }
 
   &.action-header {
@@ -126,6 +133,7 @@ const generateDescription = async () => {
       top: -31px;
       right: 0;
       height: 26px;
+      min-width: 58px;
       padding: 0 9px;
       border-radius: 6px;
       background: var(--gray-0);

@@ -159,6 +159,12 @@ async def prepare_item_metadata(item: str, content_type: str, kb_id: str, params
 
 
 def _normalize_source_path(value: object) -> str | None:
+    """归一化客户端传入的上传源路径，仅用于知识库文件树中的展示文件名。
+
+    source_path 用来保留 CLI 目录上传时的相对层级。这里不会把它当作真实
+    存储路径使用：反斜杠会转成斜杠，开头的 "./" 会被去掉，绝对路径和
+    ".." 父目录跳转会被拒绝。
+    """
     if not isinstance(value, str):
         return None
     normalized = value.strip().replace("\\", "/")

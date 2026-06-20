@@ -6,6 +6,12 @@ import { useTaskerStore } from '@/stores/tasker'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 import { parseToShanghai } from '@/utils/time'
+import {
+  canOpenFileDetail,
+  canPreviewParsed,
+  canSelectFile,
+  isProcessingFile
+} from '@/utils/knowledge_file_policy'
 
 export const useDatabaseStore = defineStore('database', () => {
   const router = useRouter()
@@ -188,7 +194,7 @@ export const useDatabaseStore = defineStore('database', () => {
     const files = database.value.files || {}
     const validFileIds = selectedRowKeys.value.filter((fileId) => {
       const file = files[fileId]
-      return file && !(file.status === 'processing' || file.status === 'waiting')
+      return canSelectFile(file)
     })
 
     if (validFileIds.length === 0) {
@@ -256,8 +262,6 @@ export const useDatabaseStore = defineStore('database', () => {
     })
   }
 
-  const processingStatuses = new Set(['processing', 'waiting', 'parsing', 'indexing'])
-
   function enableAutoRefresh(source = 'auto') {
     if (autoRefreshManualOverride && source === 'auto') {
       return
@@ -278,7 +282,7 @@ export const useDatabaseStore = defineStore('database', () => {
 
   function ensureAutoRefreshForProcessing(filesMap) {
     const files = Object.values(filesMap || {})
-    const hasPending = files.some((file) => file && processingStatuses.has(file.status))
+    const hasPending = files.some((file) => isProcessingFile(file))
     if (hasPending) {
       enableAutoRefresh('auto')
     } else if (autoRefreshSource === 'auto' && state.autoRefresh) {
@@ -415,14 +419,18 @@ export const useDatabaseStore = defineStore('database', () => {
   }
 
   async function openFileDetail(record) {
-    // 只要有 markdown_file (隐含在 status >= parsed 中) 或者是 error_indexing (说明解析成功但入库失败)，就可以查看
-    const allowStatuses = ['done', 'parsed', 'indexed', 'error_indexing']
-    if (!allowStatuses.includes(record.status)) {
+    if (!canOpenFileDetail(record)) {
       message.error('文件未处理完成，请稍后再试')
       return
     }
     state.fileDetailModalVisible = true
-    selectedFile.value = { ...record, lines: [] }
+    selectedFile.value = { ...record, lines: [], content: '' }
+    if (!canPreviewParsed(record)) {
+      state.fileDetailLoading = false
+      state.lock = false
+      return
+    }
+
     state.fileDetailLoading = true
     state.lock = true
 

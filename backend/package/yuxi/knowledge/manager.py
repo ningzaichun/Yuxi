@@ -556,9 +556,9 @@ class KnowledgeBaseManager:
         kb_instance = await self._get_kb_for_database(kb_id)
         return await kb_instance.list_file_tree(kb_id, parent_id, recursive, files_only)
 
-    async def read_file_preview(self, kb_id: str, file_id: str, variant: str = "parsed") -> dict:
+    async def read_file_preview(self, kb_id: str, file_id: str) -> dict:
         kb_instance = await self._get_kb_for_database(kb_id)
-        return await kb_instance.read_file_preview(kb_id, file_id, variant)
+        return await kb_instance.read_file_preview(kb_id, file_id)
 
     async def get_file_download(self, kb_id: str, file_id: str, variant: str = "original") -> dict:
         kb_instance = await self._get_kb_for_database(kb_id)

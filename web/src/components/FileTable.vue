@@ -16,6 +16,16 @@
         </a-input>
 
         <div class="panel-actions-default">
+          <a-button
+            type="text"
+            @click="handleRefresh"
+            :loading="refreshing"
+            title="刷新"
+            class="panel-action-btn"
+          >
+            <template #icon><RotateCw size="16" /></template>
+          </a-button>
+
           <a-dropdown trigger="click">
             <a-button
               type="text"
@@ -35,15 +45,6 @@
             </template>
           </a-dropdown>
 
-          <a-button
-            type="text"
-            @click="handleRefresh"
-            :loading="refreshing"
-            title="刷新"
-            class="panel-action-btn"
-          >
-            <template #icon><RotateCw size="16" /></template>
-          </a-button>
           <a-button
             type="text"
             @click="toggleSelectionMode"
@@ -80,6 +81,15 @@
                 </a-input>
               </div>
               <div class="overflow-actions">
+                <div
+                  class="overflow-action-item"
+                  :class="{ 'is-loading': refreshing }"
+                  @click="handleRefresh"
+                >
+                  <RotateCw size="16" :class="{ spin: refreshing }" />
+                  <span>刷新</span>
+                </div>
+
                 <a-dropdown trigger="click" placement="bottomLeft">
                   <div class="overflow-action-item" :class="{ active: statusFilter !== 'all' }">
                     <Filter size="16" />
@@ -95,15 +105,6 @@
                     </a-menu>
                   </template>
                 </a-dropdown>
-
-                <div
-                  class="overflow-action-item"
-                  :class="{ 'is-loading': refreshing }"
-                  @click="handleRefresh"
-                >
-                  <RotateCw size="16" :class="{ spin: refreshing }" />
-                  <span>刷新</span>
-                </div>
 
                 <div
                   class="overflow-action-item"
@@ -223,22 +224,28 @@
       }"
     >
       <template #bodyCell="{ column, text, record }">
-        <div v-if="column.key === 'filename'">
+        <span v-if="column.key === 'filename'" class="file-name-cell">
           <template v-if="record.is_folder">
-            <span class="folder-row" @click="toggleExpand(record)">
+            <span class="folder-row" :title="record.filename" @click="toggleExpand(record)">
               <FileTypeIcon is-dir :size="16" :style="{ marginRight: '8px' }" />
-              {{ record.filename }}
+              <span class="file-name-text">{{ record.filename }}</span>
             </span>
           </template>
-          <a-button v-else class="main-btn" type="link" @click="openFileDetail(record)">
+          <a-button
+            v-else
+            class="main-btn"
+            type="link"
+            :title="record.displayName || text"
+            @click="openFileDetail(record)"
+          >
             <FileTypeIcon
               :name="record.displayName || text"
               :size="16"
               :style="{ marginRight: '8px' }"
             />
-            {{ record.displayName || text }}
+            <span class="file-name-text">{{ record.displayName || text }}</span>
           </a-button>
-        </div>
+        </span>
         <span v-else-if="column.key === 'type'">
           <span v-if="!record.is_folder" :class="['span-type', text]">{{
             text?.toUpperCase()
@@ -296,11 +303,7 @@
                     type="text"
                     block
                     @click="handleDownloadFile(record)"
-                    :disabled="
-                      lock ||
-                      record.file_type === 'url' ||
-                      !['done', 'indexed', 'parsed', 'error_indexing'].includes(record.status)
-                    "
+                    :disabled="lock || !canDownloadFile(record)"
                   >
                     <template #icon><component :is="h(Download)" size="14" /></template>
                     下载文件
@@ -308,31 +311,31 @@
 
                   <!-- Parse Action -->
                   <a-button
-                    v-if="record.status === 'uploaded' || record.status === 'error_parsing'"
+                    v-if="canParseFile(record)"
                     type="text"
                     block
                     @click="handleParseFile(record)"
                     :disabled="lock"
                   >
                     <template #icon><component :is="h(FileText)" size="14" /></template>
-                    {{ record.status === 'error_parsing' ? '重试解析' : '解析文件' }}
+                    {{ getFilePrimaryAction(record)?.label || '解析文件' }}
                   </a-button>
 
                   <!-- Index Action -->
                   <a-button
-                    v-if="record.status === 'parsed' || record.status === 'error_indexing'"
+                    v-if="getFilePrimaryAction(record)?.type === FILE_ACTIONS.INDEX"
                     type="text"
                     block
                     @click="handleIndexFile(record)"
                     :disabled="lock"
                   >
                     <template #icon><component :is="h(Database)" size="14" /></template>
-                    {{ record.status === 'error_indexing' ? '重试入库' : '入库' }}
+                    {{ getFilePrimaryAction(record)?.label || '入库' }}
                   </a-button>
 
                   <!-- Reindex Action -->
                   <a-button
-                    v-if="record.status === 'done' || record.status === 'indexed'"
+                    v-if="canReindexFile(record)"
                     type="text"
                     block
                     @click="handleReindexFile(record)"
@@ -347,9 +350,7 @@
                     block
                     danger
                     @click="handleDeleteFile(record.file_id)"
-                    :disabled="
-                      lock || ['processing', 'parsing', 'indexing'].includes(record.status)
-                    "
+                    :disabled="!canDeleteFile(record, lock)"
                   >
                     <template #icon><component :is="h(Trash2)" size="14" /></template>
                     删除文件
@@ -371,6 +372,20 @@ import { ref, computed, h } from 'vue'
 import { useDatabaseStore } from '@/stores/database'
 import { message, Modal } from 'ant-design-vue'
 import { documentApi } from '@/apis/knowledge_api'
+import {
+  FILE_ACTIONS,
+  FILE_STATUS_FILTER_OPTIONS,
+  canDeleteFile,
+  canDownloadFile,
+  canIndexFile,
+  canParseFile,
+  canReindexFile,
+  canSelectFile,
+  getFilePrimaryAction,
+  getFileStatusSortWeight,
+  getFileStatusView,
+  matchesStatusFilter
+} from '@/utils/knowledge_file_policy'
 import {
   CheckCircleFilled,
   HourglassFilled,
@@ -400,69 +415,30 @@ const handleStatusMenuClick = (e) => {
   paginationConfig.value.current = 1
 }
 
-// Status text mapping
-const getStatusText = (status) => {
-  const map = {
-    uploaded: '待解析',
-    parsing: '解析中',
-    parsed: '待入库',
-    error_parsing: '重试解析',
-    indexing: '入库中',
-    indexed: '已入库',
-    error_indexing: '重试入库',
-    done: '已入库',
-    failed: '入库失败',
-    processing: '处理中',
-    waiting: '等待中'
-  }
-  return map[status] || status
+const statusIconMap = {
+  success: CheckCircleFilled,
+  progress: HourglassFilled,
+  error: CloseCircleFilled,
+  clock: ClockCircleFilled,
+  file: FileTextFilled
 }
 
-const statusActionMap = {
-  uploaded: 'parse',
-  error_parsing: 'parse',
-  parsed: 'index',
-  error_indexing: 'index'
-}
+const getStatusText = (status) => getFileStatusView(status).label
 
-const getStatusTone = (status) => {
-  if (status === 'done' || status === 'indexed') return 'status-success'
-  if (status === 'failed' || status === 'error_parsing' || status === 'error_indexing') {
-    return 'status-error'
-  }
-  if (status === 'processing' || status === 'parsing' || status === 'indexing') {
-    return 'status-info'
-  }
-  if (status === 'waiting' || status === 'uploaded') return 'status-warning'
-  if (status === 'parsed') return 'status-primary'
-  return ''
-}
+const getStatusTone = (status) => getFileStatusView(status).tone
 
 const getStatusIcon = (status) => {
-  if (status === 'done' || status === 'indexed') return CheckCircleFilled
-  if (status === 'failed' || status === 'error_parsing' || status === 'error_indexing') {
-    return CloseCircleFilled
-  }
-  if (status === 'processing' || status === 'parsing' || status === 'indexing') {
-    return HourglassFilled
-  }
-  if (status === 'waiting' || status === 'uploaded') return ClockCircleFilled
-  if (status === 'parsed') return FileTextFilled
-  return null
+  const icon = getFileStatusView(status).icon
+  return statusIconMap[icon] || null
 }
 
 const hasStatusAction = (record) => {
-  return !record.is_folder && Boolean(statusActionMap[record.status])
+  return Boolean(getFilePrimaryAction(record))
 }
 
 const getStatusActionTitle = (record) => {
-  const action = statusActionMap[record.status]
-  if (action === 'parse') {
-    return record.status === 'error_parsing' ? '重试解析' : '解析文件'
-  }
-  if (action === 'index') {
-    return record.status === 'error_indexing' ? '重试入库' : '入库'
-  }
+  const action = getFilePrimaryAction(record)
+  if (action) return action.label
   return getStatusText(record.status)
 }
 
@@ -493,17 +469,12 @@ const allSelectableFiles = computed(() => {
   return files.value.filter((file) => {
     if (file.is_folder) return false
     // Follow getCheckboxProps logic
-    if (lock.value || file.status === 'processing' || file.status === 'waiting') return false
+    if (!canSelectFile(file, lock.value)) return false
 
     if (nameFilter || status !== 'all') {
       const nameMatch =
         !nameFilter || (file.filename && file.filename.toLowerCase().includes(nameFilter))
-      const statusMatch =
-        status === 'all' ||
-        file.status === status ||
-        (status === 'indexed' && file.status === 'done') ||
-        (status === 'error_indexing' && file.status === 'failed')
-      return nameMatch && statusMatch
+      return nameMatch && matchesStatusFilter(file, status)
     }
     return true
   })
@@ -732,15 +703,7 @@ const handleTableChange = (pagination) => {
 // 文件名过滤
 const filenameFilter = ref('')
 const statusFilter = ref('all')
-const statusOptions = [
-  { label: '待解析', value: 'uploaded' },
-  { label: '解析中', value: 'parsing' },
-  { label: '待入库', value: 'parsed' },
-  { label: '重试解析', value: 'error_parsing' },
-  { label: '入库中', value: 'indexing' },
-  { label: '已入库', value: 'indexed' },
-  { label: '重试入库', value: 'error_indexing' }
-]
+const statusOptions = FILE_STATUS_FILTER_OPTIONS
 
 // 紧凑表格列定义
 const columnsCompact = [
@@ -763,20 +726,7 @@ const columnsCompact = [
     key: 'status',
     width: 104,
     sorter: (a, b) => {
-      const statusOrder = {
-        done: 1,
-        indexed: 1,
-        processing: 2,
-        indexing: 2,
-        parsing: 2,
-        waiting: 3,
-        uploaded: 3,
-        parsed: 3,
-        failed: 4,
-        error_indexing: 4,
-        error_parsing: 4
-      }
-      return (statusOrder[a.status] || 5) - (statusOrder[b.status] || 5)
+      return getFileStatusSortWeight(a) - getFileStatusSortWeight(b)
     },
     sortDirections: ['ascend', 'descend']
   },
@@ -912,12 +862,7 @@ const filteredFiles = computed(() => {
       .filter((file) => {
         const nameMatch =
           !nameFilter || (file.filename && file.filename.toLowerCase().includes(nameFilter))
-        const statusMatch =
-          status === 'all' ||
-          file.status === status ||
-          (status === 'indexed' && file.status === 'done') ||
-          (status === 'error_indexing' && file.status === 'failed')
-        return nameMatch && statusMatch
+        return nameMatch && matchesStatusFilter(file, status)
       })
       .map((f) => ({ ...f, displayName: f.filename }))
   }
@@ -934,7 +879,7 @@ const emptyText = computed(() => {
 const canBatchDelete = computed(() => {
   return selectedRowKeys.value.some((key) => {
     const file = files.value.find((f) => f.file_id === key)
-    return file && !(lock.value || file.status === 'processing' || file.status === 'waiting')
+    return canSelectFile(file, lock.value)
   })
 })
 
@@ -942,7 +887,7 @@ const canBatchDelete = computed(() => {
 const canBatchParse = computed(() => {
   return selectedRowKeys.value.some((key) => {
     const file = filteredFiles.value.find((f) => f.file_id === key)
-    return file && !lock.value && (file.status === 'uploaded' || file.status === 'error_parsing')
+    return !lock.value && canParseFile(file)
   })
 })
 
@@ -950,14 +895,7 @@ const canBatchParse = computed(() => {
 const canBatchIndex = computed(() => {
   return selectedRowKeys.value.some((key) => {
     const file = filteredFiles.value.find((f) => f.file_id === key)
-    return (
-      file &&
-      !lock.value &&
-      (file.status === 'parsed' ||
-        file.status === 'error_indexing' ||
-        file.status === 'done' ||
-        file.status === 'indexed')
-    )
+    return !lock.value && canIndexFile(file)
   })
 })
 
@@ -975,8 +913,7 @@ const onSelectChange = (keys, selectedRows) => {
 }
 
 const getCheckboxProps = (record) => ({
-  disabled:
-    lock.value || record.status === 'processing' || record.status === 'waiting' || record.is_folder
+  disabled: !canSelectFile(record, lock.value)
 })
 
 const onFilterChange = (e) => {
@@ -1015,7 +952,7 @@ const handleBatchDelete = () => {
 const handleBatchParse = async () => {
   const validKeys = selectedRowKeys.value.filter((key) => {
     const file = files.value.find((f) => f.file_id === key)
-    return file && (file.status === 'uploaded' || file.status === 'error_parsing')
+    return canParseFile(file)
   })
 
   if (validKeys.length === 0) {
@@ -1030,13 +967,7 @@ const handleBatchParse = async () => {
 const handleBatchIndex = async () => {
   const validKeys = selectedRowKeys.value.filter((key) => {
     const file = files.value.find((f) => f.file_id === key)
-    return (
-      file &&
-      (file.status === 'parsed' ||
-        file.status === 'error_indexing' ||
-        file.status === 'done' ||
-        file.status === 'indexed')
-    )
+    return canIndexFile(file)
   })
 
   if (validKeys.length === 0) {
@@ -1123,13 +1054,13 @@ const handleParseFile = async (record) => {
 const handleStatusAction = async (record) => {
   if (lock.value || !hasStatusAction(record)) return
 
-  const action = statusActionMap[record.status]
-  if (action === 'parse') {
+  const action = getFilePrimaryAction(record)
+  if (action?.type === FILE_ACTIONS.PARSE) {
     await handleParseFile(record)
     return
   }
 
-  if (action === 'index') {
+  if (action?.type === FILE_ACTIONS.INDEX) {
     await handleIndexFile(record)
   }
 }
@@ -1337,7 +1268,6 @@ import FileTypeIcon from '@/components/common/FileTypeIcon.vue'
   overflow: auto;
   background-color: var(--gray-0);
   min-height: 0;
-  table-layout: fixed;
   padding: 0 8px;
 }
 
@@ -1348,9 +1278,23 @@ import FileTypeIcon from '@/components/common/FileTypeIcon.vue'
   background-color: var(--gray-0) !important;
 }
 
+.file-name-cell,
+.folder-row,
 .my-table .main-btn {
-  display: flex;
-  justify-content: center;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.file-name-cell {
+  display: inline-flex;
+  vertical-align: middle;
+  width: auto;
+}
+
+.my-table .main-btn {
+  display: inline-flex;
+  justify-content: flex-start;
   padding: 0;
   height: auto;
   line-height: 1.4;
@@ -1358,6 +1302,17 @@ import FileTypeIcon from '@/components/common/FileTypeIcon.vue'
   font-weight: 600;
   color: var(--color-text);
   text-decoration: none;
+}
+
+.folder-row {
+  display: inline-flex;
+}
+
+.file-name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .my-table .main-btn:hover {
@@ -1580,8 +1535,6 @@ import FileTypeIcon from '@/components/common/FileTypeIcon.vue'
 }
 
 .folder-row {
-  display: flex;
-  align-items: center;
   cursor: pointer;
 
   &:hover {

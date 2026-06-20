@@ -10,6 +10,16 @@ from typing import Any
 from yuxi.knowledge.chunking.ragflow_like.presets import ensure_chunk_defaults_in_additional_params
 from yuxi.knowledge.schemas import FindOutputSchema, FindWindowSchema, SearchOutputSchema, SearchResultSchema
 from yuxi.knowledge.utils import resolve_processing_params, sanitize_processing_params
+from yuxi.services.file_preview import (
+    MAX_BINARY_PREVIEW_SIZE_BYTES,
+    OfficePreviewConversionError,
+    convert_office_to_pdf,
+    detect_media_type,
+    is_binary_preview_type,
+    is_office_pdf_preview_file,
+    render_preview_payload,
+    render_preview_too_large_payload,
+)
 from yuxi.utils import logger
 from yuxi.utils.datetime_utils import coerce_any_to_utc_datetime, utc_isoformat
 
@@ -444,24 +454,9 @@ class KnowledgeBase(ABC):
     def _original_file_path(file_meta: dict) -> str | None:
         return file_meta.get("minio_url") or file_meta.get("path")
 
-    def _knowledge_preview_variants(self, file_meta: dict) -> list[dict]:
-        variants = []
-        original_path = self._original_file_path(file_meta)
-        if original_path:
-            variants.append({"key": "original", "label": "Source", "supported": True})
-        if file_meta.get("markdown_file"):
-            variants.append({"key": "parsed", "label": "MD", "supported": True})
-        return variants
-
     def _knowledge_file_entry(self, kb_id: str, file_id: str, file_meta: dict) -> dict:
         is_dir = bool(file_meta.get("is_folder"))
-        variants = [] if is_dir else self._knowledge_preview_variants(file_meta)
-        preview_modes = [item["key"] for item in variants]
-        default_preview_mode = None
-        if "parsed" in preview_modes:
-            default_preview_mode = "parsed"
-        elif preview_modes:
-            default_preview_mode = preview_modes[0]
+        original_path = self._original_file_path(file_meta)
         path = f"/{file_id}"
         if is_dir:
             path = f"{path}/"
@@ -478,8 +473,8 @@ class KnowledgeBase(ABC):
             "modified_at": file_meta.get("updated_at") or file_meta.get("created_at") or "",
             "readonly": True,
             "status": file_meta.get("status", "done"),
-            "preview_modes": preview_modes,
-            "default_preview_mode": default_preview_mode,
+            "has_original_file": bool(original_path),
+            "has_parsed_markdown": bool(file_meta.get("markdown_file")),
         }
 
     def _sort_file_entries(self, entries: list[dict]) -> list[dict]:
@@ -539,17 +534,53 @@ class KnowledgeBase(ABC):
             "readonly": True,
         }
 
-    async def read_file_preview(self, kb_id: str, file_id: str, variant: str = "parsed") -> dict:
-        from yuxi.services.file_preview import detect_preview_type
+    @staticmethod
+    def _office_pdf_preview_path(kb_id: str, file_id: str) -> str:
+        return f"{kb_id}/preview/{file_id}.pdf"
 
+    async def _ensure_office_pdf_preview(self, kb_id: str, file_id: str, file_meta: dict) -> str:
+        from yuxi.storage.minio import get_minio_client
+
+        filename = file_meta.get("filename") or file_meta.get("original_filename") or file_id
+        if not is_office_pdf_preview_file(filename):
+            raise ValueError("当前文件类型不支持 PDF 预览")
+
+        minio_client = get_minio_client()
+        bucket_name = minio_client.KB_BUCKETS["parsed"]
+        object_name = self._office_pdf_preview_path(kb_id, file_id)
+        if await minio_client.astat_file(bucket_name, object_name) is not None:
+            return f"minio://{bucket_name}/{object_name}"
+
+        original_path = self._original_file_path(file_meta)
+        if not original_path:
+            raise ValueError("文件没有可转换的原始内容")
+
+        raw_content = await self._read_minio_bytes(original_path)
+        try:
+            pdf_content = await convert_office_to_pdf(filename, raw_content)
+        except OfficePreviewConversionError as exc:
+            raise ValueError(str(exc)) from exc
+        await minio_client.aupload_file(
+            bucket_name=bucket_name,
+            object_name=object_name,
+            data=pdf_content,
+            content_type="application/pdf",
+        )
+        return f"minio://{bucket_name}/{object_name}"
+
+    async def _get_minio_file_size(self, file_path: str) -> int | None:
+        from yuxi.knowledge.utils.kb_utils import is_minio_url, parse_minio_url
+        from yuxi.storage.minio import get_minio_client
+
+        if not file_path or not is_minio_url(file_path):
+            return None
+        bucket_name, object_name = parse_minio_url(file_path)
+        return await get_minio_client().astat_file(bucket_name, object_name)
+
+    async def read_file_preview(self, kb_id: str, file_id: str) -> dict:
         file_meta = self._get_file_meta(kb_id, file_id)
         if file_meta.get("is_folder"):
             raise ValueError("Cannot preview a folder")
-
-        variants = self._knowledge_preview_variants(file_meta)
-        variant_keys = {item["key"] for item in variants}
-        if variant not in {"original", "parsed"}:
-            raise ValueError("Unsupported preview variant")
 
         filename = file_meta.get("filename") or file_meta.get("original_filename") or file_id
         response = {
@@ -557,32 +588,11 @@ class KnowledgeBase(ABC):
             "kb_id": kb_id,
             "file_id": file_id,
             "filename": filename,
-            "variant": variant,
             "readonly": True,
-            "available_variants": variants,
         }
 
-        if variant == "parsed":
-            markdown_file = file_meta.get("markdown_file")
-            if not markdown_file or "parsed" not in variant_keys:
-                return {
-                    **response,
-                    "content": None,
-                    "preview_type": "unsupported",
-                    "supported": False,
-                    "message": "文件尚未生成解析结果",
-                }
-            content = await self._read_markdown_from_minio(markdown_file)
-            return {
-                **response,
-                "content": content,
-                "preview_type": "markdown",
-                "supported": True,
-                "message": None,
-            }
-
         original_path = self._original_file_path(file_meta)
-        if not original_path or "original" not in variant_keys:
+        if not original_path:
             return {
                 **response,
                 "content": None,
@@ -591,43 +601,41 @@ class KnowledgeBase(ABC):
                 "message": "文件没有可预览的原始内容",
             }
 
-        preview_type, supported, message = detect_preview_type(filename, b"")
-        if preview_type in {"image", "pdf"}:
+        file_size = file_meta.get("size")
+        if file_size is None:
+            file_size = await self._get_minio_file_size(original_path)
+        if file_size is not None and int(file_size) > MAX_BINARY_PREVIEW_SIZE_BYTES:
+            return {**response, **render_preview_too_large_payload()}
+
+        if is_office_pdf_preview_file(filename):
+            preview_path = await self._ensure_office_pdf_preview(kb_id, file_id, file_meta)
+            stem = filename.rsplit(".", 1)[0] or file_id
             return {
                 **response,
-                "content": None,
-                "preview_type": preview_type,
-                "supported": supported,
-                "message": message,
+                "content": await self._read_minio_bytes(preview_path),
+                "filename": f"{stem}.pdf",
+                "media_type": "application/pdf",
+                "preview_type": "pdf",
+                "supported": True,
+                "message": None,
+                "binary": True,
             }
 
         raw_content = await self._read_minio_bytes(original_path)
-        preview_type, supported, message = detect_preview_type(filename, raw_content)
-        if preview_type in {"image", "pdf"} or not supported:
+        if len(raw_content) > MAX_BINARY_PREVIEW_SIZE_BYTES:
+            return {**response, **render_preview_too_large_payload()}
+        payload = render_preview_payload(filename, raw_content)
+        if is_binary_preview_type(payload["preview_type"]) and payload["supported"]:
             return {
                 **response,
-                "content": None,
-                "preview_type": preview_type,
-                "supported": supported,
-                "message": message,
+                "content": raw_content,
+                "media_type": detect_media_type(filename, raw_content),
+                "preview_type": payload["preview_type"],
+                "supported": True,
+                "message": None,
+                "binary": True,
             }
-        try:
-            content = raw_content.decode("utf-8")
-        except UnicodeDecodeError:
-            return {
-                **response,
-                "content": None,
-                "preview_type": "unsupported",
-                "supported": False,
-                "message": "当前文件不是 UTF-8 文本，暂不支持预览",
-            }
-        return {
-            **response,
-            "content": content,
-            "preview_type": preview_type,
-            "supported": True,
-            "message": message,
-        }
+        return {**response, **payload}
 
     async def get_file_download(self, kb_id: str, file_id: str, variant: str = "original") -> dict:
         file_meta = self._get_file_meta(kb_id, file_id)

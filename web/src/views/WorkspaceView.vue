@@ -98,7 +98,6 @@
             :saving="savingPreviewFile"
             @close="closePreview"
             @save="handleSavePreviewFile"
-            @switch-variant="handleSwitchKnowledgeVariant"
           />
         </template>
 
@@ -130,7 +129,7 @@
       :open="previewModalVisible && !useInlinePreview"
       width="880px"
       :style="{ maxWidth: '92vw', top: '5vh' }"
-      :bodyStyle="{ maxHeight: '90vh', overflow: 'auto' }"
+      :bodyStyle="{ height: '82vh', maxHeight: '90vh', padding: '0', overflow: 'hidden' }"
       :footer="null"
       :closable="false"
       wrapClassName="workspace-file-preview-modal"
@@ -142,11 +141,13 @@
         :showClose="true"
         :showDownload="false"
         :showFullscreen="true"
+        :full-height="true"
         :editable="activeSourceKey === 'personal'"
         :saving="savingPreviewFile"
+        container-class="workspace-modal-preview-container"
+        content-class="workspace-modal-preview-content"
         @close="closePreview"
         @save="handleSavePreviewFile"
-        @switch-variant="handleSwitchKnowledgeVariant"
       />
     </a-modal>
   </div>
@@ -175,6 +176,7 @@ import {
   saveWorkspaceFileContent,
   uploadWorkspaceFiles
 } from '@/apis/workspace_api'
+import { normalizePreviewResponse } from '@/utils/file_preview'
 
 const userStore = useUserStore()
 
@@ -246,50 +248,13 @@ const revokePreviewObjectUrl = () => {
   previewObjectUrl.value = ''
 }
 
-const isBinaryPreview = (previewType) => previewType === 'image' || previewType === 'pdf'
-
-const createBinaryPreviewUrl = async (entry, response) => {
-  const downloadResponse =
-    entry.source === 'knowledge'
-      ? await downloadWorkspaceKnowledgeFile(
-          entry.kb_id,
-          entry.file_id,
-          response.variant || 'original'
-        )
-      : await downloadWorkspaceFile(entry.path)
-  const blob = await downloadResponse.blob()
-  return window.URL.createObjectURL(blob)
-}
-
 const normalizePreviewFile = async (entry, response) => {
-  const previewType = response.preview_type || response.previewType || 'text'
-  const file = {
-    ...entry,
-    ...response,
-    previewType,
-    supported: response.supported !== false,
-    previewUrl: ''
-  }
-
-  if (entry.source === 'knowledge') {
-    file.availableVariants = response.available_variants || response.availableVariants || []
-  }
-
-  if (isBinaryPreview(previewType)) {
-    file.previewUrl = await createBinaryPreviewUrl(entry, response)
-  }
-
-  return file
+  return normalizePreviewResponse(response, entry)
 }
 
 const KNOWLEDGE_PREVIEW_LOAD_MESSAGES = {
   log: '加载知识库文件预览失败:',
   resolveUserMessage: () => '加载知识库文件预览失败'
-}
-
-const KNOWLEDGE_PREVIEW_SWITCH_MESSAGES = {
-  log: '切换知识库文件预览失败:',
-  resolveUserMessage: (error) => error?.message || '切换预览失败'
 }
 
 const buildPreviewLoadingFile = (entry, baseFile = entry) => ({
@@ -374,13 +339,12 @@ const loadWorkspacePreview = async (entry) => {
 
 const loadKnowledgePreview = async (
   entry,
-  variant = entry.default_preview_mode || 'parsed',
   baseFile = entry,
   messages = KNOWLEDGE_PREVIEW_LOAD_MESSAGES
 ) => {
   const requestId = startPreviewRequest(entry, baseFile)
   try {
-    const response = await getWorkspaceKnowledgeFileContent(entry.kb_id, entry.file_id, variant)
+    const response = await getWorkspaceKnowledgeFileContent(entry.kb_id, entry.file_id)
     if (!isCurrentPreviewEntry(requestId, entry)) return
     const file = await normalizePreviewFile(entry, response)
     applyPreviewFile(requestId, entry, file)
@@ -547,20 +511,6 @@ const handleSelectEntry = async (entry) => {
   }
 
   await loadWorkspacePreview(entry)
-}
-
-const handleSwitchKnowledgeVariant = async (variant) => {
-  const entry = selectedEntry.value
-  if (!entry || entry.source !== 'knowledge' || !entry.kb_id || !entry.file_id) return
-  if (previewFile.value?.variant === variant || previewFile.value?.previewVariant === variant)
-    return
-
-  await loadKnowledgePreview(
-    entry,
-    variant,
-    previewFile.value || entry,
-    KNOWLEDGE_PREVIEW_SWITCH_MESSAGES
-  )
 }
 
 const closePreview = () => {
@@ -964,7 +914,27 @@ watch(useInlinePreview, (isInline, wasInline) => {
     }
 
     .ant-modal-body {
+      height: 82vh;
       padding: 0;
+      overflow: hidden;
+    }
+
+    .workspace-modal-preview-container {
+      height: 100%;
+      max-height: none;
+    }
+
+    .workspace-modal-preview-content {
+      flex: 1 1 auto;
+      max-height: none;
+      min-height: 0;
+    }
+
+    .workspace-modal-preview-content .html-preview,
+    .workspace-modal-preview-content .pdf-preview {
+      display: block;
+      height: 100%;
+      min-height: 100%;
     }
   }
 }

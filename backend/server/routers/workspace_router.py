@@ -68,7 +68,27 @@ async def get_workspace_tree(
     )
 
 
-@workspace.get("/file", response_model=dict)
+def _binary_preview_response(data: dict) -> StreamingResponse:
+    filename = data.get("filename") or "preview"
+    preview_type = data.get("preview_type") or "unsupported"
+    return StreamingResponse(
+        io.BytesIO(data.get("content") or b""),
+        media_type=data.get("media_type") or "application/octet-stream",
+        headers={
+            "Content-Disposition": f"inline; filename*=UTF-8''{quote(filename)}",
+            "X-Yuxi-Preview-Type": preview_type,
+            "X-Yuxi-Preview-Filename": quote(filename),
+        },
+    )
+
+
+def _preview_response(data):
+    if isinstance(data, dict) and data.get("binary"):
+        return _binary_preview_response(data)
+    return data
+
+
+@workspace.get("/file")
 async def get_workspace_file(
     path: str = Query(..., description="工作区文件路径"),
     current_user: User = Depends(get_required_user),
@@ -96,16 +116,15 @@ async def get_workspace_knowledge_tree(
         _raise_knowledge_read_error(error)
 
 
-@workspace.get("/knowledge/file", response_model=dict)
+@workspace.get("/knowledge/file")
 async def get_workspace_knowledge_file(
     kb_id: str = Query(..., description="知识库 ID"),
     file_id: str = Query(..., description="知识库文件 ID"),
-    variant: str = Query("parsed", description="预览模式：parsed 或 original"),
     current_user: User = Depends(get_required_user),
 ):
     await _ensure_knowledge_read_access(current_user, kb_id)
     try:
-        return await knowledge_base.read_file_preview(kb_id=kb_id, file_id=file_id, variant=variant)
+        return _preview_response(await knowledge_base.read_file_preview(kb_id=kb_id, file_id=file_id))
     except ValueError as error:
         _raise_knowledge_read_error(error)
 
