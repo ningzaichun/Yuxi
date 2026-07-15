@@ -11,7 +11,6 @@
       <a-result status="error" :title="error.title" :sub-title="error.message">
         <template #extra>
           <a-button type="primary" @click="retryLoad">重试</a-button>
-          <a-button :href="faqUrl" target="_blank" rel="noopener noreferrer">常见问题</a-button>
         </template>
       </a-result>
     </div>
@@ -30,26 +29,12 @@
         <div class="logo">
           <img
             :src="infoStore.organization.logo"
-            :alt="infoStore.organization.name"
+            :alt="infoStore.branding.name || 'K-AI'"
             class="logo-img"
           />
-          <span class="logo-text">{{ infoStore.organization.name }}</span>
+          <span class="logo-text">{{ infoStore.branding.name || 'K-AI' }}</span>
         </div>
         <div class="header-actions">
-          <a
-            class="github-link"
-            href="https://github.com/xerrors/Yuxi"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="GitHub"
-          >
-            <svg height="20" width="20" viewBox="0 0 16 16" version="1.1">
-              <path
-                fill-rule="evenodd"
-                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
-              ></path>
-            </svg>
-          </a>
           <UserInfoComponent :show-button="true" />
         </div>
       </header>
@@ -57,21 +42,9 @@
       <main class="hero-section">
         <div class="hero-layout">
           <div class="hero-content reveal-up">
-            <p v-if="typedBadge" class="hero-badge" :class="{ typing: isBadgeTyping }">
+            <p class="hero-badge">
               <span class="badge-dot"></span>
-              <template v-if="badgeParts.number">
-                <span>{{ badgeParts.prefix }}</span>
-                <a
-                  class="hero-badge-link"
-                  :href="repoUrl"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span class="hero-badge-number">{{ badgeParts.number }}</span>
-                </a>
-                <span>{{ badgeParts.suffix }}</span>
-              </template>
-              <template v-else>{{ typedBadge }}</template>
+              <span>{{ infoStore.organization.name || '量程科技' }} · 建筑智能化</span>
             </p>
             <h1 class="title reveal-up delay-1">{{ infoStore.branding.title }}</h1>
             <Transition name="subtitle-switch" mode="out-in">
@@ -84,15 +57,6 @@
                 <span>开始体验</span>
                 <ArrowRight :size="18" />
               </button>
-              <a
-                class="button-base secondary"
-                href="https://xerrors.github.io/Yuxi/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <BookText :size="18" />
-                <span>查看文档</span>
-              </a>
             </div>
           </div>
 
@@ -177,16 +141,6 @@
 
                 <p class="flow-caption">智能体发起检索 · 引擎融合向量与图谱 · 召回知识增强生成</p>
               </div>
-
-              <div class="stat-row" v-if="realtimeStats.length">
-                <div class="stat-item" v-for="stat in realtimeStats" :key="stat.key">
-                  <span class="stat-item-value">
-                    <component :is="stat.icon" :size="15" />
-                    {{ stat.value }}
-                  </span>
-                  <span class="stat-item-label">{{ stat.label }}</span>
-                </div>
-              </div>
             </div>
           </aside>
         </div>
@@ -211,10 +165,6 @@ import { useInfoStore } from '@/stores/info'
 import { healthApi } from '@/apis/system_api'
 import UserInfoComponent from '@/components/UserInfoComponent.vue'
 import {
-  BookText,
-  Star,
-  GitFork,
-  CircleDot,
   ArrowRight,
   Workflow,
   Library,
@@ -224,28 +174,11 @@ import {
 const router = useRouter()
 const userStore = useUserStore()
 const infoStore = useInfoStore()
-const repoUrl = 'https://github.com/xerrors/Yuxi'
-const faqUrl = 'https://xerrors.github.io/Yuxi/'
 
 // 加载状态
 const isLoading = ref(true)
 const error = ref(null)
-const typedBadge = ref('')
-const isBadgeTyping = ref(false)
-const githubStats = ref(null)
-let badgeTimer = null
 let subtitleTimer = null
-let starsFetchController = null
-
-const GITHUB_REPO_API = 'https://api.github.com/repos/xerrors/Yuxi'
-const GITHUB_STARS_TIMEOUT = 3000
-
-const formatStars = (count) => {
-  if (!Number.isFinite(count) || count <= 0) {
-    return ''
-  }
-  return `${count}`
-}
 
 const subtitleIndex = ref(0)
 
@@ -265,23 +198,6 @@ const subtitleOptions = computed(() => {
 })
 
 const currentSubtitle = computed(() => subtitleOptions.value[subtitleIndex.value] || '')
-const badgeParts = computed(() => {
-  const text = typedBadge.value || ''
-  const match = text.match(/^(.*?)(\d[\d,]*\+?)(\s+GitHub Stars.*)?$/)
-  if (!match) {
-    return {
-      prefix: text,
-      number: '',
-      suffix: ''
-    }
-  }
-
-  return {
-    prefix: match[1] || '',
-    number: match[2] || '',
-    suffix: match[3] || ''
-  }
-})
 
 const stopSubtitleCarousel = () => {
   if (subtitleTimer) {
@@ -301,76 +217,6 @@ const startSubtitleCarousel = () => {
   subtitleTimer = setInterval(() => {
     subtitleIndex.value = (subtitleIndex.value + 1) % subtitleOptions.value.length
   }, 2800)
-}
-
-const stopStarsFetch = () => {
-  if (starsFetchController) {
-    starsFetchController.abort()
-    starsFetchController = null
-  }
-}
-
-const fetchGithubRepo = async () => {
-  stopStarsFetch()
-  const controller = new AbortController()
-  starsFetchController = controller
-  const timer = setTimeout(() => {
-    controller.abort()
-  }, GITHUB_STARS_TIMEOUT)
-
-  try {
-    const response = await fetch(GITHUB_REPO_API, { signal: controller.signal })
-    if (!response.ok) {
-      return null
-    }
-
-    const data = await response.json()
-    return {
-      stars: Number(data?.stargazers_count) || 0,
-      forks: Number(data?.forks_count) || 0,
-      issues: Number(data?.open_issues_count) || 0
-    }
-  } catch {
-    return null
-  } finally {
-    clearTimeout(timer)
-    if (starsFetchController === controller) {
-      starsFetchController = null
-    }
-  }
-}
-
-const getHeroBadgeText = (starsCount = null) => {
-  const realtimeStars = formatStars(starsCount)
-  return realtimeStars ? `已获得 ${realtimeStars} GitHub Stars` : ''
-}
-
-const stopBadgeTyping = () => {
-  if (badgeTimer) {
-    clearInterval(badgeTimer)
-    badgeTimer = null
-  }
-  isBadgeTyping.value = false
-}
-
-const startBadgeTyping = (starsCount = null) => {
-  stopBadgeTyping()
-  const text = getHeroBadgeText(starsCount)
-  typedBadge.value = ''
-
-  if (!text) {
-    return
-  }
-
-  let index = 0
-  isBadgeTyping.value = true
-  badgeTimer = setInterval(() => {
-    index += 1
-    typedBadge.value = text.slice(0, index)
-    if (index >= text.length) {
-      stopBadgeTyping()
-    }
-  }, 45)
 }
 
 const checkHealth = async () => {
@@ -398,15 +244,9 @@ const loadData = async () => {
     // 健康检查通过后加载配置
     await infoStore.loadInfoConfig()
     startSubtitleCarousel()
-    const repo = await fetchGithubRepo()
-    githubStats.value = repo
-    startBadgeTyping(repo?.stars ?? null)
   } catch (e) {
     console.error('加载失败:', e)
-    stopBadgeTyping()
     stopSubtitleCarousel()
-    stopStarsFetch()
-    typedBadge.value = ''
   } finally {
     isLoading.value = false
   }
@@ -432,26 +272,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  stopBadgeTyping()
   stopSubtitleCarousel()
-  stopStarsFetch()
-})
-
-const formatCount = (count) =>
-  Number.isFinite(count) && count >= 0 ? count.toLocaleString('en-US') : ''
-
-// 首页统计直接展示实时的 GitHub 仓库数据，不再依赖 branding 配置
-const realtimeStats = computed(() => {
-  const stats = githubStats.value
-  if (!stats) {
-    return []
-  }
-
-  return [
-    { key: 'stars', label: 'Stars', value: formatCount(stats.stars), icon: Star },
-    { key: 'forks', label: 'Forks', value: formatCount(stats.forks), icon: GitFork },
-    { key: 'issues', label: 'Open Issues', value: formatCount(stats.issues), icon: CircleDot }
-  ]
 })
 </script>
 
@@ -588,32 +409,6 @@ const realtimeStats = computed(() => {
   font-weight: 600;
 }
 
-.github-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  text-decoration: none;
-  color: var(--gray-600);
-  border: 1px solid transparent;
-  transition:
-    color 0.2s ease,
-    background 0.2s ease,
-    border-color 0.2s ease;
-
-  &:hover {
-    color: var(--main-700);
-    background: var(--main-30);
-    border-color: var(--main-40);
-  }
-
-  svg {
-    fill: currentColor;
-  }
-}
-
 // Hero
 .hero-section {
   position: relative;
@@ -681,32 +476,6 @@ const realtimeStats = computed(() => {
   background: var(--main-500);
   box-shadow: 0 0 0 4px var(--main-50);
   flex-shrink: 0;
-}
-
-.hero-badge-link {
-  color: inherit;
-  text-decoration: none;
-}
-
-.hero-badge-number {
-  color: var(--main-700);
-  font-weight: 700;
-  transition: color 0.2s ease;
-}
-
-.hero-badge-link:hover .hero-badge-number {
-  color: var(--main-800);
-}
-
-.hero-badge.typing::after {
-  content: '';
-  display: inline-block;
-  width: 1px;
-  height: 1em;
-  margin-left: 2px;
-  background: var(--main-600);
-  vertical-align: -0.1em;
-  animation: caretBlink 0.8s steps(1, end) infinite;
 }
 
 .title {
@@ -982,49 +751,6 @@ const realtimeStats = computed(() => {
   line-height: 1.5;
 }
 
-.stat-row {
-  position: relative;
-  display: flex;
-  margin-top: 1.5rem;
-  padding-top: 1.35rem;
-  border-top: 1px solid var(--main-40);
-}
-
-.stat-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-
-  &:not(:first-child) {
-    padding-left: 1.2rem;
-  }
-
-  &:not(:last-child) {
-    padding-right: 1.2rem;
-    border-right: 1px solid var(--main-40);
-  }
-}
-
-.stat-item-value {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--main-800);
-  line-height: 1.1;
-
-  :deep(svg) {
-    color: var(--main-500);
-  }
-}
-
-.stat-item-label {
-  font-size: 0.8rem;
-  color: var(--gray-600);
-}
-
 // 页脚
 .footer {
   position: relative;
@@ -1052,12 +778,6 @@ const realtimeStats = computed(() => {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes caretBlink {
-  50% {
-    opacity: 0;
   }
 }
 
@@ -1123,14 +843,6 @@ const realtimeStats = computed(() => {
     background: var(--main-5);
   }
 
-  .hero-badge-number {
-    color: var(--main-200);
-  }
-
-  .hero-badge-link:hover .hero-badge-number {
-    color: var(--main-100);
-  }
-
   .button-base.secondary {
     color: var(--main-200);
 
@@ -1142,20 +854,11 @@ const realtimeStats = computed(() => {
       color: var(--main-100);
     }
   }
-
-  .github-link {
-    color: var(--gray-400);
-
-    &:hover {
-      color: var(--main-200);
-    }
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .reveal-up,
-  .orb,
-  .hero-badge.typing::after {
+  .orb {
     animation: none;
   }
 

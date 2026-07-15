@@ -256,13 +256,8 @@
 
     <!-- 页面底部：版权信息等 -->
     <footer class="page-footer">
-      <div class="footer-links">
-        <a href="https://github.com/xerrors" target="_blank">联系我们</a>
-        <span class="divider">|</span>
-        <a href="https://github.com/xerrors/Yuxi" target="_blank">使用帮助</a>
-      </div>
       <div class="copyright">
-        &copy; {{ new Date().getFullYear() }} {{ brandName }}. All Rights Reserved.
+        {{ infoStore.footer?.copyright || `© ${new Date().getFullYear()} 量程科技` }}
       </div>
     </footer>
   </div>
@@ -296,14 +291,14 @@ const loginBgImage = computed(() => {
   return infoStore.organization?.login_bg || '/login-bg.jpg'
 })
 const brandLogo = computed(() => {
-  return infoStore.organization?.logo || ''
+  return infoStore.organization?.logo || '/k-ai-logo.svg'
 })
 const brandOrgName = computed(() => {
-  return infoStore.organization?.name?.trim() || ''
+  return infoStore.organization?.name?.trim() || '量程科技'
 })
 const brandName = computed(() => {
   const orgName = brandOrgName.value
-  const brandNameRaw = infoStore.branding?.name?.trim() || 'Yuxi'
+  const brandNameRaw = infoStore.branding?.name?.trim() || 'K-AI'
 
   if (orgName && brandNameRaw && orgName !== brandNameRaw) {
     return brandNameRaw
@@ -942,27 +937,6 @@ onUnmounted(() => {
 .page-footer {
   padding: 24px;
   text-align: center;
-}
-
-.footer-links {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 8px;
-
-  a {
-    color: var(--gray-500);
-    font-size: 13px;
-    &:hover {
-      color: var(--main-color);
-    }
-  }
-
-  .divider {
-    color: var(--gray-300);
-    font-size: 12px;
-  }
 }
 
 .copyright {

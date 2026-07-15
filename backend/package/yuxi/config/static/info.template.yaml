@@ -3,25 +3,25 @@
 
 # 组织信息
 organization:
-  name: "江南语析"           # 完整组织名称
-  logo: "/favicon.svg"       # Logo文件路径（放在 web/public 目录下）
-  avatar: "/avatar.jpg"      # 头像文件路径（放在 web/public 目录下）
+  name: "量程科技"           # 完整组织名称
+  logo: "/k-ai-logo.svg"     # Logo文件路径（放在 web/public 目录下）
+  avatar: "/k-ai-logo.svg"   # 头像文件路径（放在 web/public 目录下）
   login_bg: "/login-bg.jpg"  # 登录背景图片路径（放在 web/public 目录下）
 
 # 项目信息
 branding:
-  name: "Yuxi"
-  title: "让智能体可构建、可编排、可落地"     # 系统标题
-  subtitle: "开源智能体平台套件，融合 RAG 与知识图谱"          # 副标题（subtitles 为空时使用）
+  name: "K-AI"
+  title: "建筑行业智能知识库与智能体平台"     # 系统标题
+  subtitle: "连接建筑知识、项目资料与智能体工作流"          # 副标题（subtitles 为空时使用）
   subtitles:
-    - "开源智能体平台套件，融合 RAG 与知识图谱"
-    - "统一编排 Agent、知识库、图谱与工具链"
-    - "让智能体可构建，让知识可连接，让决策可验证"
-    - "让智能体可落地，让流程可编排，让协作可扩展"
-    - "让数据可沉淀，让能力可复用，让系统可进化"
+    - "连接建筑知识、项目资料与智能体工作流"
+    - "统一管理知识库、知识图谱与智能体能力"
+    - "让建筑知识可检索、可关联、可复用"
+    - "面向建筑业务场景，沉淀企业智能知识资产"
+    - "让团队更高效地检索、分析与协作"
 
 # 页脚信息
 footer:
-  copyright: "© 江南语析 2026 v{{YUXI_VERSION}}"
+  copyright: "© 量程科技 2026 · K-AI v{{YUXI_VERSION}}"
   user_agreement_url: "/protocols/user-agreement.template.html"
   privacy_policy_url: "/protocols/privacy-policy.template.html"
