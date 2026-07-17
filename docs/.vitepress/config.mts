@@ -8,6 +8,7 @@ export default defineConfig({
   title: "Yuxi",
   description: "语析",
   base: '/Yuxi/',
+  head: [['link', { rel: 'icon', type: 'image/png', href: '/Yuxi/k-ai-favicon.png' }]],
   ignoreDeadLinks: [
     /localhost/,
     /CONTRIBUTING$/,
@@ -21,7 +22,7 @@ export default defineConfig({
   },
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
-    logo: "/favicon.svg",
+    logo: "/k-ai-logo.png",
     nav: [
       { text: '快速开始', link: '/intro/quick-start' },
       { text: '智能体开发', link: '/agents/agents-config' }

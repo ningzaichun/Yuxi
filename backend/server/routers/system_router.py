@@ -12,6 +12,8 @@ from server.utils.auth_middleware import get_admin_user, get_required_user
 
 system = APIRouter(prefix="/system", tags=["system"])
 
+_INFO_CONFIG_DIR = Path(__file__).resolve().parents[2] / "package" / "yuxi" / "config" / "static"
+
 # =============================================================================
 # === 健康检查分组 ===
 # =============================================================================
@@ -137,13 +139,13 @@ async def load_info_config():
     """加载信息配置文件"""
     try:
         # 配置文件路径
-        brand_file_path = os.environ.get("YUXI_BRAND_FILE_PATH", "package/yuxi/config/static/info.local.yaml")
-        config_path = Path(brand_file_path)
+        brand_file_path = os.environ.get("YUXI_BRAND_FILE_PATH")
+        config_path = Path(brand_file_path) if brand_file_path else _INFO_CONFIG_DIR / "info.local.yaml"
 
         # 检查文件是否存在
         if not config_path.exists():
             logger.debug(f"The config file {config_path} does not exist, using default config")
-            config_path = Path("package/yuxi/config/static/info.template.yaml")
+            config_path = _INFO_CONFIG_DIR / "info.template.yaml"
 
         # 异步读取配置文件
         async with aiofiles.open(config_path, encoding="utf-8") as file:

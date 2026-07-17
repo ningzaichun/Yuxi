@@ -291,7 +291,7 @@ const loginBgImage = computed(() => {
   return infoStore.organization?.login_bg || '/login-bg.jpg'
 })
 const brandLogo = computed(() => {
-  return infoStore.organization?.logo || '/k-ai-logo.svg'
+  return infoStore.organization?.logo || '/k-ai-logo.png'
 })
 const brandOrgName = computed(() => {
   return infoStore.organization?.name?.trim() || '量程科技'

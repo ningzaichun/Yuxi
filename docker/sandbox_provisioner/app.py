@@ -173,17 +173,17 @@ class LocalContainerProvisionerBackend:
         self._threads_host_path = self._normalize_host_bind_path(self._threads_host_path)
 
     @staticmethod
-    def _normalize_host_bind_path(path_value: str | None) -> str:
+    def _normalize_host_bind_path(path_value: str | None, runtime_os_name: str | None = None) -> str:
         value = str(path_value or "").strip()
         if not value:
             raise RuntimeError("docker host bind path is required")
 
-        # Docker Desktop on Windows can report bind sources as D:\\... while
-        # this provisioner runs in a Linux container. Convert that daemon-
-        # reported path into the Linux path exposed inside Docker Desktop.
+        # Docker Desktop can report bind sources as D:\\... to a provisioner
+        # running in a Linux container. Convert only in that case. A
+        # provisioner running directly on Windows must keep the drive path.
         normalized = value.replace("\\", "/")
         match = re.match(r"^([A-Za-z]):/(.+)$", normalized)
-        if match:
+        if match and (runtime_os_name or os.name) != "nt":
             drive = match.group(1).lower()
             rest = match.group(2).lstrip("/")
             return f"/run/desktop/mnt/host/{drive}/{rest}"

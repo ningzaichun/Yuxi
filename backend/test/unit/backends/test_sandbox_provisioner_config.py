@@ -83,6 +83,24 @@ def test_local_container_identity_validation_rejects_unsafe_path_segments(monkey
             backend_cls._validate_uid(value)
 
 
+def test_docker_bind_path_preserves_windows_path_for_host_provisioner(monkeypatch):
+    monkeypatch.setenv("PROVISIONER_BACKEND", "memory")
+    module = _load_module()
+
+    assert module.LocalContainerProvisionerBackend._normalize_host_bind_path(
+        r"D:\workspace\Yuxi\saves\threads", runtime_os_name="nt"
+    ) == "D:/workspace/Yuxi/saves/threads"
+
+
+def test_docker_bind_path_converts_windows_path_for_linux_provisioner(monkeypatch):
+    monkeypatch.setenv("PROVISIONER_BACKEND", "memory")
+    module = _load_module()
+
+    assert module.LocalContainerProvisionerBackend._normalize_host_bind_path(
+        r"D:\workspace\Yuxi\saves\threads", runtime_os_name="posix"
+    ) == "/run/desktop/mnt/host/d/workspace/Yuxi/saves/threads"
+
+
 def test_memory_backend_accepts_split_thread_ids(monkeypatch):
     monkeypatch.setenv("PROVISIONER_BACKEND", "memory")
     module = _load_module()

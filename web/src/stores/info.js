@@ -10,14 +10,13 @@ export const useInfoStore = defineStore('info', () => {
   const debugMode = ref(false)
 
   // 计算属性 - 组织信息
-  const organization = computed(
-    () =>
-      infoConfig.value.organization || {
-        name: '',
-        logo: '',
-        avatar: ''
-      }
-  )
+  const organization = computed(() => ({
+    name: '量程科技',
+    logo: '/k-ai-logo.png',
+    avatar: '/k-ai-logo.png',
+    login_bg: '/login-bg.jpg',
+    ...(infoConfig.value.organization || {})
+  }))
 
   // 计算属性 - 品牌信息
   const branding = computed(

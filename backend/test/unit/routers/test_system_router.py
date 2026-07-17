@@ -4,9 +4,22 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from server.routers.system_router import system
+from server.routers.system_router import load_info_config, system
 
 pytestmark = pytest.mark.unit
+
+
+async def test_load_info_config_uses_source_relative_template(monkeypatch, tmp_path):
+    monkeypatch.delenv("YUXI_BRAND_FILE_PATH", raising=False)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("server.routers.system_router.get_version", lambda: "0.7.1.dev0")
+
+    config = await load_info_config()
+
+    assert config["organization"]["name"] == "量程科技"
+    assert config["organization"]["logo"] == "/k-ai-logo.png"
+    assert config["organization"]["avatar"] == "/k-ai-logo.png"
+    assert config["footer"]["copyright"].endswith("K-AI v0.7.1.dev0")
 
 
 def test_discovery_endpoint_is_public(monkeypatch):

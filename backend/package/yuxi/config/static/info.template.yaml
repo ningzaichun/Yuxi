@@ -4,8 +4,8 @@
 # 组织信息
 organization:
   name: "量程科技"           # 完整组织名称
-  logo: "/k-ai-logo.svg"     # Logo文件路径（放在 web/public 目录下）
-  avatar: "/k-ai-logo.svg"   # 头像文件路径（放在 web/public 目录下）
+  logo: "/k-ai-logo.png"     # Logo文件路径（放在 web/public 目录下）
+  avatar: "/k-ai-logo.png"   # 头像文件路径（放在 web/public 目录下）
   login_bg: "/login-bg.jpg"  # 登录背景图片路径（放在 web/public 目录下）
 
 # 项目信息

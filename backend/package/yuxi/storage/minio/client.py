@@ -10,6 +10,7 @@ import os
 from contextlib import asynccontextmanager
 from datetime import timedelta
 from io import BytesIO
+from urllib.parse import urlparse
 
 from urllib3 import BaseHTTPResponse
 from yuxi.utils import logger
@@ -58,19 +59,33 @@ class MinIOClient:
         self.secret_key = os.getenv("MINIO_SECRET_KEY") or "minioadmin"
         self._client = None
 
-        # 设置公开访问端点
-        if os.getenv("RUNNING_IN_DOCKER"):
+        public_uri = (os.getenv("MINIO_PUBLIC_URI") or "").strip().rstrip("/")
+        if public_uri:
+            parsed_public_uri = urlparse(public_uri)
+            if (
+                parsed_public_uri.scheme not in {"http", "https"}
+                or not parsed_public_uri.netloc
+                or parsed_public_uri.path not in {"", "/"}
+                or parsed_public_uri.query
+                or parsed_public_uri.fragment
+                or parsed_public_uri.username
+                or parsed_public_uri.password
+            ):
+                raise ValueError("MINIO_PUBLIC_URI must be an http(s) origin without a path")
+            self.public_base_url = public_uri
+        elif os.getenv("RUNNING_IN_DOCKER") == "true":
             host_ip = (os.getenv("HOST_IP") or "").strip()
             if not host_ip:
                 host_ip = "localhost"
             if "://" in host_ip:
                 host_ip = host_ip.split("://")[-1]
             host_ip = host_ip.rstrip("/")
-            self.public_endpoint = f"{host_ip}:9000"
-            logger.debug(f"Docker MinIOClient public_endpoint: {self.public_endpoint}")
+            self.public_base_url = f"http://{host_ip}:9000"
         else:
-            self.public_endpoint = "localhost:9000"
-            logger.debug(f"Default_client: {self.public_endpoint}")
+            self.public_base_url = self.endpoint.rstrip("/")
+
+        self.public_endpoint = urlparse(self.public_base_url).netloc
+        logger.debug(f"MinIOClient public_base_url: {self.public_base_url}")
 
     @property
     def client(self) -> Minio:
@@ -124,7 +139,7 @@ class MinIOClient:
             )
 
             assert result is not None
-            url = f"http://{self.public_endpoint}/{bucket_name}/{object_name}"
+            url = f"{self.public_base_url}/{bucket_name}/{object_name}"
 
             return UploadResult(url, bucket_name, object_name)
 
@@ -390,10 +405,11 @@ class MinIOClient:
         parsed = urlparse(url)
 
         # 验证主机
-        endpoint_host = self.endpoint.split("://")[-1].split(":")[0]
-        url_host = parsed.netloc.split(":")[0]
+        endpoint_host = urlparse(self.endpoint).hostname
+        public_host = urlparse(self.public_base_url).hostname
+        url_host = parsed.hostname
 
-        if endpoint_host != url_host and url_host != os.environ.get("HOST_IP", "localhost"):
+        if url_host not in {endpoint_host, public_host}:
             raise StorageError(f"不允许的外部 URL: {url_host}")
 
         # 检查路径遍历
