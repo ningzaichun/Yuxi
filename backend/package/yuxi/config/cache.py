@@ -13,7 +13,7 @@ from yuxi.utils.logging_config import logger
 
 RUNTIME_CONFIG_REDIS_KEY = "yuxi:runtime_config"
 RUNTIME_CONFIG_SYNC_INTERVAL_SECONDS = 5.0
-_RUNTIME_CONFIG_REDIS_TIMEOUT_SECONDS = 0.2
+_RUNTIME_CONFIG_REDIS_TIMEOUT_SECONDS = 1
 
 
 def _runtime_config_redis_config() -> RedisConfig:
