@@ -1,52 +1,65 @@
-# Yuxi Split Deployment
+# Yuxi 拆分生产部署
 
-This directory separates three independent runtime roles:
+拆分部署包含两个相互独立的 Docker Compose 项目：
 
-| Role | Definition | Runtime |
+| 服务器角色 | Compose 与配置 | 运行服务 |
 | --- | --- | --- |
-| Infrastructure server | `docker-compose.infra.yml` + `.env.infra` | PostgreSQL, Redis, MinIO, Etcd, Milvus, Neo4j |
-| Application server | `docker-compose.app.yml` + `.env.app` | Web, API, Worker, Sandbox Provisioner |
-| Developer host | `.env.host.dev.template` copied to root `.env` | Host-native uv/pnpm processes |
+| 基础设施服务器 | `docker-compose.infra.yml` + `.env.infra` | PostgreSQL、Redis、MinIO、Etcd、Milvus、Neo4j |
+| 应用服务器 | `docker-compose.app.yml` + `.env.app` | Web、API、Worker、Sandbox Provisioner |
 
-Run the following commands from the repository root.
+以下命令都在仓库根目录执行。两台服务器只需保留各自使用的配置文件，且必须通过私网或 VPN 互通。
 
-Generate only the required configuration:
+## 准备配置
 
-```powershell
-.\scripts\split-deploy\Initialize-SplitConfig.ps1 -Scope Infra
-.\scripts\split-deploy\Initialize-SplitConfig.ps1 -Scope App
-.\scripts\split-deploy\Initialize-SplitConfig.ps1 -Scope Host
+```bash
+cp deploy/split/.env.infra.template deploy/split/.env.infra
+cp deploy/split/.env.app.template deploy/split/.env.app
 ```
 
-Start and validate infrastructure:
+填写配置后，先进行解析校验。校验不会启动容器：
 
-```powershell
-.\scripts\split-deploy\Start-Infra.ps1 -Pull
-.\scripts\split-deploy\Test-Infra.ps1
+```bash
+docker compose --project-name yuxi-infra --project-directory . --env-file deploy/split/.env.infra -f deploy/split/docker-compose.infra.yml config --quiet
+docker compose --project-name yuxi-app --project-directory . --env-file deploy/split/.env.app -f deploy/split/docker-compose.app.yml config --quiet
 ```
 
-Start and validate the independent application server:
+## 基础设施服务器
 
-```powershell
-.\scripts\split-deploy\Start-App.ps1
-.\scripts\split-deploy\Test-App.ps1
+```bash
+docker compose --project-name yuxi-infra --project-directory . --env-file deploy/split/.env.infra -f deploy/split/docker-compose.infra.yml pull
+docker compose --project-name yuxi-infra --project-directory . --env-file deploy/split/.env.infra -f deploy/split/docker-compose.infra.yml up -d
+docker compose --project-name yuxi-infra --project-directory . --env-file deploy/split/.env.infra -f deploy/split/docker-compose.infra.yml ps
 ```
 
-Start host-native development services in four terminals:
+停止服务但保留数据卷：
 
-```powershell
-.\scripts\split-deploy\Start-HostService.ps1 -Service Sandbox
-.\scripts\split-deploy\Start-HostService.ps1 -Service Api
-.\scripts\split-deploy\Start-HostService.ps1 -Service Worker
-.\scripts\split-deploy\Start-HostService.ps1 -Service Web
+```bash
+docker compose --project-name yuxi-infra --project-directory . --env-file deploy/split/.env.infra -f deploy/split/docker-compose.infra.yml down --remove-orphans
 ```
 
-Never commit `.env.infra`, `.env.app`, the root `.env`, or `web/.env.local`. Stop scripts intentionally preserve volumes; do not add `--volumes` to routine shutdown commands.
+## 应用服务器
 
-Detailed Chinese guides are stored under `docs/vibe/`:
+```bash
+docker compose --project-name yuxi-app --project-directory . --env-file deploy/split/.env.app -f deploy/split/docker-compose.app.yml up -d --build
+docker compose --project-name yuxi-app --project-directory . --env-file deploy/split/.env.app -f deploy/split/docker-compose.app.yml ps
+```
 
-- `2026-07-15-split-infrastructure-and-application-deployment-plan.md`
-- `2026-07-16-application-server-deployment-guide.md`
-- `2026-07-16-host-native-local-development-guide.md`
-- `2026-07-16-sandbox-deployment-and-local-development-plan.md`
-- `2026-07-16-conda-host-development-environment-guide.md`
+健康检查默认通过 Web 容器暴露的端口访问：
+
+```bash
+curl --fail http://127.0.0.1:8080/api/system/health
+```
+
+停止服务但保留应用文件和模型卷：
+
+```bash
+docker compose --project-name yuxi-app --project-directory . --env-file deploy/split/.env.app -f deploy/split/docker-compose.app.yml down --remove-orphans
+```
+
+## 数据与安全边界
+
+- 不要提交 `.env.infra`、`.env.app`、根 `.env` 或 `web/.env.local`。
+- 日常停止命令不要增加 `--volumes`，否则会删除 Compose 管理的数据卷。
+- PostgreSQL、Redis、MinIO、Milvus 和 Neo4j 端口只向受控私网开放。
+- 应用服务器中的 API、Worker 和 Sandbox Provisioner 必须使用同一组基础设施地址与凭据。
+- 一体化生产部署使用根目录 `docker-compose.prod.yml`；本目录不负责本地源码开发。

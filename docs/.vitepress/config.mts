@@ -9,6 +9,7 @@ export default defineConfig({
   description: "语析",
   base: '/Yuxi/',
   head: [['link', { rel: 'icon', type: 'image/png', href: '/Yuxi/k-ai-favicon.png' }]],
+  srcExclude: ['change_logs/**', 'project_analysis/**'],
   ignoreDeadLinks: [
     /localhost/,
     /CONTRIBUTING$/,
@@ -68,6 +69,7 @@ export default defineConfig({
       {
         text: '开发指南',
         items: [
+          { text: '本地开发', link: '/develop-guides/local-development' },
           { text: '参与贡献', link: '/develop-guides/contributing' },
           { text: '开发路线图', link: '/develop-guides/roadmap' },
           { text: '版本变更记录', link: '/develop-guides/changelog' },

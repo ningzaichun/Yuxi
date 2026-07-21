@@ -45,5 +45,5 @@ foreach ($pair in $configPairs) {
 
 Write-Host "Fill all empty remote connection strings and secrets before starting services." -ForegroundColor Cyan
 if ($Scope -in @("All", "Host")) {
-    Write-Host "The root .env is used by host-native API, Worker and Sandbox processes." -ForegroundColor Cyan
+    Write-Host "The root .env is used by host-native API/Worker and the local Docker Sandbox Provisioner." -ForegroundColor Cyan
 }

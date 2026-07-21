@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet("Api", "Worker", "Web", "Sandbox")]
+    [ValidateSet("Api", "Worker", "Web")]
     [string]$Service
 )
 
@@ -86,28 +86,6 @@ switch ($Service) {
         $port = Get-EnvValue "HOST_DEV_WEB_PORT" "5173"
         Set-Location (Join-Path $repoRoot "web")
         & pnpm run server -- --host $hostName --port $port
-    }
-    "Sandbox" {
-        if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
-            throw "uv is not available in PATH."
-        }
-        $backend = (Get-EnvValue "PROVISIONER_BACKEND" "docker").ToLowerInvariant()
-        if ($backend -eq "docker" -and -not (Get-Command docker -ErrorAction SilentlyContinue)) {
-            throw "Docker is required by PROVISIONER_BACKEND=docker."
-        }
-        if ([string]::IsNullOrWhiteSpace($env:DOCKER_THREADS_HOST_PATH)) {
-            $env:DOCKER_THREADS_HOST_PATH = Join-Path $repoRoot "saves/threads"
-        }
-        New-Item -ItemType Directory -Force -Path $env:DOCKER_THREADS_HOST_PATH | Out-Null
-        $env:DOCKER_SANDBOX_HOST = Get-EnvValue "DOCKER_SANDBOX_HOST" "127.0.0.1"
-        $hostName = Get-EnvValue "HOST_DEV_SANDBOX_HOST" "127.0.0.1"
-        $port = Get-EnvValue "HOST_DEV_SANDBOX_PORT" "8002"
-        & uv run --project $backendPath `
-            --with-requirements (Join-Path $repoRoot "docker/sandbox_provisioner/requirements.txt") `
-            uvicorn app:app `
-            --app-dir (Join-Path $repoRoot "docker/sandbox_provisioner") `
-            --host $hostName `
-            --port $port
     }
 }
 

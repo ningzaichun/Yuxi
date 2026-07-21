@@ -1,6 +1,6 @@
 # 生产部署指南
 
-本文档介绍如何在生产环境中部署 Yuxi。
+生产环境统一使用 Docker Compose，支持一台服务器一体化部署，以及基础设施、应用服务分布在两台服务器的拆分部署。本地源码开发流程见《本地开发指南》，不要与生产 Compose 混用。
 
 ## 前置要求
 
@@ -14,7 +14,16 @@
 3. 前端有调试面板（长按侧边栏触发），生产环境建议关闭
 :::
 
-## 部署步骤
+## 部署方式
+
+| 方式 | Compose 文件 | 适用场景 |
+| --- | --- | --- |
+| 一体化部署 | `docker-compose.prod.yml` | 单台服务器、内部环境或中小规模部署 |
+| 拆分部署 | `deploy/split/docker-compose.infra.yml` + `docker-compose.app.yml` | 基础设施与应用服务使用不同服务器 |
+
+以下步骤先介绍一体化部署。拆分部署的完整命令见仓库中的 `deploy/split/README.md`。
+
+## 一体化部署
 
 ### 1. 准备配置文件
 
@@ -36,10 +45,10 @@ cp .env.template .env.prod
 
 ```bash
 # 仅启动核心服务（CPU 模式）
-docker compose -f docker-compose.prod.yml up -d --build
+docker compose --project-directory . --env-file .env.prod -f docker-compose.prod.yml up -d --build
 
 # 启动所有服务（包含 GPU OCR）
-docker compose -f docker-compose.prod.yml --profile all up -d --build
+docker compose --project-directory . --env-file .env.prod -f docker-compose.prod.yml --profile all up -d --build
 ```
 
 ### 3. 验证部署
@@ -60,6 +69,19 @@ docker compose -f docker-compose.prod.yml --profile all up -d --build
 
 开发环境（`YUXI_ENV=development` 且未设置该变量）默认允许 `http://localhost:5173` 与 `http://127.0.0.1:5173`，方便本地前后端独立启动调试。从 0.7.0 升级到 0.7.1 时，如果此前是跨域部署但未显式声明来源，必须补上 `YUXI_CORS_ORIGINS`，否则前端跨域请求会被拒绝。
 
+## 拆分部署
+
+拆分方式在基础设施服务器运行 PostgreSQL、Redis、MinIO、Milvus/Etcd 和 Neo4j，在应用服务器运行 API、Worker、Web 和 Sandbox Provisioner。两台服务器分别直接使用 `deploy/split` 下的 Compose 文件，不依赖额外 PowerShell 启停脚本。
+
+部署前必须确认：
+
+- 两台服务器通过受控私网或 VPN 互通。
+- `.env.app` 使用基础设施服务器可访问的真实地址，不能使用另一 Compose 项目的服务名。
+- MinIO 的内部地址与浏览器公开地址配置正确。
+- 常规停止命令不使用 `--volumes`。
+
+具体的 `config`、`up`、`ps` 和 `down` 命令见仓库文件 `deploy/split/README.md`。
+
 ## 维护与更新
 
 ### 更新代码
@@ -69,7 +91,7 @@ docker compose -f docker-compose.prod.yml --profile all up -d --build
 git pull
 
 # 重新构建并启动
-docker compose -f docker-compose.prod.yml up -d --build
+docker compose --project-directory . --env-file .env.prod -f docker-compose.prod.yml up -d --build
 ```
 
 ### 查看日志

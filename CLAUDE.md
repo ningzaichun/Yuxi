@@ -86,11 +86,11 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## 开发与调试工作流 (Development & Debugging Workflow)
 
-本项目完全通过 Docker Compose 进行管理。所有开发和调试都应在运行的容器环境中进行。使用 `docker compose up -d` 命令进行构建和启动。
+本项目的生产部署通过 Docker Compose 管理；日常开发采用远程基础设施、本机源码进程和本机 Docker Sandbox 的混合拓扑。完整入口见 [本地开发指南](docs/develop-guides/local-development.md)。
 
 **核心原则**:
 
-1. 由于 Compose 服务 `api` / `web`（容器名 `api-dev` / `web-dev`）均配置了热重载 (hot-reloading)，本地修改代码后无需重启容器，服务会自动更新。应该先检查项目是否已经在后台启动（`docker ps`），查看日志（`docker logs api-dev --tail 100`）具体的可以阅读 [docker-compose.yml](docker-compose.yml).
+1. API、Worker、Web 通过 `scripts/split-deploy/Start-HostService.ps1` 在开发机宿主机运行并热重载；`sandbox-provisioner` 通过根 `docker-compose.yml` 单独启动，真正的 Sandbox Runtime 由它按需创建。开始调试前先检查 `5050`、`5173`、`8002` 健康状态和相关终端/容器日志，不要同时启动生产 Compose 中的同名服务。
 2. 开发完成之后必须按改动范围进行 检查 -> 测试 -> Lint：相关单元测试必跑；涉及接口时跑集成测试；涉及关键主链路时补跑端到端测试。测试脚本不完善时应完善脚本。
 3. 测试规范务必遵守 [testing-guidelines.md](docs/develop-guides/testing-guidelines.md) 中的规范，测试脚本务必放在 backend/test/unit、backend/test/integration 或 backend/test/e2e 对应目录下，并且在提交前确保测试通过。
 4. 非常重要！千万不要使用过度的防御/回退机制来掩盖设计上的缺陷，良好的软件应该在预设的条件下运行，其余情况均应该及时发现问题/错误并修复，而不是通过增加冗余代码来掩盖问题。
@@ -121,7 +121,7 @@ make format        # 格式化代码
 - Python 代码要符合 pythonic 风格
 - 尽量使用较新的语法，避免使用旧版本的语法（版本兼容到 3.12+）
 - 更新 [changelog.md](docs/develop-guides/changelog.md) 文档记录本次修改，多个类似的功能更新已经补充在一起
-- 开发完成后务必在 docker 中进行测试，可以读取 .env 获取管理员账户和密码；敏感值仅用于本地测试命令，不要输出到回复、日志摘录、测试文件或文档中
+- 开发完成后在与改动匹配的本地环境中测试：业务程序测试在宿主机 uv/pnpm 环境执行，Sandbox 行为在本机 Docker 中验证，接口/主链路测试连接开发用远程基础设施。可以读取 `.env` 获取本地测试凭据；敏感值仅用于本地测试命令，不要输出到回复、日志摘录、测试文件或文档中
 - 不允许把代码写得稀碎：不要为简单线性逻辑拆出一堆细碎 helper；优先写成职责清晰、结构完整、可一眼读懂的实现。
 - 拆函数必须服务于明确的复用、隔离副作用或降低认知负担；如果拆分后调用链更绕、上下文更分散，就应合并回更直接的实现。
 - 遵循向下规则（The Stepdown Rule）：公开的、高层次的方法放在文件顶部，细节逐层下沉。读者从上往下阅读时，每一层只调用紧接着的下一层实现，像读报纸标题一样逐级展开细节，无需跳跃。
