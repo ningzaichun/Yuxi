@@ -100,6 +100,8 @@ services:
       context: ./docker/sandbox_provisioner
       dockerfile: Dockerfile
     container_name: sandbox-provisioner
+    ports:
+      - "8002:8002"
     volumes:
       - ./docker/volumes/yuxi:/app/saves
       - ./docker/sandbox_provisioner/sandbox.env:/app/sandbox.env:ro
@@ -123,7 +125,7 @@ services:
       - HTTPS_PROXY=${SANDBOX_HTTPS_PROXY:-}
       - NO_PROXY=localhost,127.0.0.1,host.docker.internal
       # Docker backend only
-      - DOCKER_NETWORK=${SANDBOX_DOCKER_NETWORK:-yuxi-know_app-network}
+      - DOCKER_NETWORK=${SANDBOX_DOCKER_NETWORK:-yuxi_app-network}
       - DOCKER_THREADS_HOST_PATH=${SANDBOX_DOCKER_THREADS_HOST_PATH:-}
       - DOCKER_SANDBOX_PREFIX=${SANDBOX_DOCKER_SANDBOX_PREFIX:-yuxi-sandbox}
       - DOCKER_SANDBOX_HOST=${SANDBOX_DOCKER_SANDBOX_HOST:-host.docker.internal}
