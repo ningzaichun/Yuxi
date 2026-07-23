@@ -290,6 +290,37 @@ def test_prepare_skill_invalid_virtual_path_does_not_fallback_to_sandbox(monkeyp
     assert "fallback" not in calls
 
 
+def test_prepare_skill_from_sandbox_uses_slug_from_current_parser_contract(monkeypatch, tmp_path: Path):
+    source_dir = tmp_path / "source-skill"
+    source_dir.mkdir()
+    (source_dir / "SKILL.md").write_text(
+        "---\n"
+        "name: Ian 小黑正文配图\n"
+        "slug: ian-xiaohei-illustrations\n"
+        "description: 生成 Ian 风格的中文正文配图。\n"
+        "---\n",
+        encoding="utf-8",
+    )
+    staging_root = tmp_path / "staging"
+    staging_root.mkdir()
+
+    monkeypatch.setattr(
+        "yuxi.agents.backends.sandbox.resolve_virtual_path",
+        lambda *_args, **_kwargs: source_dir,
+    )
+
+    staged_dir, parsed_slug = install_skill_module._prepare_skill_from_sandbox(
+        "/home/gem/user-data/uploads/ian-xiaohei-illustrations",
+        "thread-1",
+        "user-1",
+        staging_root,
+    )
+
+    assert parsed_slug == "ian-xiaohei-illustrations"
+    assert staged_dir == staging_root / "ian-xiaohei-illustrations"
+    assert (staged_dir / "SKILL.md").is_file()
+
+
 def test_collect_sandbox_file_paths_rejects_more_than_1000_files():
     class FakeBackend:
         def ls(self, _remote_dir):

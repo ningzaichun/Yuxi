@@ -83,7 +83,7 @@ def _download_skill_dir(backend, remote_dir: str, local_dir: Path) -> None:
 
 
 def _prepare_skill_from_sandbox(sandbox_path: str, thread_id: str, uid: str, staging_root: Path) -> tuple[Path, str]:
-    """从 Sandbox 路径准备 skill 目录。返回 (本地目录, 原始 skill name)。"""
+    """从 Sandbox 路径准备 skill 目录。返回 (本地目录, 原始 skill slug)。"""
     from yuxi.agents.backends.sandbox import ProvisionerSandboxBackend, resolve_virtual_path
     from yuxi.agents.skills.service import (
         _parse_skill_markdown,
@@ -114,8 +114,8 @@ def _prepare_skill_from_sandbox(sandbox_path: str, thread_id: str, uid: str, sta
             raise ValueError(f"沙盒路径 {sandbox_path} 中未找到 SKILL.md")
 
     content = (staging / "SKILL.md").read_text(encoding="utf-8")
-    parsed_name, _, _ = _parse_skill_markdown(content)
-    return staging, parsed_name
+    parsed_slug, _, _, _ = _parse_skill_markdown(content)
+    return staging, parsed_slug
 
 
 async def _enable_skills_in_current_config(db, thread_id: str, uid: str, skill_slugs: list[str]) -> bool:
@@ -195,7 +195,7 @@ async def _run_install_task(
 
         if source.startswith("/"):
             with tempfile.TemporaryDirectory(prefix=".skill-install-") as tmp:
-                source_dir, parsed_name = _prepare_skill_from_sandbox(source, thread_id, uid, Path(tmp))
+                source_dir, parsed_slug = _prepare_skill_from_sandbox(source, thread_id, uid, Path(tmp))
                 async with pg_manager.get_async_session_context() as db:
                     item = await import_skill_dir(
                         db,
@@ -204,7 +204,7 @@ async def _run_install_task(
                         share_config=personal_share_config,
                     )
                     installed_slugs = [item.slug]
-                    if item.slug != parsed_name:
+                    if item.slug != parsed_slug:
                         slug_warnings.append(f"⚠️ 技能 slug '{item.slug}' 已存在，已自动重命名安装")
                     config_success = await _enable_skills_in_current_config(db, thread_id, uid, installed_slugs)
         else:

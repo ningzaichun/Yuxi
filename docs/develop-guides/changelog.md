@@ -15,7 +15,7 @@
 
 ### 开发记录
 
-- 新增 Skills 开发指南：系统说明 Skill、后端 Tool 与 MCP 的选择边界，覆盖内置源码注册与同步、ZIP/SKILL.md 上传、远程 prepare + confirm 安装、权限共享、依赖闭包、动态激活和 Sandbox 脚本边界；新增内置 `sales-csv-report` Demo，使用无第三方依赖的标准库脚本校验并汇总销售 CSV，生成 Markdown 后通过 `present_artifacts` 交付；同步修正 Skills 管理文档中“脚本不可执行”和依赖 Skill 自动激活工具/MCP的过时说明。
+- 新增 Skills 开发指南：系统说明 Skill、后端 Tool 与 MCP 的选择边界，覆盖内置源码注册与同步、ZIP/SKILL.md 上传、远程 prepare + confirm 安装、权限共享、依赖闭包、动态激活和 Sandbox 脚本边界；新增内置 `sales-csv-report` Demo，使用无第三方依赖的标准库脚本校验并汇总销售 CSV，生成 Markdown 后通过 `present_artifacts` 交付；同步修正 Skills 管理文档中“脚本不可执行”和依赖 Skill 自动激活工具/MCP的过时说明。修复主智能体从 Sandbox `user-data` 本地路径安装 Skill 时，安装工具仍按旧三元契约解析 `SKILL.md`、与当前四元解析结果不匹配而中断的问题；安装准备阶段现在读取解析结果中的 `slug`，并补充展示名与 slug 不同场景的回归测试。
 - 新增知识图谱开发与维护指南：以完全虚构的“滨江科创中心一期工程”为案例，提供 6 份可上传 Markdown、标准实体/关系 CSV 和验证问题，覆盖当前 Milvus + Neo4j + PostgreSQL 图谱架构、与 LightRAG 的实现差异、建筑领域 Schema、试建与增量构建、图检索、管理 API、重建删除、排障、代码地图和测试建议；补充“检索测试”右侧配置面板中的图检索启用路径、小屏布局、原始结果 `fusion_sources`/`graph_score` 验证方法和基础检索回退排查说明；本次仅新增教程与测试数据，不修改图谱算法或业务接口。
 - 新增 Agent 内置天气查询工具：按城市名称通过 Open-Meteo 地理编码与当前天气接口返回城市、天气状况、温度、体感温度、湿度和风速；工具使用独立 `weather.py` 模块注册，无需 API Key，城市不存在或上游异常时明确报错，并复用现有通用工具调用展示。新增 Agent 工具开发指南，沉淀内置工具、MCP 与 Skill 的选择边界，以及目录组织、注册、测试优先、错误处理、前端展示判断和验收流程。
 - 新增基础设施、应用服务器与宿主机调试三层拆分方案：保留原一体化 Compose；基础设施服务器独立运行 PostgreSQL、Redis、MinIO、Milvus/Etcd、Neo4j；应用服务器独立运行生产态 Web、API、Worker与Sandbox Provisioner；开发机通过 uv/pnpm 直接运行程序，不使用本地应用Compose。提供三类环境模板、独立启停/检查脚本和宿主机依赖/分服务启动脚本，统一根目录 `.env`、`saves`、`PYTHONPATH` 和 Vite代理；修复 Windows宿主机Provisioner错误转换Docker挂载盘符路径的问题，并新增 `MINIO_PUBLIC_URI`区分MinIO内部连接与调用方公开地址。配套手册和计划覆盖网络、安全、热重载、应用升级、测试、迁移、备份、验收与回滚。
