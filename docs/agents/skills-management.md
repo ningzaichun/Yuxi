@@ -186,7 +186,7 @@ Skills 之间可以建立依赖关系，形成一个松耦合的技能网络。
 |----------|------|----------|
 | `tool_dependencies` | 需要的内置工具 | 激活后按需加载 |
 | `mcp_dependencies` | 需要的 MCP 服务 | 激活后按需加载 |
-| `skill_dependencies` | 依赖的其他 Skill | 会话启动即生效 |
+| `skill_dependencies` | 依赖的其他 Skill | 会话启动时进入提示词和可读范围；依赖 Skill 的工具/MCP 仍需读取其 `SKILL.md` 才激活 |
 
 ### 渐进式加载机制
 
@@ -227,8 +227,9 @@ Skills 之间可以建立依赖关系，形成一个松耦合的技能网络。
 
 当在 Agent 配置中只选择 `pro-skill` 时：
 1. 启动阶段：`_readable_skills` = [`pro-skill`, `advanced-skill`, `base-skill`]（自动展开依赖链）
-2. Agent 首次调用任何 skill 时：所有三个 Skill 都可读
-3. 当 Agent 读取 `pro-skill/SKILL.md` 时：触发激活，工具和 MCP 依赖被加载
+2. 三个 Skill 都会进入提示词和只读文件范围
+3. Agent 读取 `pro-skill/SKILL.md` 时，只激活 `pro-skill` 自己声明的工具和 MCP
+4. 如果还要使用 `advanced-skill` 或 `base-skill` 的工具和 MCP，必须分别读取它们自己的 `SKILL.md`
 
 ## 权限管理
 
@@ -271,8 +272,8 @@ Skills 使用 `source_type`、`share_config` 和 `enabled` 控制来源、共享
 - **禁止写入**：不能创建、修改或删除文件
 - **路径安全**：所有路径都经过安全校验，防止目录穿越攻击
 
-::: tip 虚拟文件系统限制
-当前 Skills 目录挂载为虚拟文件系统，**不支持 shell 命令执行**。Skill 中的脚本仅作为提示词参考，Agent 无法直接执行这些脚本。如果需要执行特定功能，建议通过 MCP 工具或自定义工具实现。
+::: tip Skill 脚本的执行边界
+Skill 目录对文件系统工具只读，但选中的 Skill 会复制到线程 Skills 目录并挂载到 Sandbox 的 `/home/gem/skills`。Agent 可以通过 terminal 执行其中的脚本；脚本不能修改 Skill 目录，应把结果写入 `/home/gem/user-data/workspace` 或 `/home/gem/user-data/outputs`。需要访问 Yuxi 后端内部对象或权限数据时，应通过受控后端 Tool，而不是让沙盒脚本读取后端进程环境。
 :::
 
 ### 会话隔离

@@ -312,6 +312,19 @@ def test_mysql_reporter_builtin_skill_spec_replaces_reporter_and_deep_reporter()
         assert script_path.read_text(encoding="utf-8").startswith("# /// script")
 
 
+def test_sales_csv_report_builtin_skill_spec():
+    specs = {spec["slug"]: spec for spec in svc.list_builtin_skill_specs()}
+
+    report = specs["sales-csv-report"]
+    assert report["name"] == "销售 CSV 报表 Demo"
+    assert report["version"] == "2026.07.23"
+    assert report["tool_dependencies"] == ["present_artifacts"]
+    assert report["mcp_dependencies"] == []
+    assert report["skill_dependencies"] == []
+    assert (report["source_dir"] / "SKILL.md").exists()
+    assert (report["source_dir"] / "scripts" / "build_report.py").exists()
+
+
 def test_is_valid_skill_slug():
     # Test valid slugs
     assert svc.is_valid_skill_slug("demo-skill") is True

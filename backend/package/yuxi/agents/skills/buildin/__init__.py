@@ -53,4 +53,11 @@ BUILTIN_SKILLS: list[BuiltinSkillSpec] = [
         version="2026.06.05",
         mcp_dependencies=("mcp-server-chart",),
     ),
+    BuiltinSkillSpec(
+        slug="sales-csv-report",
+        source_dir=_SKILLS_ROOT / "sales-csv-report",
+        description="分析销售 CSV，生成包含关键指标、每日趋势和产品汇总的 Markdown 报表。",
+        version="2026.07.23",
+        tool_dependencies=("present_artifacts",),
+    ),
 ]
