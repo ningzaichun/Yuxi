@@ -70,6 +70,7 @@ export default defineConfig({
         text: '开发指南',
         items: [
           { text: '本地开发', link: '/develop-guides/local-development' },
+          { text: '知识图谱开发', link: '/develop-guides/knowledge-graph-development' },
           { text: 'Agent 工具开发', link: '/develop-guides/agent-tool-development' },
           { text: '参与贡献', link: '/develop-guides/contributing' },
           { text: '开发路线图', link: '/develop-guides/roadmap' },
