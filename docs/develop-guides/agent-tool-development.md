@@ -361,7 +361,6 @@ category: buildin
 完成代码后：
 
 - 在 `docs/develop-guides/changelog.md` 当前版本中记录新增能力和关键边界。
-- 按项目约定在 `docs/change_logs/` 新建本次中文结构化变更记录。
 - 如果增加面向用户的配置、部署要求或正式功能说明，同步更新对应正式文档和 `docs/.vitepress/config.mts` 导航。
 
 变更记录只写已经发生并验证过的事实，不写计划中的能力。

@@ -79,7 +79,6 @@ docs/
 ├── agents/                 # 智能体相关文档
 ├── advanced/               # 高级配置和部署说明
 ├── develop-guides/         # 开发与贡献规范
-├── change_logs/            # 每次代码变更的独立审计记录，不进入站点
 ├── project_analysis/       # 项目分析记录，不进入站点
 ├── index.md                # 文档站首页
 ├── package.json            # VitePress 命令和依赖

@@ -9,7 +9,7 @@ export default defineConfig({
   description: "语析",
   base: '/Yuxi/',
   head: [['link', { rel: 'icon', type: 'image/png', href: '/Yuxi/k-ai-favicon.png' }]],
-  srcExclude: ['change_logs/**', 'project_analysis/**'],
+  srcExclude: ['project_analysis/**'],
   ignoreDeadLinks: [
     /localhost/,
     /CONTRIBUTING$/,
@@ -71,6 +71,7 @@ export default defineConfig({
         items: [
           { text: '本地开发', link: '/develop-guides/local-development' },
           { text: '知识图谱开发', link: '/develop-guides/knowledge-graph-development' },
+          { text: '新业务智能体开发', link: '/develop-guides/agent-development' },
           { text: 'Agent 工具开发', link: '/develop-guides/agent-tool-development' },
           { text: 'Skills 开发', link: '/develop-guides/skills-development' },
           { text: '参与贡献', link: '/develop-guides/contributing' },
