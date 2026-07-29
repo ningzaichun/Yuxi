@@ -112,7 +112,7 @@
     <div v-if="userStore.isAdmin" class="section-title">服务链接</div>
     <div v-if="userStore.isAdmin">
       <p class="section-description">
-        快速访问系统相关的外部服务，需要将 localhost 替换为实际的 IP 地址。
+        快速访问系统相关的外部服务，默认使用当前访问主机，也可通过部署配置覆盖。
       </p>
       <div class="services-grid">
         <div class="service-link-card">
@@ -123,7 +123,7 @@
           <a-button
             type="default"
             class="lucide-icon-btn"
-            @click="openLink('http://localhost:7474/')"
+            @click="openLink(serviceUrls.neo4j)"
             :icon="h(Globe, { size: 18 })"
           >
             访问
@@ -138,7 +138,7 @@
           <a-button
             type="default"
             class="lucide-icon-btn"
-            @click="openLink('http://localhost:5050/docs')"
+            @click="openLink(serviceUrls.apiDocs)"
             :icon="h(Globe, { size: 18 })"
           >
             访问
@@ -153,7 +153,7 @@
           <a-button
             type="default"
             class="lucide-icon-btn"
-            @click="openLink('http://localhost:9001')"
+            @click="openLink(serviceUrls.minio)"
             :icon="h(Globe, { size: 18 })"
           >
             访问
@@ -168,7 +168,7 @@
           <a-button
             type="default"
             class="lucide-icon-btn"
-            @click="openLink('http://localhost:9091/webui/')"
+            @click="openLink(serviceUrls.milvus)"
             :icon="h(Globe, { size: 18 })"
           >
             访问
@@ -191,6 +191,13 @@ import RerankModelSelector from '@/components/RerankModelSelector.vue'
 const configStore = useConfigStore()
 const userStore = useUserStore()
 const items = computed(() => configStore.config?._config_items || {})
+const browserServiceOrigin = `${window.location.protocol}//${window.location.hostname}`
+const serviceUrls = computed(() => ({
+  neo4j: configStore.config?.neo4j_browser_url || `${browserServiceOrigin}:7474/`,
+  apiDocs: configStore.config?.api_docs_url || `${browserServiceOrigin}:5050/docs`,
+  minio: configStore.config?.minio_console_url || `${browserServiceOrigin}:9001`,
+  milvus: configStore.config?.milvus_webui_url || `${browserServiceOrigin}:9091/webui/`
+}))
 const ocrEngineOptions = [
   { value: 'disable', label: '不启用' },
   { value: 'rapid_ocr', label: 'RapidOCR (ONNX)' },

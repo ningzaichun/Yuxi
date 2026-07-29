@@ -262,6 +262,24 @@ def test_dump_config_hides_save_dir(tmp_path):
     assert "save_dir" not in dumped["_config_items"]
 
 
+def test_service_link_urls_can_be_overridden_by_environment(tmp_path, monkeypatch: pytest.MonkeyPatch):
+    service_urls = {
+        "NEO4J_BROWSER_URL": "https://infra.example.test/neo4j",
+        "API_DOCS_URL": "https://app.example.test/docs",
+        "MINIO_CONSOLE_URL": "https://infra.example.test/minio",
+        "MILVUS_WEBUI_URL": "https://infra.example.test/milvus",
+    }
+    for name, value in service_urls.items():
+        monkeypatch.setenv(name, value)
+
+    cfg = Config(save_dir=str(tmp_path))
+
+    assert cfg.neo4j_browser_url == service_urls["NEO4J_BROWSER_URL"]
+    assert cfg.api_docs_url == service_urls["API_DOCS_URL"]
+    assert cfg.minio_console_url == service_urls["MINIO_CONSOLE_URL"]
+    assert cfg.milvus_webui_url == service_urls["MILVUS_WEBUI_URL"]
+
+
 def test_resolve_chat_model_spec_reads_runtime_refreshed_default(tmp_path, monkeypatch):
     from yuxi.agents import models
 

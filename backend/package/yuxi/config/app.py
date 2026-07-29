@@ -61,6 +61,10 @@ class Config(BaseModel):
         description="内容审查LLM模型",
     )
     default_ocr_engine: str = Field(default=DEFAULT_OCR_ENGINE, description="默认 OCR 解析引擎")
+    neo4j_browser_url: str = Field(default="", description="Neo4j 浏览器访问地址")
+    api_docs_url: str = Field(default="", description="API 接口文档访问地址")
+    minio_console_url: str = Field(default="", description="MinIO 控制台访问地址")
+    milvus_webui_url: str = Field(default="", description="Milvus WebUI 访问地址")
 
     sandbox_provider: str = Field(default="provisioner", description="沙箱提供者")
     sandbox_provisioner_url: str = Field(default="http://sandbox-provisioner:8002", description="沙箱服务地址")
@@ -109,6 +113,10 @@ class Config(BaseModel):
             logger.error(f"Failed to load config from {self._config_file}: {e}")
 
     def _handle_environment(self) -> None:
+        self.neo4j_browser_url = (os.getenv("NEO4J_BROWSER_URL") or self.neo4j_browser_url).strip()
+        self.api_docs_url = (os.getenv("API_DOCS_URL") or self.api_docs_url).strip()
+        self.minio_console_url = (os.getenv("MINIO_CONSOLE_URL") or self.minio_console_url).strip()
+        self.milvus_webui_url = (os.getenv("MILVUS_WEBUI_URL") or self.milvus_webui_url).strip()
         self.sandbox_provider = (os.getenv("SANDBOX_PROVIDER") or self.sandbox_provider or "provisioner").strip()
         self.sandbox_provisioner_url = (
             os.getenv("SANDBOX_PROVISIONER_URL") or self.sandbox_provisioner_url or "http://sandbox-provisioner:8002"
