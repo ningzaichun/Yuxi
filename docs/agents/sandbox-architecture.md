@@ -24,7 +24,7 @@ Docker 和 Kubernetes 不是互斥关系。Docker 解决的是“把一个进程
 
 调用链可以概括为：Web/API 请求进入 Yuxi 后端，后端构造 `ProvisionerSandboxBackend`，再经由 `ProvisionerClient` 调用 `sandbox-provisioner` 的 `/api/sandboxes` 接口。`sandbox-provisioner` 根据 `SANDBOX_PROVISIONER_BACKEND` 选择内存占位实现、Docker 容器实现或 Kubernetes 实现。沙盒真正启动后，对外暴露一个 HTTP 地址，Yuxi 再使用这个地址完成执行命令、上传文件、下载文件、目录遍历等操作。
 
-当前仓库的默认配置和默认开发环境都应该理解为 `docker`。正常情况下运行中的 provisioner 健康检查应返回 `backend=docker`。这意味着我们用 `docker compose up -d` 启动项目时，应用并不是直接把代码跑在宿主机上，而是通过 `sandbox-provisioner` 再去用 Docker 启一个真正的沙盒容器。
+当前仓库的默认 provisioner backend 应理解为 `docker`。正常情况下运行中的 provisioner 健康检查应返回 `backend=docker`。日常开发时 API、Worker、Web 运行在宿主机，只有 `sandbox-provisioner` 和它按需创建的 Sandbox Runtime 运行在本机 Docker 中。
 
 ## 三、`memory`、`docker`、`kubernetes` 分别是什么
 
@@ -38,15 +38,15 @@ Docker 和 Kubernetes 不是互斥关系。Docker 解决的是“把一个进程
 
 因此，如果在界面、文档或者环境变量里看到 “docker / k8s” 这几个词，最准确的理解应该是：Yuxi 的应用层只有一种 provider，也就是 `provisioner`；provisioner 下面有多种 backend；其中 `docker` 是默认的本机 Docker 后端，`kubernetes` 是另一种远程集群后端。
 
-## 四、默认开发模式到底是什么
+## 四、日常开发模式是什么
 
-默认开发模式是 Docker Compose 启动整个项目，再由 `sandbox-provisioner` 按 `docker` 后端去创建沙盒容器。也就是说，项目本身跑在 Compose 里，沙盒也跑在 Docker 里，只不过沙盒不是 Compose 静态声明的长期服务，而是 provisioner 按需动态拉起和回收的短生命周期容器。
+日常开发采用混合拓扑：PostgreSQL、Redis、MinIO、Milvus/Etcd 和 Neo4j 位于远程基础设施服务器；API、Worker、Web 在开发机宿主机运行；本机 Docker 只常驻 `sandbox-provisioner`，真正执行命令和处理文件的 Sandbox Runtime 由它按线程动态创建。
 
-这也是为什么在 `docker-compose.yml` 中既能看到 `api`、`worker`、`sandbox-provisioner` 这样的常驻服务，又能看到 `sandbox-provisioner` 挂载了 `/var/run/docker.sock`。这不是重复设计，而是为了让 provisioner 有能力继续调用宿主机 Docker daemon 去创建新的“每线程沙盒容器”。
+宿主机进程、provisioner 和 Runtime 必须共享根目录 `saves/threads`。本地启动时需要显式传入宿主机线程目录，不能把完整 Compose 使用的容器内目录误当作宿主机源码进程的文件根。
 
-换句话说，当前项目不存在单独的 “纯宿主机 local 模式”。本机开发和单机部署应显式使用 `docker` 后端。
+根 `docker-compose.yml` 仍保留完整本地 Compose 能力，生产环境也有对应的 Compose 文件，但它们不属于日常热重载开发拓扑。完整启动流程见[本地开发指南](/develop-guides/local-development)。
 
-这里还需要把 Compose 里的环境变量分两层看。`api` 和 `worker` 关注的是应用层变量，例如 `SANDBOX_PROVIDER`、`SANDBOX_PROVISIONER_URL`、`SANDBOX_VIRTUAL_PATH_PREFIX`、`SANDBOX_EXEC_TIMEOUT_SECONDS`、`SANDBOX_MAX_OUTPUT_BYTES`。`sandbox-provisioner` 自己则有另一组变量，负责决定具体如何创建沙盒实例。两层不要混看，否则很容易误以为改了 API 环境变量就能切换底层承载方式。
+环境变量仍需分成两层理解。API 和 Worker 使用 `SANDBOX_PROVIDER`、`SANDBOX_PROVISIONER_URL`、`SANDBOX_VIRTUAL_PATH_PREFIX` 等应用层变量；`sandbox-provisioner` 使用另一组变量决定如何创建沙盒实例。两层不要混看，否则很容易误以为改了 API 环境变量就能切换底层承载方式。
 
 ## 五、Docker 本机后端是如何工作的
 
@@ -162,28 +162,23 @@ skills 的结合方式分成两层。第一层是提示词层，`prepare_agent_r
 
 ## 十一、当前推荐如何使用 Docker 沙盒
 
-如果只是正常开发、调试或单机部署，最简单也是当前默认的方式就是保留 `SANDBOX_PROVIDER=provisioner`，同时把 `SANDBOX_PROVISIONER_BACKEND` 设为 `docker`。这会让整个项目继续由 Docker Compose 管理，而沙盒实例由 provisioner 动态创建。通常不需要手工 `docker run` 沙盒镜像，也不需要在 Compose 文件里静态声明每一个沙盒容器。
+日常开发保留 `SANDBOX_PROVIDER=provisioner`，同时把 `SANDBOX_PROVISIONER_BACKEND` 设为 `docker`。API、Worker、Web 在宿主机运行，Compose 只启动 provisioner；通常不需要手工 `docker run` 沙盒镜像，也不需要静态声明每一个 Runtime 容器。
 
-最小必要配置通常就是下面这几项：
+本地配置为：
 
 ```env
 SANDBOX_PROVIDER=provisioner
-SANDBOX_PROVISIONER_URL=http://sandbox-provisioner:8002
+SANDBOX_PROVISIONER_URL=http://127.0.0.1:8002
 SANDBOX_PROVISIONER_BACKEND=docker
 SANDBOX_VIRTUAL_PATH_PREFIX=/home/gem/user-data
-SANDBOX_DOCKER_SANDBOX_HOST=host.docker.internal
+SANDBOX_DOCKER_SANDBOX_HOST=127.0.0.1
 ```
 
-然后用常规方式启动即可：
-
-```bash
-docker compose up -d
-curl http://localhost:8002/health
-```
+启动时还必须把宿主机 `saves/threads` 的绝对路径传给 Dockerized Provisioner。具体命令和 API、Worker、Web 的启动顺序只在[本地开发指南](/develop-guides/local-development)维护，避免两份流程再次漂移。
 
 如果健康检查返回 `backend: docker`，就说明 provisioner 已经处于默认的 Docker 本机后端。真正的沙盒容器不会在系统启动时立即全部出现，而是在你第一次创建线程并触发需要文件系统或命令执行的操作后才会被创建。
 
-如果运行在 Linux，而不是 Docker Desktop，那么 `host.docker.internal` 不一定总是可用。这时要把 `SANDBOX_DOCKER_SANDBOX_HOST` 改成一个从 `api` 容器可达的宿主机地址，或者改成当前网络环境里更稳定的名字。否则 provisioner 虽然能成功起容器，但后端可能拿到一个自己无法访问的 `sandbox_url`。
+完整 Compose 或生产部署下，`SANDBOX_PROVISIONER_URL` 和 `SANDBOX_DOCKER_SANDBOX_HOST` 应改为 API/Worker 所在运行环境可达的地址；不要直接复制宿主机开发值。否则 provisioner 虽然能成功创建容器，应用进程仍可能无法访问返回的 `sandbox_url`。
 
 ## 十二、如何理解文件管理与暴露边界
 
@@ -291,7 +286,7 @@ CHECK_YUXI_SANDBOX_ENV_EXISTS=True
 | provisioner 自身行为 | `.env` 或 compose 环境 | `PROVISIONER_BACKEND`, `DOCKER_*` |
 | 沙盒容器内部环境 | `sandbox.env` 文件 | 代理、认证等运行时变量 |
 
-## 十四、和旧版文档相比，今天最重要的理解方式
+## 十四、核心理解方式
 
 当前项目不应再按“应用直接管理一个长期存在的本地 sandbox 服务”去理解。更准确的认识应该是：Yuxi 只管理线程和上下文；provisioner 负责创建线程对应的沙盒实例；文件系统不是简单地暴露一个容器根目录，而是把可写工作区、只读 skills 等组合成一个受控命名空间（知识库不再映射为沙盒目录，改由 `query_kb`/`open_kb_document` 等工具访问）。
 
@@ -299,8 +294,8 @@ CHECK_YUXI_SANDBOX_ENV_EXISTS=True
 
 ## 十五、排障时建议先看什么
 
-如果怀疑是 provisioner 级问题，先看 `http://localhost:8002/health`，确认 backend 类型和 idle timeout 是否符合预期。默认 Docker 部署下这里应看到 `backend=docker`。接着看 `docker logs sandbox-provisioner --tail 200`，因为这里能直接看到创建容器、复用旧实例、健康检查失败和 idle reaper 删除的日志。
+如果怀疑是 provisioner 级问题，先看 `http://127.0.0.1:8002/health`，确认 backend 类型和 idle timeout 是否符合预期。默认 Docker backend 下这里应看到 `backend=docker`。接着看 `docker logs sandbox-provisioner --tail 200`，因为这里能直接看到创建容器、复用旧实例、健康检查失败和 idle reaper 删除的日志。
 
-如果怀疑是 Docker 地址不可达，重点检查 `SANDBOX_DOCKER_SANDBOX_HOST` 和随机映射端口是否从 `api` 容器可访问。可以在 `api` 容器内直接 `curl` provisioner 返回的 `sandbox_url`。如果怀疑是 Kubernetes 地址不可达，重点检查 `NODE_HOST` 和 NodePort 的外部连通性，因为当前实现并不是通过集群内部 Service 名称回连。
+如果怀疑是 Docker 地址不可达，重点检查 `SANDBOX_DOCKER_SANDBOX_HOST` 和随机映射端口是否从 API 实际运行位置可访问。可以在同一运行环境中直接请求 provisioner 返回的 `sandbox_url`。如果怀疑是 Kubernetes 地址不可达，重点检查 `NODE_HOST` 和 NodePort 的外部连通性，因为当前实现并不是通过集群内部 Service 名称回连。
 
 如果怀疑是文件看得到但模型读不到，或者模型写了但 viewer 看不到，优先把问题拆成两层：一层是宿主机路径是否存在于 `saves/...` 下，另一层是该路径是否真的被当前线程沙盒挂载并暴露到了 `/home/gem/user-data` 或 `/home/gem/skills`。只要先分清“宿主机侧文件语义”和“沙盒侧运行时挂载语义”，定位问题通常会快很多。

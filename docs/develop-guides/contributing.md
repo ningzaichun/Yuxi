@@ -2,7 +2,7 @@
 
 感谢你对 Yuxi 的兴趣。我们欢迎 Issue、文档改进、Bug 修复、测试补充以及新功能贡献。
 
-如果你只是想快速了解仓库入口信息，可以先看根目录的 [CONTRIBUTING.md](../../CONTRIBUTING.md)。
+根目录的 [CONTRIBUTING.md](../../CONTRIBUTING.md) 是 GitHub 入口页，本页是唯一维护完整贡献流程的文档。
 
 <a href="https://github.com/xerrors/Yuxi/contributors">
     <img src="https://contributors.nn.ci/api?repo=xerrors/Yuxi" alt="贡献者名单">
@@ -27,24 +27,15 @@
 
 ## 开发环境
 
-Yuxi 基于 Docker Compose 管理开发环境。开发、调试、测试都应尽量在运行中的容器中完成。
+日常开发采用“远程基础设施 + 本机源码进程 + 本机 Docker Sandbox”：API、Worker、Web 在宿主机热重载运行，本机 Compose 只启动 `sandbox-provisioner`，由它按线程创建 Sandbox Runtime。
 
-### 启动项目
+完整初始化、启动、健康检查和停止命令统一维护在[本地开发指南](./local-development.md)。开始开发前先确认：
 
-```bash
-docker compose up -d
-```
+- Web：`http://127.0.0.1:5173`
+- API：`http://127.0.0.1:5050`
+- Sandbox Provisioner：`http://127.0.0.1:8002/health`
 
-### 常用检查命令
-
-```bash
-docker ps
-docker logs api-dev --tail 100
-```
-
-`api-dev` 和 `web-dev` 默认支持热重载。通常情况下，本地修改代码后不需要重启容器。
-
-如需进一步了解服务定义，可查看 [docker-compose.yml](../../docker-compose.yml)。
+不要同时启动生产 Compose 中的同名服务。
 
 ## 贡献流程
 
@@ -112,12 +103,12 @@ git push origin feature/amazing-feature
 
 - Python 风格尽量保持 pythonic
 - 优先使用较新的语法，兼容目标为 Python 3.12+
-- 优先在容器内运行调试和测试命令
+- 业务程序测试在宿主机 uv 环境运行；Sandbox 行为在本机 Docker 中验证
 
 示例：
 
 ```bash
-docker compose exec api uv run python test/your_script.py
+uv run pytest backend/test/unit
 ```
 
 测试脚本建议放在 `backend/test` 下。
