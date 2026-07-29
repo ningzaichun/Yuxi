@@ -1,0 +1,29 @@
+openapi: 3.1.0
+info:
+  title: Yuxi 外部集成 API
+  version: 1.0.0
+  description: 外部项目通过 API Key 查询 Agent、创建调用和读取结果的最小接口契约。
+servers:
+  - url: https://yuxi.example.com
+    description: 替换为实际 Yuxi 实例根地址
+paths:
+  /api/agent:
+    $ref: "./modules/external-agent-invocation.yaml#/paths/~1api~1agent"
+  /api/chat/thread:
+    $ref: "./modules/external-agent-invocation.yaml#/paths/~1api~1chat~1thread"
+  /api/chat/thread/{thread_id}/history:
+    $ref: "./modules/external-agent-invocation.yaml#/paths/~1api~1chat~1thread~1{thread_id}~1history"
+  /api/chat/thread/{thread_id}/attachments:
+    $ref: "./modules/external-agent-invocation.yaml#/paths/~1api~1chat~1thread~1{thread_id}~1attachments"
+  /api/chat/thread/{thread_id}/attachments/{file_id}:
+    $ref: "./modules/external-agent-invocation.yaml#/paths/~1api~1chat~1thread~1{thread_id}~1attachments~1{file_id}"
+  /api/chat/image/upload:
+    $ref: "./modules/external-agent-invocation.yaml#/paths/~1api~1chat~1image~1upload"
+  /api/agent-invocation/agent-call/runs:
+    $ref: "./modules/external-agent-invocation.yaml#/paths/~1api~1agent-invocation~1agent-call~1runs"
+  /api/agent-invocation/agent-call/runs/result:
+    $ref: "./modules/external-agent-invocation.yaml#/paths/~1api~1agent-invocation~1agent-call~1runs~1result"
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: "./modules/external-agent-invocation.yaml#/components/securitySchemes/bearerAuth"

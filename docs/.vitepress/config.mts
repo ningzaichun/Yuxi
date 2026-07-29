@@ -63,7 +63,9 @@ export default defineConfig({
           { text: '品牌自定义', link: '/advanced/branding' },
           { text: '其他配置', link: '/advanced/misc' },
           { text: '生产部署', link: '/advanced/deployment' },
-          { text: 'API Key 外部集成', link: '/advanced/api-key-integration' }
+          { text: '施工规则校验外部接入', link: '/advanced/business-agent-external-integration' },
+          { text: 'API Key 外部项目接入', link: '/advanced/api-key-integration' },
+          { text: '外部调用 API 参考', link: '/api/modules/external-agent-invocation' }
         ]
       },
       {

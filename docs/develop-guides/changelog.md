@@ -4,6 +4,10 @@
 
 同一版本的多次功能更新时，应以功能为单位进行更新，比如之前添加了 A 功能的更新，在后续的更新中修复了因 A 功能引入的 bug，那么这个修复说明应该和 A 功能描述放在一起，而不是新增一条修复记录，功能更新同理。
 
+## 未发布
+
+- 重写 API Key 外部项目接入文档，并新增建筑施工过程规则校验智能体接入指南，补充 Yuxi 侧 Agent、知识库、激活规则和施工场景 JSON 的配置职责，以及外部 Java 服务的一次性同步/异步校验、最终 JSON 输出、校验记录存储、幂等重试、错误处理、CORS 与生产安全流程；明确规则校验不接收附件或图片，线程附件和多模态图片属于其他独立业务；新增安全读取环境变量且只输出业务 JSON 的 Python Demo 和纯规则校验 JDK 17 Demo，以及从真实路由和响应模型整理的 OpenAPI 3.1 外部调用契约；补充完整 JSON 输出结构和无关 Tools/Skills 隔离要求，Java Demo 固定使用 HTTP/1.1 以避免 JDK 明文 HTTP 的 h2c Upgrade 与 Uvicorn 不兼容，并分别报告 HTTP 错误和 Agent 非 JSON 输出；Java Demo 改为由 `main` 直接填写 URL、API Key、Agent、规则和场景参数，再调用普通 `validateConstructionRules(...)` 方法，不再依赖环境变量或命令行参数；方法内部异步创建并轮询 run，调试模式完整打印请求地址、请求体、HTTP 状态、响应体、`run_id`、运行状态和异常堆栈，但不打印 API Key，长期 `pending` 时明确提示检查 Worker。
+
 ## v0.7.1 (current)
 
 ### 破坏性变更

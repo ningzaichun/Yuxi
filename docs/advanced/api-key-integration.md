@@ -1,192 +1,493 @@
-# API Key 外部集成
+# API Key 外部项目接入
 
-Yuxi 平台提供了 API Key 认证机制，允许外部系统在无需用户登录的情况下调用智能体对话接口。本文档详细介绍 API Key 的使用方法、接口调用方式以及安全注意事项。
+Yuxi 支持外部服务通过 API Key 调用平台中的智能体。本页以一次性的建筑施工过程规则校验为示例，介绍密钥创建、Agent 选择、激活规则和施工场景数据传递、同步调用、异步轮询、幂等、错误处理和生产安全要求。
 
-## API Key 概述
+如果只想先验证连通性，请直接阅读[五分钟完成首次调用](#五分钟完成首次调用)。
 
-API Key 是一种用于身份验证的密钥字符串，外部系统可以通过它在请求头中携带凭据来访问 Yuxi 的对话接口。与传统的用户名密码登录方式相比，API Key 更加适合用于系统间的自动化调用场景。Yuxi 的 API Key 以 `yxkey_` 为前缀，长度为 54 个字符，采用 SHA-256 哈希存储，确保密钥本身不会在数据库中明文保存。系统会记录每个 API Key 的最后使用时间，方便管理员追踪使用情况。
+## 接入范围与推荐接口
 
-## 创建 API Key
+外部项目通常只需要以下三个接口：
 
-登录系统后，进入 API Key 管理界面，可以创建新的密钥。创建时需要为 API Key 设置一个名称，用于标识其用途，例如"外部客服系统"或"数据同步服务"。创建的 API Key 会自动绑定到当前登录用户，绑定后的 API Key 在调用接口时会以该用户的身份执行操作。API Key 还支持设置过期时间，过期后该密钥将自动失效。
+| 接口 | 用途 |
+| --- | --- |
+| `GET /api/agent` | 查询当前 API Key 身份可见的 Agent，并获取 `slug` |
+| `POST /api/agent-invocation/agent-call/runs` | 创建 Agent 调用；支持同步等待或异步返回 |
+| `POST /api/agent-invocation/agent-call/runs/result` | 查询异步调用结果 |
 
-需要特别注意的是，创建 API Key 时返回的完整密钥（secret）只会显示一次，务必在创建时将其安全保存。如果遗失，需要通过"重新生成"功能生成新的密钥，原有的密钥将立即失效。
+推荐优先使用 `agent-invocation` 接口。它会为每次调用自动创建内部临时线程，接受接近 OpenAI messages 的输入格式，并返回固定的 `output`、`choices` 和 `usage` 结构。业务方只读取并解析 `output` 中的最终规则校验 JSON。只有需要消费工具事件、运行状态等细粒度过程时，才需要使用通用 AgentRun + SSE 接口。
 
-管理接口同样走通用认证：
+## 接入前准备
 
-- `GET /api/user/apikey/`：列出当前用户可见的 API Key
-- `POST /api/user/apikey/`：创建 API Key
-- `PUT /api/user/apikey/{api_key_id}`：更新名称、状态或过期时间
-- `POST /api/user/apikey/{api_key_id}/regenerate`：重新生成密钥
-- `DELETE /api/user/apikey/{api_key_id}`：删除密钥
+开始前需要准备：
 
-## 确定 API 访问地址
+- 一个可登录 Yuxi 的有效用户，该用户必须属于某个部门；
+- 该用户可以访问的目标 Agent；
+- 可从外部项目访问的 Yuxi 实例地址；
+- 为此外部项目单独创建的 API Key。
 
-Yuxi 后端服务绑定在 `0.0.0.0:5050`，不会自动探测或对外宣告本机 IP。实际访问地址取决于部署环境：
+API Key 继承绑定用户的身份和权限。调用方只能访问该用户本身可见的 Agent、会话和运行结果。
 
-- **本地开发**：`http://localhost:5050`
-- **生产部署（Nginx 反向代理）**：**强烈建议使用 HTTPS**，即 `https://<服务器域名>`（443 端口）。由于 API Key 会在请求头中以明文形式传输，使用 HTTP（80 端口）会导致密钥在网络传输过程中被窃听或篡改，必须避免
+### 确定实例地址
 
-完整的 API 交互流程可参考自动生成的 Swagger 文档：`{base_url}/docs`。
+文档中的 `base_url` 指 Yuxi 实例根地址，不包含 `/api`，末尾也不需要 `/`。
 
-## 接口调用方式
+| 环境 | 示例 |
+| --- | --- |
+| 本地开发 | `http://localhost:5050` |
+| 生产环境 | `https://yuxi.example.com` |
 
-> **关于 `agent_id` / `agent_slug` 的说明**：创建会话线程时仍使用 `agent_id` 绑定目标 Agent；创建运行任务时使用 `agent_slug` 快照本次运行目标。二者的取值都是智能体的 **slug**（如 `default-chatbot`），不是数据库自增 ID 或 `agent_config_id`。
+生产环境必须使用 HTTPS。API Key 通过请求头传输，使用公网 HTTP 会暴露密钥。
 
-外部系统通过 HTTP 请求调用 Yuxi 接口时，需要在请求头中携带 API Key：
+可访问以下地址确认服务是否正常：
+
+```text
+https://yuxi.example.com/docs
+```
+
+该页面是 FastAPI 自动生成的完整接口调试页。本项目维护的外部接入 OpenAPI 文件位于 [API 文档索引](../api/README.md)。
+
+## 创建与保存 API Key
+
+1. 登录 Yuxi。
+2. 点击页面右上角的“系统设置”。
+3. 进入“API Keys”。
+4. 点击“创建 API Key”，填写能标识调用方的名称，例如 `construction-quality-production`。
+5. 按需设置过期时间。
+6. 创建后立即复制并保存完整密钥。
+
+完整密钥形如：
+
+```text
+yxkey_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+完整密钥只在创建或重新生成时返回一次。Yuxi 数据库只保存 SHA-256 哈希和可识别前缀，之后无法找回原值。密钥遗失时必须重新生成，原密钥会立即失效。
+
+建议在外部项目中通过环境变量或密钥管理服务保存：
+
+```bash
+export YUXI_BASE_URL="https://yuxi.example.com"
+export YUXI_API_KEY="yxkey_替换为完整密钥"
+export YUXI_AGENT_SLUG="construction-process-rule-validator"
+```
+
+PowerShell：
+
+```powershell
+$env:YUXI_BASE_URL = "https://yuxi.example.com"
+$env:YUXI_API_KEY = "yxkey_替换为完整密钥"
+$env:YUXI_AGENT_SLUG = "construction-process-rule-validator"
+```
+
+不要把真实密钥写入源码、Git 仓库、镜像、前端代码、URL 参数或日志。
+
+## 五分钟完成首次调用
+
+所有受保护接口都使用同一种认证请求头：
 
 ```http
-Authorization: Bearer yxkey_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Authorization: Bearer yxkey_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-当前智能体对话采用 run + SSE 流程：
+### 1. 查询可用 Agent
 
-1. 创建对话线程：`POST /api/chat/thread`
-2. 创建运行任务：`POST /api/agent/runs`
-3. 订阅事件流：`GET /api/agent/runs/{run_id}/events`
+`agent_slug` 是 Agent 的稳定字符串标识，不是数据库自增 ID，也不是 `backend_id`。
 
-`POST /api/agent/runs` 请求体必填 `query`、`agent_slug` 和 `thread_id`，可选字段包括 `meta`、`image_content`、`resume`、`created_by_run_id`。接口返回 `run_id`、`thread_id`、`status`、`request_id` 和 `stream_url`。
-
-以下是一个典型的 Python 调用示例：
-
-```python
-import json
-import requests
-
-base_url = "https://your-yuxi-server"  # 生产环境务必使用 HTTPS；本地开发可改为 http://localhost:5050
-headers = {
-    "Authorization": "Bearer yxkey_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-    "Content-Type": "application/json",
-}
-
-thread_resp = requests.post(
-    f"{base_url}/api/chat/thread",
-    headers=headers,
-    json={
-        "agent_id": "default-chatbot",
-        "title": "外部系统会话",
-        "metadata": {},
-    },
-)
-thread_resp.raise_for_status()
-thread_id = thread_resp.json()["id"]
-
-run_resp = requests.post(
-    f"{base_url}/api/agent/runs",
-    headers=headers,
-    json={
-        "query": "你好，请介绍一下你自己",
-        "agent_slug": "default-chatbot",
-        "thread_id": thread_id,
-        "meta": {"request_id": "external-request-001"},
-    },
-)
-run_resp.raise_for_status()
-run = run_resp.json()
-
-with requests.get(f"{base_url}{run['stream_url']}", headers=headers, stream=True) as response:
-    response.raise_for_status()
-    event_type = None
-    data_lines = []
-
-    for line in response.iter_lines(decode_unicode=True):
-        if line is None:
-            continue
-        if line.startswith(":"):
-            continue
-
-        if line == "":
-            if event_type and data_lines:
-                payload = json.loads("\n".join(data_lines))
-                print(event_type, payload)
-                if event_type == "end":
-                    break
-            event_type = None
-            data_lines = []
-            continue
-
-        if line.startswith("event:"):
-            event_type = line.removeprefix("event:").strip()
-        elif line.startswith("data:"):
-            data_lines.append(line.removeprefix("data:").strip())
+```bash
+curl --fail-with-body \
+  --request GET \
+  --header "Authorization: Bearer ${YUXI_API_KEY}" \
+  --header "Accept: application/json" \
+  "${YUXI_BASE_URL}/api/agent"
 ```
 
-如果已经有会话线程，可以复用已有 `thread_id` 直接创建 run：
+响应中的 `agents[].slug` 可直接用于后续调用：
 
 ```json
 {
-    "query": "继续上一轮话题",
-    "agent_slug": "default-chatbot",
-    "thread_id": "existing-thread-id",
-    "meta": {}
+  "agents": [
+    {
+      "slug": "construction-process-rule-validator",
+      "name": "建筑施工过程规则校验",
+      "description": "根据当前激活规则校验施工工序、工程部位和现场数据"
+    }
+  ]
 }
 ```
 
-### 读取运行结果
+列表只包含当前 API Key 绑定用户可见的 Agent。目标 Agent 不在列表中时，需要先调整 Agent 的共享权限或更换绑定用户。
 
-如果不需要逐事件消费 SSE，可以在 run 终态后直接拉取最终结果：
+### 2. 发起同步调用
 
-```http
-GET /api/agent/runs/{run_id}/result
+同步模式适合命令行验证和耗时较短的请求。省略 `async_mode` 时默认为 `false`。
+
+```bash
+curl --fail-with-body \
+  --request POST \
+  --header "Authorization: Bearer ${YUXI_API_KEY}" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "agent_slug": "construction-process-rule-validator",
+    "messages": [
+      {
+        "role": "user",
+        "content": "【当前激活规则 active_rules】\n[{\"rule_id\":\"CONCRETE-POUR-001\",\"condition\":\"process_data.rebar_inspection_status == 'passed'\"}]\n\n【当前施工场景数据 scene_data】\n{\"construction_context\":{\"work_type\":\"混凝土浇筑\",\"building_no\":\"1号楼\",\"floor\":\"8层\"},\"process_data\":{\"rebar_inspection_status\":\"pending\"}}"
+      }
+    ],
+    "request_id": "inspection-PC-2026-001-validation-1"
+  }' \
+  "${YUXI_BASE_URL}/api/agent-invocation/agent-call/runs"
 ```
 
-返回结构包含运行状态、最终 assistant 输出、Langfuse trace id 和错误信息。该接口只读，不会再次触发 run。对外部系统只关心「最终答案」、不需要展示中间过程的场景，比订阅 SSE 更简单。
+成功响应：
 
-### 外部系统调用入口
+```json
+{
+  "run_id": "2f249f09-4a21-4a2d-a248-9ad30ca87687",
+  "agent_slug": "construction-process-rule-validator",
+  "thread_id": "d4ac87d0-16dd-4ef4-9d0a-04c22dd39429",
+  "status": "completed",
+  "request_id": "inspection-PC-2026-001-validation-1",
+  "output": "{\"validation_status\":\"non_compliant\",\"results\":[{\"rule_id\":\"CONCRETE-POUR-001\",\"status\":\"non_compliant\",\"reason\":\"钢筋隐蔽工程验收状态为 pending，未满足规则要求的 passed\"}]}",
+  "choices": [
+    {
+      "index": 0,
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "{\"validation_status\":\"non_compliant\",\"results\":[{\"rule_id\":\"CONCRETE-POUR-001\",\"status\":\"non_compliant\",\"reason\":\"钢筋隐蔽工程验收状态为 pending，未满足规则要求的 passed\"}]}"
+        }
+      ],
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0
+  }
+}
+```
 
-除通用 `/api/agent/runs` 之外，Yuxi 还提供专为外部系统设计的 `agent-invocation` 路由，复用同一套 AgentRun 队列与结果读取能力：
+外部项目只读取 `output`，并将其解析为约定的 JSON 对象后返回给业务端。`choices` 用于兼容 OpenAI 风格的消费逻辑；某些模型或运行链路没有提供 token usage 时，`usage` 中的值会是 `0`。
 
-| 接口 | 用途 | 关键字段 |
-|------|------|----------|
-| `POST /api/agent-invocation/agent-call/runs` | 外部系统调用 Agent；`async_mode=true` 时立即返回 `run_id`，否则阻塞到 run 终态返回结果 | `agent_slug`、`messages`、`thread_id`、`request_id`、`model_spec`、`async_mode` |
-| `POST /api/agent-invocation/agent-call/runs/result` | 读取 agent-call run 的 OpenAI 兼容结果结构 | `run_id`、可选 `agent_slug` |
-| `POST /api/agent-invocation/eval/runs` | 运行一次评估样例，阻塞到 run 终态后返回最终输出与可选轨迹摘要 | `query`、`agent_slug`、`evaluation`、`include_trajectory_summary` |
+## 运行完整 Python Demo
 
-agent-call 的 `messages[].content` 兼容 OpenAI 风格的 `text`/`image_url` 多模态数组：纯文本数组不会触发 422，图片输入会保留原始 LangChain 多模态消息供 worker 恢复。出于安全考虑，**不允许通过 `agent_call_meta.context` 覆盖 Agent 运行上下文**；运行时模型覆盖只允许走独立 `model_spec` 字段。Agent Eval 通常通过 `yuxi agent eval` CLI 触发，详见[智能体评估](../agents/agent-evaluation.md)。
+仓库提供了一个仅使用 Python 标准库的可运行 Demo：
 
-## 响应格式
+- Demo 源码：`docs/public/examples/api-key-integration-demo/yuxi_agent_demo.py`
 
-运行事件流采用 Server-Sent Events 格式，响应头为 `text/event-stream`。每个事件包含：
+在仓库根目录执行：
 
-- `event`：事件类型，可能是模型输出、工具调用、子智能体输出等语义事件，也可能是 `error` 或终止事件 `end`
-- `data`：JSON 编码的事件 envelope，包含 `run_id`、`thread_id`、事件载荷等字段
-- `id`：Redis Stream 序号，可作为断线重连游标
+```bash
+python docs/public/examples/api-key-integration-demo/yuxi_agent_demo.py \
+  "【当前激活规则 active_rules】[{\"rule_id\":\"CONCRETE-POUR-001\",\"condition\":\"钢筋隐蔽工程验收状态必须为passed\"}]【当前施工场景数据 scene_data】{\"work_type\":\"混凝土浇筑\",\"building_no\":\"1号楼\",\"floor\":\"8层\",\"rebar_inspection_status\":\"pending\"}"
+```
 
-服务端还会定期发送以 `:` 开头的 heartbeat 注释，客户端应忽略。断线重连时，可以在请求头中传 `Last-Event-ID`，或在 query 参数中传 `after_seq`，服务端会从该序号后继续回放事件。
+列出当前身份可见的 Agent：
 
-事件流默认返回完整载荷，便于排查 LangGraph/Langfuse 运行细节。如果只需要渲染消息、工具调用、工具结果、Agent state 和终止状态，可以在订阅地址追加 `?verbose=false`。精简模式会保留 SSE `event/data/id`、data 中的 `run_id/thread_id/request_id/payload` 以及客户端消费所需字段；同一 data 内的 `request_id` 会外提为单个字段。精简模式还会跳过 `metadata` 和空 `yuxi.agent_state`，并去掉每个 chunk 中重复的 `meta`、`metadata`、`thread_id`、`response`、空 `namespace` 和图片 base64 等调试字段。
+```bash
+python docs/public/examples/api-key-integration-demo/yuxi_agent_demo.py --list-agents
+```
 
-每次创建 run 都会返回 `request_id`，可用于日志追踪和问题排查。如果需要在多轮对话中使用同一个会话，请复用 `thread_id`，系统会将同一线程的消息串联起来形成连贯的对话上下文。
+验证异步模式：
 
-## 认证方式
+```bash
+python docs/public/examples/api-key-integration-demo/yuxi_agent_demo.py \
+  --async-mode \
+  "【当前激活规则 active_rules】[{\"rule_id\":\"SAFETY-EDGE-001\",\"condition\":\"scene_data.edge_protection_status == 'complete'\"}]【当前施工场景数据 scene_data】{\"building_no\":\"1号楼\",\"floor\":\"8层\",\"edge_protection_status\":\"missing\"}"
+```
 
-Yuxi 的 API 接口统一支持两种认证方式：
+Demo 支持 `--request-id` 固定幂等 ID，以及 `--wait-timeout` 调整异步等待上限。每次运行都是独立校验，标准输出只打印解析后的业务 JSON。运行 `--help` 可查看完整参数。
 
-1. **API Key 认证**：使用 `Authorization: Bearer <api_key>` 格式，其中 API Key 必须以 `yxkey_` 前缀开头
-2. **JWT Token 认证**：使用 `Authorization: Bearer <jwt_token>` 格式
+## Agent 调用接口
 
-系统根据 token 的前缀自动判断认证方式。以 `yxkey_` 开头的 token 被视为 API Key，其他 token 则作为 JWT Token 处理。这种设计使得同一个接口可以同时支持外部系统（使用 API Key）和内部前端应用（使用用户登录态）调用。
+### 创建调用
 
-## 安全注意事项
+```http
+POST /api/agent-invocation/agent-call/runs
+Content-Type: application/json
+Authorization: Bearer <API_KEY>
+```
 
-**传输层安全**：API Key 在请求头中以明文形式传输，**生产环境必须通过 HTTPS（443 端口）调用**，避免在公网上以 HTTP 明文传输造成密钥泄露。建议在 Nginx 反向代理层启用 TLS 并强制 HTTP 重定向到 HTTPS。
+请求字段：
 
-保管好 API Key 密钥是最重要的安全原则。由于 API Key 一旦泄露就可能被滥用，建议不要将密钥硬编码在代码中，而是通过环境变量或配置中心来管理。如果怀疑密钥泄露，应立即在管理界面禁用该 API Key 并重新生成。启用密钥过期功能是一种良好的安全实践，可以设置较短的有效期并定期轮换。
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+| --- | --- | --- | --- | --- |
+| `agent_slug` | `string` | 是 | - | 目标 Agent 的 `slug` |
+| `messages` | `array<object>` | 是 | - | 消息列表；系统从后向前取最后一条 `role=user` 消息作为本次输入 |
+| `stream` | `boolean` | 否 | `false` | 当前必须为 `false`；传 `true` 返回 `422` |
+| `agent_call_meta` | `object` | 否 | `{}` | 调用方追踪元数据；不能包含 `context` |
+| `thread_id` | `string` | 否 | 自动生成 | 施工规则校验不传；其他需要线程资源的业务按自身流程使用 |
+| `request_id` | `string` | 否 | 自动生成 UUID | 幂等 ID，去除首尾空白后最多 64 个字符 |
+| `model_spec` | `string` | 否 | Agent 配置模型 | 覆盖本次调用的模型 |
+| `async_mode` | `boolean` | 否 | `false` | `true` 时创建成功后立即返回 |
 
-在生产环境中，建议为不同的外部系统创建独立的 API Key，这样可以在某个密钥泄露时快速定位问题并限制影响范围。同时，建议在管理界面定期查看 API Key 的使用记录，检查是否存在异常调用情况。
+最小请求：
 
-关于权限控制，API Key 的权限等同于其绑定的用户在系统中的角色。如果 API Key 绑定到特定用户，则该用户的所有权限都会体现在 API Key 的操作中，因此务必妥善保管。
+```json
+{
+  "agent_slug": "construction-process-rule-validator",
+  "messages": [
+    {
+      "role": "user",
+      "content": "【当前激活规则 active_rules】\n[]\n\n【当前施工场景数据 scene_data】\n{}"
+    }
+  ]
+}
+```
 
-## 常见问题
+`messages[].content` 支持纯文本：
 
-**Q: API Key 认证失败返回什么错误？**
-A: 认证失败时返回 401 Unauthorized 错误，错误信息为"无效的凭证"。请检查请求头中 `Authorization` 字段的格式是否正确，是否包含完整的密钥，且密钥必须以 `yxkey_` 开头。
+```json
+{
+  "role": "user",
+  "content": "请根据当前激活规则校验1号楼8层梁板混凝土浇筑前置条件"
+}
+```
 
-**Q: 可以同时使用 API Key 和 JWT Token 吗？**
-A: 不可以。系统根据 token 前缀自动判断认证方式。以 `yxkey_` 开头的 token 使用 API Key 认证，其他 token 使用 JWT 认证。
+接口本身也支持 OpenAI 风格的 `text` 和 `image_url` 多模态数组，但这属于独立的图片业务，不应发送给 `construction-process-rule-validator`。图片业务应创建另一个 Agent，例如：
 
-**Q: API Key 是否有调用频率限制？**
-A: 目前没有单独的频率限制，但 API Key 的行为等同于其绑定的用户身份，因此会受到用户角色相关的一些限制。
+```json
+{
+  "agent_slug": "image-analysis-assistant",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "请分析图片内容并按照图片业务约定返回结果。"
+        },
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "data:image/png;base64,iVBORw0KGgoAAA..."
+          }
+        }
+      ]
+    }
+  ]
+}
+```
 
-**Q: 对话返回的内容是乱码怎么办？**
-A: 确保客户端正确处理了 UTF-8 编码。流式响应中可能包含中文字符，需要使用正确的编码方式解析。如果在终端显示乱码，可以检查终端的编码设置。
+当前接口不会把整个 `messages` 数组重放为历史上下文，只提取最后一条 user 消息。因此每次规则校验都应在这一条消息中提供完整的 `active_rules` 和 `scene_data`，不要依赖历史消息。
+
+### 响应字段
+
+| 字段 | 说明 |
+| --- | --- |
+| `run_id` | 本次 AgentRun ID，用于查询结果和排查日志 |
+| `agent_slug` | 实际运行的 Agent |
+| `thread_id` | Yuxi 内部线程 ID；施工规则校验不传入也不复用 |
+| `status` | `pending`、`running`、`completed`、`failed`、`cancelled` 或 `interrupted` |
+| `request_id` | 本次请求的幂等/追踪 ID |
+| `output` | 最终规则校验 JSON 的字符串形式；异步未完成时为空字符串 |
+| `choices` | OpenAI 风格结果包装 |
+| `usage` | token 使用量；无法取得时为 `0` |
+| `error` | 运行失败时的错误对象，成功时通常不存在 |
+
+`finish_reason` 的取值规则：
+
+- `completed` 对应 `stop`；
+- `failed`、`cancelled`、`interrupted` 对应同名值；
+- 非终态对应 `null`。
+
+## 生产环境推荐：异步调用
+
+耗时不确定、会调用工具或可能超过网关超时的请求应使用异步模式。
+
+### 1. 创建异步调用
+
+```json
+{
+  "agent_slug": "construction-process-rule-validator",
+  "messages": [
+    {
+      "role": "user",
+      "content": "【当前激活规则 active_rules】\n[{\"rule_id\":\"CONCRETE-POUR-001\",\"condition\":\"process_data.rebar_inspection_status == 'passed'\"}]\n\n【当前施工场景数据 scene_data】\n{\"construction_context\":{\"work_type\":\"混凝土浇筑\",\"inspection_batch_id\":\"PC-2026-001\"},\"process_data\":{\"rebar_inspection_status\":\"pending\"}}"
+    }
+  ],
+  "request_id": "inspection-PC-2026-001-validation-1",
+  "async_mode": true
+}
+```
+
+接口立即返回，典型状态为 `pending`：
+
+```json
+{
+  "run_id": "ae3377d2-50c9-4520-8e86-f6f451f5928d",
+  "agent_slug": "construction-process-rule-validator",
+  "thread_id": "0e4dc23d-7c82-4bb0-becf-31da990bb7b7",
+  "status": "pending",
+  "request_id": "inspection-PC-2026-001-validation-1",
+  "output": "",
+  "choices": [
+    {
+      "index": 0,
+      "messages": [
+        {
+          "role": "assistant",
+          "content": ""
+        }
+      ],
+      "finish_reason": null
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0
+  }
+}
+```
+
+### 2. 轮询结果
+
+```http
+POST /api/agent-invocation/agent-call/runs/result
+Content-Type: application/json
+Authorization: Bearer <API_KEY>
+```
+
+```json
+{
+  "run_id": "ae3377d2-50c9-4520-8e86-f6f451f5928d",
+  "agent_slug": "construction-process-rule-validator"
+}
+```
+
+`agent_slug` 可省略；传入时，服务端会校验 run 是否属于该 Agent，不匹配返回 `409`。
+
+建议每 1 至 3 秒查询一次，并在调用方设置总等待上限。遇到 `completed` 即读取 `output`；遇到 `failed`、`cancelled` 或 `interrupted` 应停止轮询并记录 `run_id`、`request_id` 和 `error`。
+
+不要在每次轮询时重新创建 run。
+
+## 一次性校验与幂等
+
+每次施工规则校验都是独立任务：
+
+- 不传 `thread_id`、附件或图片；
+- 下一次校验不复用上一次运行的上下文；
+- 修改规则或场景数据后，携带完整新输入并生成新的 `request_id`；
+- 外部业务系统不需要维护多轮消息历史。
+
+### 使用 `request_id` 安全重试
+
+`request_id` 用于幂等和跨系统追踪，最多 64 个字符。建议由调用方生成稳定且可定位的值，例如：
+
+```text
+inspection-PC-2026-001-validation-1
+```
+
+网络超时后，可以用相同的 `request_id` 和 `agent_slug` 重试，服务端会返回已创建的 run。相同 `request_id` 被用于其他用户、Agent 或线程时会返回 `409 request_id 冲突`。
+
+不要用时间过短或会重复的序号作为全局 `request_id`。
+
+### 校验最终 `output`
+
+只有同时满足以下条件才算调用成功：
+
+1. `status=completed`；
+2. `output` 非空；
+3. `output` 可以解析为 JSON 对象；
+4. JSON 满足业务约定的 Schema。
+
+Agent 的系统提示词必须要求只输出 JSON，不使用 Markdown 代码围栏，不在 JSON 前后添加解释。调用方仍需执行 JSON 解析和 Schema 校验，不能只依赖提示词。
+
+## 错误处理
+
+FastAPI 参数校验错误和业务错误都以 JSON 返回，常见格式为：
+
+```json
+{
+  "detail": "错误说明"
+}
+```
+
+部分冲突和超时会返回结构化 `detail`：
+
+```json
+{
+  "detail": {
+    "code": "run_busy",
+    "message": "该智能体线程正在运行，请等待、查询或取消当前运行后再继续",
+    "active_run_id": "run-id"
+  }
+}
+```
+
+| HTTP 状态码 | 常见原因 | 处理建议 |
+| --- | --- | --- |
+| `400` | API Key 用户没有部门等前置条件不满足 | 修复用户或部门配置 |
+| `401` | 缺少认证头、格式错误、Key 不存在、已禁用或已过期 | 检查 `Bearer` 格式并在管理页确认 Key 状态 |
+| `404` | Agent 不可见或不存在 | 调用 `GET /api/agent` 核对 `slug` 和权限 |
+| `409` | `request_id` 冲突、线程绑定其他 Agent、线程正在运行 | 按 `detail` 修正幂等范围或等待当前 run |
+| `422` | 请求字段无效、没有 user 消息、`stream=true` 等 | 修正请求体，不要原样重试 |
+| `504` | 同步等待超过服务端上限，但 run 可能仍在执行 | 从 `detail.run` 取得 run 信息，改用异步模式查询 |
+| `5xx` | 服务端或依赖暂时异常 | 使用退避重试；保留相同 `request_id` 防止重复创建 |
+
+日志中建议记录：
+
+- 调用方业务 ID；
+- `request_id`；
+- `run_id`；
+- `thread_id`；
+- HTTP 状态码和脱敏后的错误。
+
+严禁记录 `Authorization` 请求头或完整 API Key。
+
+## API Key 生命周期管理接口
+
+通常应由用户在 Yuxi 设置页面管理密钥。需要自动化管理时，以下接口与其他 API 一样使用 Bearer 认证：
+
+| 方法与路径 | 说明 |
+| --- | --- |
+| `GET /api/user/apikey/?skip=0&limit=100` | 列出当前用户的 Key；superadmin 可查看全部 |
+| `POST /api/user/apikey/` | 创建 Key，响应中的 `secret` 只返回一次 |
+| `GET /api/user/apikey/{api_key_id}` | 读取 Key 元数据，不返回完整 secret |
+| `PUT /api/user/apikey/{api_key_id}` | 修改名称、过期时间或启用状态 |
+| `POST /api/user/apikey/{api_key_id}/regenerate` | 重新生成并立即废止旧 Key |
+| `DELETE /api/user/apikey/{api_key_id}` | 删除 Key |
+
+普通用户只能管理自己的 Key，superadmin 可以管理其他用户的 Key。生产集成建议把“运行调用凭据”和“密钥管理凭据”分离，避免业务进程拥有不必要的密钥管理能力。
+
+## 生产安全检查表
+
+- 为每个外部系统和环境创建独立 API Key，例如生产与测试不要共用；
+- API Key 绑定最小权限用户，不要默认使用 superadmin；
+- 生产流量只允许 HTTPS，并在反向代理层关闭访问日志中的认证头；
+- 密钥存入环境变量、Vault 或云密钥管理服务，不进入前端和 Git；
+- 设置合理的过期时间和轮换周期；
+- 泄露时先禁用或重新生成，再排查 `last_used_at` 与网关日志；
+- 在 API 网关按调用方增加速率限制、请求体大小限制和超时；
+- 使用稳定的 `request_id` 实现安全重试和链路追踪；
+- 长任务使用异步模式，避免反向代理或客户端提前断开；
+- 定期检查不再使用的 Key 并删除。
+
+Yuxi 当前没有为 API Key 单独设置调用频率限制。公网部署应在 Nginx、API Gateway 或服务网格层补充限流。
+
+## 浏览器直接调用与 CORS
+
+API Key 更适合保存在服务端。把长期密钥放入浏览器 JavaScript 会暴露给终端用户，不建议这样接入。
+
+如果确实需要由受控 Web 页面跨域调用，后端必须通过 `YUXI_CORS_ORIGINS` 显式允许页面来源，例如：
+
+```text
+YUXI_CORS_ORIGINS=https://portal.example.com
+```
+
+不要仅为解决 CORS 而把生产来源设置成 `*`。更推荐由业务后端保管 API Key，浏览器只调用业务后端。
+
+## 接口事实来源
+
+本文档对应以下实现：
+
+- API Key 认证：`backend/server/utils/auth_middleware.py`
+- API Key 管理：`backend/server/routers/user_router.py`
+- 外部 Agent 路由：`backend/server/routers/agent_invocation_router.py`
+- 外部调用语义与响应：`backend/package/yuxi/services/agent_invocation_service.py`
+- Agent 列表：`backend/server/routers/agent_router.py`
+
+机器可读契约与字段结构见 [外部 Agent 调用 API 参考](../api/modules/external-agent-invocation.md)。
