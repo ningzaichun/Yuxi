@@ -51,7 +51,8 @@ export default defineConfig({
           { text: '沙盒架构与设计', link: '/agents/sandbox-architecture' },
           { text: 'MCP 集成', link: '/agents/mcp-integration' },
           { text: 'Skills 管理', link: '/agents/skills-management' },
-          { text: '子智能体', link: '/agents/subagents-management' }
+          { text: '子智能体', link: '/agents/subagents-management' },
+          { text: '子智能体调用链', link: '/agents/subagent-invocation-lifecycle' }
         ]
       },
       {

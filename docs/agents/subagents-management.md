@@ -2,6 +2,8 @@
 
 Yuxi 的子智能体是 Agent-backed 形态：它仍然是 `agents` 表中的一级 Agent，只是额外带有 `is_subagent=true` 标记，并使用专用后端 `SubAgentBackend`。子智能体不再有独立的创建入口、独立表或独立管理接口。
 
+如果需要维护或扩展主子智能体运行链路，请继续阅读[主智能体调用子智能体：运行链路与结果回传](/agents/subagent-invocation-lifecycle)。
+
 ## 用户视角
 
 ### 子智能体能解决什么问题
@@ -82,7 +84,7 @@ class TaskToolSchema(BaseModel):
 
 1. 从父 Agent 的 `context.subagents` 读取允许的子智能体 slug；未显式配置或空列表会展开为当前用户可见的全部子智能体。
 2. 使用 `AgentRepository` 加载当前用户可见且 `is_subagent=true` 的 Agent。
-3. 新任务会为本次调用生成 child checkpoint thread id，例如 `<parent_thread_id>_sub_<slug>_<uuid8>`；续跑任务会校验并复用传入的 `thread_id`。
+3. 新任务会根据父 `thread_id`、子智能体 slug 和本次 `tool_call_id` 确定性生成 `subagent_<sha256>` 形式的 child checkpoint thread ID；续跑任务会校验并复用传入的 `thread_id`。
 4. 使用子智能体自己的 `SubAgentContext` 和 `config_json.context` 构建真实 Agent graph。
 5. 调用结束后，把子智能体线程 ID 和最终 assistant 文本作为 `task` 工具结果返回给主 Agent。
 
@@ -137,4 +139,4 @@ class TaskToolSchema(BaseModel):
 
 ### 子智能体能否继承主 Agent 的模型或工具？
 
-子智能体运行时使用自己的 Agent 配置。确实需要一致时，应在子智能体配置中显式选择相同模型、工具或 Skills；运行时只继承必要的父会话作用域，例如 uploads/outputs。
+子智能体运行时使用自己的 Agent 配置。工具、知识库、MCP、Skills 和系统提示词不会继承主 Agent；确实需要一致时，应在子智能体配置中显式选择。模型是唯一的缺省继承项：子智能体未显式配置模型时，会沿用主 Agent 当前运行模型。文件系统还会继承必要的父会话作用域，例如 uploads/outputs。
