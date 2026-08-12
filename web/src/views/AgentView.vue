@@ -7,6 +7,7 @@
           ref="chatComponentRef"
           :single-mode="false"
           @thread-change="handleThreadChange"
+          @draft-consumed="clearScheduleEntryQuery"
         >
           <template #input-actions-left="{ hasActiveThread }">
             <a-dropdown
@@ -117,6 +118,7 @@ const router = useRouter()
 const { agents, selectedAgentId, isLoadingConfig } = storeToRefs(agentStore)
 
 const syncingRouteThread = ref(false)
+const consumingScheduleEntry = ref(false)
 
 const getRouteThreadId = () => {
   const value = route.params.thread_id
@@ -125,6 +127,11 @@ const getRouteThreadId = () => {
 
 const getRouteAgentId = () => {
   const value = route.query.agent_id
+  return typeof value === 'string' ? value : ''
+}
+
+const getRouteScheduleIssueId = () => {
+  const value = route.query.schedule_issue_id
   return typeof value === 'string' ? value : ''
 }
 
@@ -152,23 +159,47 @@ const syncSelectedThreadFromRoute = async () => {
 
 const consumeRouteAgentSelection = async () => {
   const targetAgentId = getRouteAgentId()
-  if (!targetAgentId || getRouteThreadId()) return
+  const scheduleIssueId = getRouteScheduleIssueId()
+  const chatComponent = chatComponentRef.value
+  if (
+    (!targetAgentId && !scheduleIssueId) ||
+    getRouteThreadId() ||
+    !chatComponent ||
+    consumingScheduleEntry.value
+  )
+    return
 
+  consumingScheduleEntry.value = true
   try {
     if (!agentStore.isInitialized) {
       await agentStore.initialize()
     }
 
     await nextTick()
-    await chatComponentRef.value?.selectThreadFromRoute?.('')
-    await agentStore.selectAgent(targetAgentId)
+    await chatComponent.selectThreadFromRoute?.('')
+    if (targetAgentId) await agentStore.selectAgent(targetAgentId)
+    if (scheduleIssueId) {
+      chatComponent.setDraftMessage?.(
+        `请解释排期审查问题 issue_id=${scheduleIssueId}，并说明证据、影响和需要工程人员确认的事项。`
+      )
+    }
   } catch (error) {
     handleChatError(error, 'load')
   } finally {
+    consumingScheduleEntry.value = false
+  }
+  if (!scheduleIssueId) {
     const nextQuery = { ...route.query }
     delete nextQuery.agent_id
     await router.replace({ name: 'AgentComp', query: nextQuery })
   }
+}
+
+const clearScheduleEntryQuery = async () => {
+  const nextQuery = { ...route.query }
+  delete nextQuery.agent_id
+  delete nextQuery.schedule_issue_id
+  await router.replace({ name: 'AgentComp', query: nextQuery })
 }
 
 watch(
@@ -180,16 +211,19 @@ watch(
 )
 
 watch(
-  () => route.query.agent_id,
+  () => [route.query.agent_id, route.query.schedule_issue_id],
   () => {
     consumeRouteAgentSelection()
   },
   { immediate: true }
 )
 
-watch(chatComponentRef, (instance) => {
+watch(chatComponentRef, async (instance) => {
   if (!instance) return
-  syncSelectedThreadFromRoute()
+  // Route thread selection and Schedule draft projection both reset the
+  // empty-chat state, so keep their order deterministic on first mount.
+  await syncSelectedThreadFromRoute()
+  await consumeRouteAgentSelection()
 })
 
 const handleThreadChange = (threadId) => {

@@ -624,7 +624,7 @@ const props = defineProps({
   singleMode: { type: Boolean, default: true },
   sendDisabled: { type: Boolean, default: false }
 })
-const emit = defineEmits(['thread-change'])
+const emit = defineEmits(['thread-change', 'draft-consumed'])
 
 // ==================== STORE MANAGEMENT ====================
 const agentStore = useAgentStore()
@@ -637,6 +637,7 @@ const { threads, currentThreadId, currentThread } = storeToRefs(chatThreadsStore
 
 // ==================== LOCAL CHAT & UI STATE ====================
 const userInput = ref('')
+const scheduleDraftActive = ref(false)
 const sendCooldownActive = ref(false)
 let sendCooldownTimer = null
 // 预设的打招呼文本
@@ -2642,6 +2643,18 @@ const handleQuestionCancel = () => {
   handleApprovalWithStream('reject')
 }
 
+const setDraftMessage = (value) => {
+  userInput.value = String(value || '')
+  scheduleDraftActive.value = Boolean(userInput.value)
+}
+
+watch(userInput, (value) => {
+  if (scheduleDraftActive.value && !value.trim()) {
+    scheduleDraftActive.value = false
+    emit('draft-consumed')
+  }
+})
+
 const buildExportPayload = () => {
   const agentId = currentAgentId.value
   let agentDescription = ''
@@ -2665,7 +2678,8 @@ const buildExportPayload = () => {
 
 defineExpose({
   getExportPayload: buildExportPayload,
-  selectThreadFromRoute
+  selectThreadFromRoute,
+  setDraftMessage
 })
 
 const handleAgentStateRefresh = async (threadId = null) => {

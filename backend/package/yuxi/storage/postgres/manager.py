@@ -11,6 +11,9 @@ from sqlalchemy.orm import declarative_base
 from yuxi.storage.postgres.models_business import AGENT_RUN_TERMINAL_STATUSES
 from yuxi.storage.postgres.models_business import Base as BusinessBase
 from yuxi.storage.postgres.models_knowledge import Base as KnowledgeBase
+# Importing the module registers Schedule tables on the shared business metadata
+# before startup invokes metadata.create_all().
+from yuxi.storage.postgres import models_schedule as _models_schedule  # noqa: F401
 from yuxi.utils import logger
 from yuxi.utils.singleton import SingletonMeta
 
@@ -377,6 +380,12 @@ class PostgresManager(metaclass=SingletonMeta):
         """确保业务 schema 包含后续新增字段（运行时 schema 演进）。"""
         self._check_initialized()
         stmts = [
+            (
+                "ALTER TABLE IF EXISTS schedule_snapshots "
+                "ADD COLUMN IF NOT EXISTS execution_started_at TIMESTAMP"
+            ),
+            "ALTER TABLE IF EXISTS schedule_snapshots ALTER COLUMN source_snapshot_id TYPE TEXT",
+            "ALTER TABLE IF EXISTS schedule_issues ALTER COLUMN sort_key TYPE TEXT",
             "ALTER TABLE IF EXISTS skills ADD COLUMN IF NOT EXISTS tool_dependencies JSONB DEFAULT '[]'::jsonb",
             "ALTER TABLE IF EXISTS skills ADD COLUMN IF NOT EXISTS mcp_dependencies JSONB DEFAULT '[]'::jsonb",
             "ALTER TABLE IF EXISTS skills ADD COLUMN IF NOT EXISTS skill_dependencies JSONB DEFAULT '[]'::jsonb",

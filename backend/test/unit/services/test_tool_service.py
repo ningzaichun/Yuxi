@@ -12,7 +12,12 @@ def test_get_tool_metadata_includes_config_guide(monkeypatch):
         name="demo_tool",
         description="demo description",
         metadata={},
-        args_schema=None,
+        args={
+            "query": {
+                "type": "string",
+                "description": "查询内容",
+            }
+        },
     )
     fake_extra = SimpleNamespace(
         category="buildin",
@@ -38,11 +43,28 @@ def test_get_tool_metadata_includes_config_guide(monkeypatch):
             "name": "演示工具",
             "description": "demo description",
             "metadata": {},
-            "args": [],
+            "args": [
+                {
+                    "name": "query",
+                    "type": "string",
+                    "description": "查询内容",
+                }
+            ],
             "category": "buildin",
             "tags": ["demo"],
             "config_guide": "请先配置 DEMO_API_KEY",
         }
     ]
+
+    tool_service._metadata_cache.clear()
+
+
+def test_schedule_tool_metadata_excludes_injected_runtime():
+    tool_service._metadata_cache.clear()
+
+    result = {item["slug"]: item for item in tool_service.get_tool_metadata(category="buildin")}
+
+    assert [arg["name"] for arg in result["get_schedule_audit"]["args"]] == ["schedule_snapshot_id"]
+    assert [arg["name"] for arg in result["get_schedule_issue_context"]["args"]] == ["issue_id"]
 
     tool_service._metadata_cache.clear()

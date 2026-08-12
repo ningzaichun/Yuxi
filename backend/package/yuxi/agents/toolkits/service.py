@@ -17,11 +17,10 @@ def _extract_tool_info(tool_obj) -> dict:
         "args": [],
     }
 
-    if hasattr(tool_obj, "args_schema") and tool_obj.args_schema:
-        schema = tool_obj.args_schema
-        if hasattr(schema, "schema"):
-            schema = schema.schema()
-        for arg_name, arg_info in schema.get("properties", {}).items():
+    # BaseTool.args 是提供给模型的公开参数，已排除 ToolRuntime 等框架注入字段。
+    # 不要直接序列化 args_schema；其中可能包含无法生成 JSON Schema 的运行时类型。
+    for arg_name, arg_info in (getattr(tool_obj, "args", None) or {}).items():
+        if isinstance(arg_info, dict):
             info["args"].append(
                 {
                     "name": arg_name,

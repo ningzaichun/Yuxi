@@ -72,6 +72,19 @@ const router = createRouter({
       ]
     },
     {
+      path: '/schedule',
+      name: 'schedule',
+      component: AppLayout,
+      children: [
+        {
+          path: '',
+          name: 'ScheduleComp',
+          component: () => import('../views/ScheduleView.vue'),
+          meta: { keepAlive: false, requiresAuth: true }
+        }
+      ]
+    },
+    {
       path: '/dashboard',
       name: 'dashboard',
       component: AppLayout,

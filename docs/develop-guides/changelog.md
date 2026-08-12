@@ -6,6 +6,7 @@
 
 ## 未发布
 
+- 新增排期审查第一阶段闭环：支持 `canonical_schedule_v2.2` 严格契约、JSON Schema 漂移检查、脱敏黄金样例、不可变 Snapshot、PostgreSQL/私有 MinIO 持久化、并发幂等、60 秒执行租约与失败/取消恢复；Yuxi 独立计算 Statistics、Capability 和 16 类确定性 Issue，当前黄金样例稳定得到 68 条零 Lag 已检查、22 条非零 Lag 未检查、2 个开放起点、15 个开放终点和 4 个汇总任务依赖。新增 `/schedule` 只读页面、证据与直接上下游 Drawer、两个只读 Agent 工具以及仅预填不自动发送的 Agent 入口；修复 Agent 解释调用中 `ToolRuntime` 被自定义参数模型丢弃、配置页序列化内部运行时参数导致 Schedule 工具无法显示、相同请求的并发等待早于 60 秒租约结束，以及页面无法继续读取首批以外 Snapshot/Issue 的问题，分类筛选不再依赖当前页数据；补充真实工具入口、工具元数据和并发等待回归测试，并修正开发端口说明。CandidateSnapshot 暂以 `schedule_candidate_draft_v0` 作为后续内部实验契约，不冻结长期字段。同步新增排期审查操作与维护手册。
 - 新增主智能体调用子智能体的运行链路与结果回传维护教程：系统说明 `tool_call_id`、`run_id`、`child_thread_id` 三类身份，覆盖同步 `task`、异步 `subagent_start/status/cancel/await`、child conversation 与 AgentRun 创建、Worker 执行、最终 assistant 消息落库、`Command + ToolMessage` 回写父 LangGraph、前端 `subagent_runs` 状态旁路、文件与 Sandbox 作用域、失败/超时/续跑、调试 SQL、测试入口和扩展不变量；同步修正子智能体概览中已过时的 child thread ID 生成方式，以及未配置模型时继承主 Agent 当前模型的说明。
 - 修复系统设置“服务链接”固定指向 `localhost`：Neo4j、API 文档、MinIO 与 Milvus 默认改为使用浏览器当前访问主机，并支持通过 `NEO4J_BROWSER_URL`、`API_DOCS_URL`、`MINIO_CONSOLE_URL`、`MILVUS_WEBUI_URL` 配置完整访问地址，适配拆分部署和反向代理场景。
 - 清理过期和重复文档：删除已被 `ARCHITECTURE.md` 与正式指南替代的日期化项目分析快照；根贡献入口收敛为正式贡献指南的索引；贡献指南和沙盒架构说明统一到当前“远程基础设施 + 本机源码进程 + 本机 Docker Sandbox”开发拓扑，移除已过期的完整 Compose 日常开发指引。

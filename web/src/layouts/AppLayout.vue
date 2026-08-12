@@ -121,6 +121,13 @@ const mainList = computed(() => {
   })
 
   items.push({
+    name: '排期审查',
+    path: '/schedule',
+    icon: ClipboardList,
+    activeIcon: ClipboardList
+  })
+
+  items.push({
     name: '智能体扩展',
     path: '/extensions',
     activePaths: ['/extensions'],

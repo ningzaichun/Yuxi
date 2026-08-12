@@ -52,7 +52,8 @@ export default defineConfig({
           { text: 'MCP 集成', link: '/agents/mcp-integration' },
           { text: 'Skills 管理', link: '/agents/skills-management' },
           { text: '子智能体', link: '/agents/subagents-management' },
-          { text: '子智能体调用链', link: '/agents/subagent-invocation-lifecycle' }
+          { text: '子智能体调用链', link: '/agents/subagent-invocation-lifecycle' },
+          { text: '排期审查模块', link: '/agents/schedule-audit' }
         ]
       },
       {
