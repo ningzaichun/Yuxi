@@ -86,5 +86,8 @@ def build_schedule_benchmark_payload(*, task_count: int = 1_000, dependency_coun
             "source_schedule_dependency_violations": 0,
         }
     )
-    payload["capabilities"]["cpm_recalculation"] = {"allowed": True, "reasons": []}
+    payload["capabilities"]["cpm_recalculation"] = {
+        "allowed": True,
+        "reasons": [],
+    }
     return payload

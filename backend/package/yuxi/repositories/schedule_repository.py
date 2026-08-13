@@ -12,7 +12,11 @@ from yuxi.schedule.domain.models import AuditExecution
 from yuxi.storage.postgres.manager import pg_manager
 from yuxi.storage.postgres.models_schedule import (
     ScheduleAuditRunRecord,
+    ScheduleCandidateDecisionRecord,
+    ScheduleCandidateRecord,
+    ScheduleDependencyDecisionRecord,
     ScheduleIssueRecord,
+    ScheduleOptimizationRunRecord,
     ScheduleSnapshotRecord,
 )
 from yuxi.utils.datetime_utils import utc_now_naive
@@ -212,6 +216,17 @@ class ScheduleRepository:
             result = await session.execute(statement.order_by(ScheduleIssueRecord.sort_key).limit(limit).offset(offset))
             return list(result.scalars())
 
+    async def list_all_issues(self, owner_uid: str, snapshot_id: str) -> list[ScheduleIssueRecord] | None:
+        if await self.get_ready(owner_uid, snapshot_id) is None:
+            return None
+        async with self._session_factory() as session:
+            result = await session.execute(
+                select(ScheduleIssueRecord)
+                .where(ScheduleIssueRecord.schedule_snapshot_id == snapshot_id)
+                .order_by(ScheduleIssueRecord.sort_key)
+            )
+            return list(result.scalars())
+
     async def get_issue(self, owner_uid: str, issue_id: str) -> ScheduleIssueRecord | None:
         async with self._session_factory() as session:
             return await session.scalar(
@@ -225,6 +240,239 @@ class ScheduleRepository:
                     ScheduleSnapshotRecord.owner_uid == owner_uid,
                     ScheduleSnapshotRecord.submission_status == "ready",
                 )
+            )
+
+    async def get_dependency_decision(self, owner_uid: str, issue_id: str) -> ScheduleDependencyDecisionRecord | None:
+        async with self._session_factory() as session:
+            return await session.scalar(
+                select(ScheduleDependencyDecisionRecord).where(
+                    ScheduleDependencyDecisionRecord.owner_uid == owner_uid,
+                    ScheduleDependencyDecisionRecord.issue_id == issue_id,
+                )
+            )
+
+    async def save_dependency_decision(
+        self,
+        owner_uid: str,
+        issue: ScheduleIssueRecord,
+        values: dict[str, Any],
+    ) -> ScheduleDependencyDecisionRecord:
+        async with self._session_factory() as session:
+            existing = await session.scalar(
+                select(ScheduleDependencyDecisionRecord).where(
+                    ScheduleDependencyDecisionRecord.issue_id == issue.issue_id
+                )
+            )
+            if existing is not None:
+                if existing.owner_uid != owner_uid or existing.status == "confirmed":
+                    raise ValueError("dependency decision is not editable")
+                for key, value in values.items():
+                    setattr(existing, key, value)
+                existing.updated_at = utc_now_naive()
+                await session.flush()
+                return existing
+
+            record = ScheduleDependencyDecisionRecord(
+                decision_id=uuid.uuid4().hex,
+                owner_uid=owner_uid,
+                issue_id=issue.issue_id,
+                schedule_snapshot_id=issue.schedule_snapshot_id,
+                status="draft",
+                **values,
+            )
+            session.add(record)
+            await session.flush()
+            return record
+
+    async def confirm_dependency_decision(
+        self, owner_uid: str, issue_id: str
+    ) -> ScheduleDependencyDecisionRecord | None:
+        async with self._session_factory() as session:
+            record = await session.scalar(
+                select(ScheduleDependencyDecisionRecord).where(
+                    ScheduleDependencyDecisionRecord.owner_uid == owner_uid,
+                    ScheduleDependencyDecisionRecord.issue_id == issue_id,
+                )
+            )
+            if record is None:
+                return None
+            if record.status == "confirmed":
+                return record
+            record.status = "confirmed"
+            record.confirmed_at = utc_now_naive()
+            record.updated_at = record.confirmed_at
+            await session.flush()
+            return record
+
+    async def get_dependency_decision_by_id(
+        self, owner_uid: str, decision_id: str
+    ) -> ScheduleDependencyDecisionRecord | None:
+        async with self._session_factory() as session:
+            return await session.scalar(
+                select(ScheduleDependencyDecisionRecord).where(
+                    ScheduleDependencyDecisionRecord.owner_uid == owner_uid,
+                    ScheduleDependencyDecisionRecord.decision_id == decision_id,
+                )
+            )
+
+    async def get_latest_ready_for_project(
+        self, owner_uid: str, external_project_id: str
+    ) -> ScheduleSnapshotRecord | None:
+        async with self._session_factory() as session:
+            return await session.scalar(
+                select(ScheduleSnapshotRecord)
+                .where(
+                    ScheduleSnapshotRecord.owner_uid == owner_uid,
+                    ScheduleSnapshotRecord.external_project_id == external_project_id,
+                    ScheduleSnapshotRecord.submission_status == "ready",
+                )
+                .order_by(
+                    ScheduleSnapshotRecord.created_at.desc(),
+                    ScheduleSnapshotRecord.schedule_snapshot_id.desc(),
+                )
+                .limit(1)
+            )
+
+    async def reserve_optimization(self, values: dict[str, Any]) -> tuple[ScheduleOptimizationRunRecord, bool]:
+        async with self._session_factory() as session:
+            statement = (
+                insert(ScheduleOptimizationRunRecord)
+                .values(**values)
+                .on_conflict_do_nothing()
+                .returning(ScheduleOptimizationRunRecord)
+            )
+            created = (await session.execute(statement)).scalar_one_or_none()
+            if created is not None:
+                return created, True
+            identity = ScheduleOptimizationRunRecord.request_id == values["request_id"]
+            if values.get("dependency_decision_id") is not None:
+                identity = or_(
+                    identity,
+                    ScheduleOptimizationRunRecord.dependency_decision_id == values["dependency_decision_id"],
+                )
+            existing = await session.scalar(
+                select(ScheduleOptimizationRunRecord).where(
+                    ScheduleOptimizationRunRecord.owner_uid == values["owner_uid"],
+                    identity,
+                )
+            )
+            if existing is None:
+                raise RuntimeError("optimization idempotency reservation disappeared")
+            return existing, False
+
+    async def finalize_optimization(
+        self,
+        optimization_id: str,
+        requested_patch: dict[str, Any],
+        candidate_values: dict[str, Any],
+    ) -> ScheduleCandidateRecord:
+        async with self._session_factory() as session:
+            optimization = await session.get(ScheduleOptimizationRunRecord, optimization_id)
+            if optimization is None or optimization.status != "creating":
+                raise RuntimeError("optimization is not finalizable")
+            optimization.status = candidate_values["candidate_status"]
+            optimization.requested_patch = requested_patch
+            optimization.updated_at = utc_now_naive()
+            candidate = ScheduleCandidateRecord(**candidate_values)
+            session.add(candidate)
+            await session.flush()
+            return candidate
+
+    async def mark_optimization_failed(self, optimization_id: str, failure_code: str) -> None:
+        async with self._session_factory() as session:
+            await session.execute(
+                update(ScheduleOptimizationRunRecord)
+                .where(ScheduleOptimizationRunRecord.optimization_id == optimization_id)
+                .values(status="failed", failure_code=failure_code, updated_at=utc_now_naive())
+            )
+
+    async def get_optimization(self, owner_uid: str, optimization_id: str) -> ScheduleOptimizationRunRecord | None:
+        async with self._session_factory() as session:
+            return await session.scalar(
+                select(ScheduleOptimizationRunRecord).where(
+                    ScheduleOptimizationRunRecord.owner_uid == owner_uid,
+                    ScheduleOptimizationRunRecord.optimization_id == optimization_id,
+                )
+            )
+
+    async def get_candidate(self, owner_uid: str, candidate_snapshot_id: str) -> ScheduleCandidateRecord | None:
+        async with self._session_factory() as session:
+            return await session.scalar(
+                select(ScheduleCandidateRecord).where(
+                    ScheduleCandidateRecord.owner_uid == owner_uid,
+                    ScheduleCandidateRecord.candidate_snapshot_id == candidate_snapshot_id,
+                )
+            )
+
+    async def get_candidate_by_optimization(
+        self, owner_uid: str, optimization_id: str
+    ) -> ScheduleCandidateRecord | None:
+        async with self._session_factory() as session:
+            return await session.scalar(
+                select(ScheduleCandidateRecord).where(
+                    ScheduleCandidateRecord.owner_uid == owner_uid,
+                    ScheduleCandidateRecord.optimization_id == optimization_id,
+                )
+            )
+
+    async def get_candidate_by_dependency_decision(
+        self, owner_uid: str, dependency_decision_id: str
+    ) -> ScheduleCandidateRecord | None:
+        async with self._session_factory() as session:
+            return await session.scalar(
+                select(ScheduleCandidateRecord).where(
+                    ScheduleCandidateRecord.owner_uid == owner_uid,
+                    ScheduleCandidateRecord.dependency_decision_id == dependency_decision_id,
+                )
+            )
+
+    async def save_candidate_decision(
+        self,
+        owner_uid: str,
+        candidate_snapshot_id: str,
+        values: dict[str, Any],
+    ) -> tuple[ScheduleCandidateDecisionRecord, bool]:
+        async with self._session_factory() as session:
+            statement = (
+                insert(ScheduleCandidateDecisionRecord)
+                .values(
+                    candidate_decision_id=uuid.uuid4().hex,
+                    owner_uid=owner_uid,
+                    candidate_snapshot_id=candidate_snapshot_id,
+                    **values,
+                )
+                .on_conflict_do_nothing(index_elements=["owner_uid", "candidate_snapshot_id", "request_id"])
+                .returning(ScheduleCandidateDecisionRecord)
+            )
+            created = (await session.execute(statement)).scalar_one_or_none()
+            if created is not None:
+                return created, True
+            existing = await session.scalar(
+                select(ScheduleCandidateDecisionRecord).where(
+                    ScheduleCandidateDecisionRecord.owner_uid == owner_uid,
+                    ScheduleCandidateDecisionRecord.candidate_snapshot_id == candidate_snapshot_id,
+                    ScheduleCandidateDecisionRecord.request_id == values["request_id"],
+                )
+            )
+            if existing is None:
+                raise RuntimeError("candidate decision idempotency reservation disappeared")
+            return existing, False
+
+    async def get_latest_candidate_decision(
+        self, owner_uid: str, candidate_snapshot_id: str
+    ) -> ScheduleCandidateDecisionRecord | None:
+        async with self._session_factory() as session:
+            return await session.scalar(
+                select(ScheduleCandidateDecisionRecord)
+                .where(
+                    ScheduleCandidateDecisionRecord.owner_uid == owner_uid,
+                    ScheduleCandidateDecisionRecord.candidate_snapshot_id == candidate_snapshot_id,
+                )
+                .order_by(
+                    ScheduleCandidateDecisionRecord.created_at.desc(),
+                    ScheduleCandidateDecisionRecord.candidate_decision_id.desc(),
+                )
+                .limit(1)
             )
 
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass
 from typing import Any
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from yuxi.schedule.contracts.audit import Capability, DependencyDateChecks
 from yuxi.schedule.domain.models import ScheduleSnapshot, ScheduleTask
@@ -56,22 +57,66 @@ def _calculate_statistics(schedule: ScheduleSnapshot, network: DependencyNetwork
     }
 
 
-def _calculate_capabilities(
-    schedule: ScheduleSnapshot, network: DependencyNetwork
-) -> dict[str, Capability]:
+def _calculate_capabilities(schedule: ScheduleSnapshot, network: DependencyNetwork) -> dict[str, Capability]:
     cpm_reasons: list[str] = []
     summary_task_ids = {task.task_id for task in schedule.tasks if task.task_type == "summary"}
     if any(dep.predecessor_task_id == dep.successor_task_id for dep in schedule.dependencies):
         cpm_reasons.append("SELF_DEPENDENCY")
     if network.cyclic_components():
         cpm_reasons.append("DEPENDENCY_CYCLE")
-    if any(dep.lag_minutes != 0 for dep in schedule.dependencies):
-        cpm_reasons.append("LAG_CALENDAR_POLICY_UNSPECIFIED")
+    if any(dep.lag_minutes < 0 for dep in schedule.dependencies):
+        cpm_reasons.append("NEGATIVE_DEPENDENCY_LAG_UNSUPPORTED")
     if any(
         dep.predecessor_task_id in summary_task_ids or dep.successor_task_id in summary_task_ids
         for dep in schedule.dependencies
     ):
         cpm_reasons.append("SUMMARY_TASK_DEPENDENCIES")
+    if len(schedule.calendars) != 1:
+        cpm_reasons.append("MULTIPLE_CALENDARS_UNSUPPORTED")
+    else:
+        calendar = schedule.calendars[0]
+        if calendar.calendar_id != schedule.default_calendar_id or calendar.parent_calendar_id:
+            cpm_reasons.append("CALENDAR_INHERITANCE_UNSUPPORTED")
+        if calendar.has_exceptions:
+            cpm_reasons.append("CALENDAR_EXCEPTIONS_UNSUPPORTED")
+        if not calendar.working_intervals_valid:
+            cpm_reasons.append("CALENDAR_INTERVALS_INVALID")
+    activity_tasks = [task for task in schedule.tasks if task.task_type != "summary"]
+    if not activity_tasks:
+        cpm_reasons.append("NO_ACTIVITY_TASKS")
+    if any(not task.active for task in activity_tasks):
+        cpm_reasons.append("INACTIVE_TASK_UNSUPPORTED")
+    if any(task.duration_minutes == 0 for task in activity_tasks):
+        cpm_reasons.append("MILESTONE_UNSUPPORTED")
+    if any(
+        (task.constraint_type == "AS_SOON_AS_POSSIBLE" and task.constraint_date is not None)
+        or (task.constraint_type != "AS_SOON_AS_POSSIBLE" and task.constraint_date is None)
+        for task in activity_tasks
+    ):
+        cpm_reasons.append("TASK_CONSTRAINT_INVALID")
+    if any(
+        task.percent_complete or task.actual_start is not None or task.actual_finish is not None
+        for task in activity_tasks
+    ):
+        cpm_reasons.append("ACTUAL_PROGRESS_UNSUPPORTED")
+    if any(
+        task.calendar_id is not None
+        or not schedule.calendars
+        or task.effective_calendar_id != schedule.calendars[0].calendar_id
+        for task in activity_tasks
+    ):
+        cpm_reasons.append("TASK_CALENDAR_UNSUPPORTED")
+    try:
+        project_time_zone = ZoneInfo(schedule.time_zone)
+    except ZoneInfoNotFoundError:
+        cpm_reasons.append("TIME_ZONE_UNSUPPORTED")
+    else:
+        if any(
+            task.planned_start.utcoffset() != task.planned_start.astimezone(project_time_zone).utcoffset()
+            or task.planned_finish.utcoffset() != task.planned_finish.astimezone(project_time_zone).utcoffset()
+            for task in activity_tasks
+        ):
+            cpm_reasons.append("TASK_TIME_ZONE_MISMATCH")
 
     resource_unclassified = any(resource.semantic_type == "UNCLASSIFIED" for resource in schedule.resources)
     no_assignments = schedule.assignment_count == 0
@@ -97,9 +142,7 @@ def _calculate_capabilities(
     }
 
 
-def _calculate_date_checks(
-    schedule: ScheduleSnapshot, tasks_by_id: dict[str, ScheduleTask]
-) -> DependencyDateChecks:
+def _calculate_date_checks(schedule: ScheduleSnapshot, tasks_by_id: dict[str, ScheduleTask]) -> DependencyDateChecks:
     checked = 0
     skipped = 0
     violations = 0
@@ -120,9 +163,7 @@ def _calculate_date_checks(
     )
 
 
-def dependency_date_is_valid(
-    relation_type: str, predecessor: ScheduleTask, successor: ScheduleTask
-) -> bool:
+def dependency_date_is_valid(relation_type: str, predecessor: ScheduleTask, successor: ScheduleTask) -> bool:
     anchors = {
         "FS": (predecessor.planned_finish, successor.planned_start),
         "SS": (predecessor.planned_start, successor.planned_start),

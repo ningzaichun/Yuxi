@@ -1,0 +1,696 @@
+{
+  "schema_version": "canonical_schedule_v2.2",
+  "snapshot_id": "snapshot:synthetic-case-s-v1",
+  "generated_at": "2026-08-13T00:00:00+08:00",
+  "source": {
+    "format": "SYNTHETIC_TEST_DATA",
+    "file_name": "synthetic-schedule-case-s.json",
+    "sha256": "fa40db2bc98062dc38d980acb2c791ba18400b23728592809bef0592a018596a",
+    "extraction_method": "DETERMINISTIC_CASE_FACTORY",
+    "extraction_application_version": "1",
+    "opened_read_only": true
+  },
+  "semantics": {
+    "time_zone": "Asia/Shanghai",
+    "time_zone_source": "SYNTHETIC_CASE_DECLARATION",
+    "duration_storage_unit": "working_minute",
+    "lag_storage_unit": "working_minute",
+    "lag_calendar_policy": "UNSPECIFIED_REQUIRES_ENGINE_PROFILE",
+    "task_calendar_resolution": "PROJECT_DEFAULT_ONLY",
+    "source_dates_preserved": true
+  },
+  "project": {
+    "project_id": "project:synthetic-case-s",
+    "name": "合成协议回归案例 S",
+    "source_file_name": "synthetic-schedule-case-s.json",
+    "planned_start": "2026-09-01T08:00:00+08:00",
+    "planned_finish": "2026-09-30T17:00:00+08:00",
+    "planned_date_source": "SYNTHETIC_CASE_DECLARATION",
+    "source_project_summary": {
+      "source_unique_id": 0,
+      "name": "合成协议回归案例 S",
+      "start": "2026-09-01T08:00:00+08:00",
+      "finish": "2026-09-30T17:00:00+08:00",
+      "duration_minutes": 10560
+    },
+    "current_date": "2026-08-13T00:00:00+08:00",
+    "status_date": null,
+    "default_calendar_id": "calendar:synthetic-standard",
+    "default_daily_work_minutes": 480,
+    "default_calendar_weekly_work_minutes": 2400
+  },
+  "statistics": {
+    "tasks": 9,
+    "summary_tasks": 4,
+    "leaf_tasks": 5,
+    "milestones": 0,
+    "dependencies": 5,
+    "dependency_types": {
+      "FS": 2,
+      "SS": 1,
+      "FF": 1,
+      "SF": 1
+    },
+    "positive_lag_dependencies": 1,
+    "negative_lag_dependencies": 0,
+    "calendars": 1,
+    "resources_raw": 0,
+    "assignments": 0,
+    "open_start_tasks": 1,
+    "open_finish_tasks": 1,
+    "summary_task_dependencies": 1,
+    "source_schedule_dependency_violations": 0
+  },
+  "capabilities": {
+    "gantt_display": {
+      "allowed": true,
+      "reasons": []
+    },
+    "source_schedule_review": {
+      "allowed": true,
+      "reasons": []
+    },
+    "cpm_recalculation": {
+      "allowed": false,
+      "reasons": [
+        "SUMMARY_TASK_DEPENDENCIES"
+      ]
+    },
+    "resource_leveling": {
+      "allowed": false,
+      "reasons": [
+        "NO_SOURCE_ASSIGNMENTS"
+      ]
+    },
+    "resource_cost_optimization": {
+      "allowed": false,
+      "reasons": [
+        "NO_SOURCE_ASSIGNMENTS"
+      ]
+    }
+  },
+  "calendars": [
+    {
+      "calendar_id": "calendar:synthetic-standard",
+      "source_index": 1,
+      "name": "合成标准五日历",
+      "parent_calendar_id": null,
+      "weekly_pattern": {
+        "SUNDAY": {
+          "day_type": "NON_WORKING",
+          "intervals": []
+        },
+        "MONDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00:00",
+              "finish": "12:00:00"
+            },
+            {
+              "start": "13:00:00",
+              "finish": "17:00:00"
+            }
+          ]
+        },
+        "TUESDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00:00",
+              "finish": "12:00:00"
+            },
+            {
+              "start": "13:00:00",
+              "finish": "17:00:00"
+            }
+          ]
+        },
+        "WEDNESDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00:00",
+              "finish": "12:00:00"
+            },
+            {
+              "start": "13:00:00",
+              "finish": "17:00:00"
+            }
+          ]
+        },
+        "THURSDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00:00",
+              "finish": "12:00:00"
+            },
+            {
+              "start": "13:00:00",
+              "finish": "17:00:00"
+            }
+          ]
+        },
+        "FRIDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00:00",
+              "finish": "12:00:00"
+            },
+            {
+              "start": "13:00:00",
+              "finish": "17:00:00"
+            }
+          ]
+        },
+        "SATURDAY": {
+          "day_type": "NON_WORKING",
+          "intervals": []
+        }
+      },
+      "exceptions": []
+    }
+  ],
+  "resources": [],
+  "tasks": [
+    {
+      "task_id": "synthetic-task:root",
+      "source_id": 1,
+      "source_unique_id": 75576468,
+      "source_guid": "9ee6b5e3-de8c-5d49-a767-0f1a9fa461dd",
+      "parent_task_id": null,
+      "wbs": "1",
+      "outline_level": 1,
+      "name": "合成项目总览",
+      "task_type": "summary",
+      "active": true,
+      "scheduling_mode": "automatic",
+      "project_task_type": "FIXED_DURATION",
+      "calendar_id": null,
+      "effective_calendar_id": "calendar:synthetic-standard",
+      "planned_start": "2026-09-01T08:00:00+08:00",
+      "planned_finish": "2026-09-30T17:00:00+08:00",
+      "duration_minutes": 480,
+      "source_work_minutes": 0,
+      "percent_complete": 0,
+      "actual_start": null,
+      "actual_finish": null,
+      "deadline": null,
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "source_calculation": {
+        "early_start": "2026-09-01T08:00:00+08:00",
+        "early_finish": "2026-09-30T17:00:00+08:00",
+        "late_start": "2026-09-01T08:00:00+08:00",
+        "late_finish": "2026-09-30T17:00:00+08:00",
+        "total_slack_minutes": 0,
+        "free_slack_minutes": 0,
+        "critical": false
+      },
+      "source_resource_names_text": null,
+      "notes": "仅用于 synthetic 协议回归，不代表真实业务计划。"
+    },
+    {
+      "task_id": "synthetic-task:phase-a",
+      "source_id": 2,
+      "source_unique_id": 257024882,
+      "source_guid": "0b5475cc-4faf-5e5a-b55c-b1ef16fb639c",
+      "parent_task_id": "synthetic-task:root",
+      "wbs": "1.1",
+      "outline_level": 2,
+      "name": "合成阶段甲",
+      "task_type": "summary",
+      "active": true,
+      "scheduling_mode": "automatic",
+      "project_task_type": "FIXED_DURATION",
+      "calendar_id": null,
+      "effective_calendar_id": "calendar:synthetic-standard",
+      "planned_start": "2026-09-01T08:00:00+08:00",
+      "planned_finish": "2026-09-15T17:00:00+08:00",
+      "duration_minutes": 480,
+      "source_work_minutes": 0,
+      "percent_complete": 0,
+      "actual_start": null,
+      "actual_finish": null,
+      "deadline": null,
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "source_calculation": {
+        "early_start": "2026-09-01T08:00:00+08:00",
+        "early_finish": "2026-09-15T17:00:00+08:00",
+        "late_start": "2026-09-01T08:00:00+08:00",
+        "late_finish": "2026-09-15T17:00:00+08:00",
+        "total_slack_minutes": 0,
+        "free_slack_minutes": 0,
+        "critical": false
+      },
+      "source_resource_names_text": null,
+      "notes": "仅用于 synthetic 协议回归，不代表真实业务计划。"
+    },
+    {
+      "task_id": "synthetic-task:design",
+      "source_id": 3,
+      "source_unique_id": 175627914,
+      "source_guid": "3115c934-9f17-522f-b2db-c128f26359d0",
+      "parent_task_id": "synthetic-task:phase-a",
+      "wbs": "1.1.1",
+      "outline_level": 3,
+      "name": "合成方案确认",
+      "task_type": "activity",
+      "active": true,
+      "scheduling_mode": "automatic",
+      "project_task_type": "FIXED_UNITS",
+      "calendar_id": null,
+      "effective_calendar_id": "calendar:synthetic-standard",
+      "planned_start": "2026-09-01T08:00:00+08:00",
+      "planned_finish": "2026-09-03T17:00:00+08:00",
+      "duration_minutes": 480,
+      "source_work_minutes": 0,
+      "percent_complete": 0,
+      "actual_start": null,
+      "actual_finish": null,
+      "deadline": null,
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "source_calculation": {
+        "early_start": "2026-09-01T08:00:00+08:00",
+        "early_finish": "2026-09-03T17:00:00+08:00",
+        "late_start": "2026-09-01T08:00:00+08:00",
+        "late_finish": "2026-09-03T17:00:00+08:00",
+        "total_slack_minutes": 0,
+        "free_slack_minutes": 0,
+        "critical": false
+      },
+      "source_resource_names_text": null,
+      "notes": "仅用于 synthetic 协议回归，不代表真实业务计划。"
+    },
+    {
+      "task_id": "synthetic-task:build",
+      "source_id": 3,
+      "source_unique_id": 71661007,
+      "source_guid": "8b4b7a2d-d4e9-5691-b904-f92fc2a05f25",
+      "parent_task_id": "synthetic-task:phase-a",
+      "wbs": "1.1.2",
+      "outline_level": 3,
+      "name": "合成实施分组",
+      "task_type": "summary",
+      "active": true,
+      "scheduling_mode": "automatic",
+      "project_task_type": "FIXED_DURATION",
+      "calendar_id": null,
+      "effective_calendar_id": "calendar:synthetic-standard",
+      "planned_start": "2026-09-04T08:00:00+08:00",
+      "planned_finish": "2026-09-15T17:00:00+08:00",
+      "duration_minutes": 480,
+      "source_work_minutes": 0,
+      "percent_complete": 0,
+      "actual_start": null,
+      "actual_finish": null,
+      "deadline": null,
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "source_calculation": {
+        "early_start": "2026-09-04T08:00:00+08:00",
+        "early_finish": "2026-09-15T17:00:00+08:00",
+        "late_start": "2026-09-04T08:00:00+08:00",
+        "late_finish": "2026-09-15T17:00:00+08:00",
+        "total_slack_minutes": 0,
+        "free_slack_minutes": 0,
+        "critical": false
+      },
+      "source_resource_names_text": null,
+      "notes": "仅用于 synthetic 协议回归，不代表真实业务计划。"
+    },
+    {
+      "task_id": "synthetic-task:build-a",
+      "source_id": 4,
+      "source_unique_id": 98965238,
+      "source_guid": "da511ebb-7630-56b7-8607-f374fcd64cb2",
+      "parent_task_id": "synthetic-task:build",
+      "wbs": "1.1.2.1",
+      "outline_level": 4,
+      "name": "合成实施任务甲",
+      "task_type": "activity",
+      "active": true,
+      "scheduling_mode": "automatic",
+      "project_task_type": "FIXED_UNITS",
+      "calendar_id": null,
+      "effective_calendar_id": "calendar:synthetic-standard",
+      "planned_start": "2026-09-04T08:00:00+08:00",
+      "planned_finish": "2026-09-08T17:00:00+08:00",
+      "duration_minutes": 480,
+      "source_work_minutes": 0,
+      "percent_complete": 0,
+      "actual_start": null,
+      "actual_finish": null,
+      "deadline": null,
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "source_calculation": {
+        "early_start": "2026-09-04T08:00:00+08:00",
+        "early_finish": "2026-09-08T17:00:00+08:00",
+        "late_start": "2026-09-04T08:00:00+08:00",
+        "late_finish": "2026-09-08T17:00:00+08:00",
+        "total_slack_minutes": 0,
+        "free_slack_minutes": 0,
+        "critical": false
+      },
+      "source_resource_names_text": null,
+      "notes": "仅用于 synthetic 协议回归，不代表真实业务计划。"
+    },
+    {
+      "task_id": "synthetic-task:build-b",
+      "source_id": 4,
+      "source_unique_id": 133756331,
+      "source_guid": "8f201f6e-e380-5740-a156-9c41a3f27421",
+      "parent_task_id": "synthetic-task:build",
+      "wbs": "1.1.2.2",
+      "outline_level": 4,
+      "name": "合成实施任务乙",
+      "task_type": "activity",
+      "active": true,
+      "scheduling_mode": "automatic",
+      "project_task_type": "FIXED_UNITS",
+      "calendar_id": null,
+      "effective_calendar_id": "calendar:synthetic-standard",
+      "planned_start": "2026-09-09T08:00:00+08:00",
+      "planned_finish": "2026-09-15T17:00:00+08:00",
+      "duration_minutes": 480,
+      "source_work_minutes": 0,
+      "percent_complete": 0,
+      "actual_start": null,
+      "actual_finish": null,
+      "deadline": null,
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "source_calculation": {
+        "early_start": "2026-09-09T08:00:00+08:00",
+        "early_finish": "2026-09-15T17:00:00+08:00",
+        "late_start": "2026-09-09T08:00:00+08:00",
+        "late_finish": "2026-09-15T17:00:00+08:00",
+        "total_slack_minutes": 0,
+        "free_slack_minutes": 0,
+        "critical": false
+      },
+      "source_resource_names_text": null,
+      "notes": "仅用于 synthetic 协议回归，不代表真实业务计划。"
+    },
+    {
+      "task_id": "synthetic-task:phase-b",
+      "source_id": 2,
+      "source_unique_id": 48889401,
+      "source_guid": "d2e1cd53-b003-5645-9452-29299c83898d",
+      "parent_task_id": "synthetic-task:root",
+      "wbs": "1.2",
+      "outline_level": 2,
+      "name": "合成阶段乙",
+      "task_type": "summary",
+      "active": true,
+      "scheduling_mode": "automatic",
+      "project_task_type": "FIXED_DURATION",
+      "calendar_id": null,
+      "effective_calendar_id": "calendar:synthetic-standard",
+      "planned_start": "2026-09-16T08:00:00+08:00",
+      "planned_finish": "2026-09-30T17:00:00+08:00",
+      "duration_minutes": 480,
+      "source_work_minutes": 0,
+      "percent_complete": 0,
+      "actual_start": null,
+      "actual_finish": null,
+      "deadline": null,
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "source_calculation": {
+        "early_start": "2026-09-16T08:00:00+08:00",
+        "early_finish": "2026-09-30T17:00:00+08:00",
+        "late_start": "2026-09-16T08:00:00+08:00",
+        "late_finish": "2026-09-30T17:00:00+08:00",
+        "total_slack_minutes": 0,
+        "free_slack_minutes": 0,
+        "critical": false
+      },
+      "source_resource_names_text": null,
+      "notes": "仅用于 synthetic 协议回归，不代表真实业务计划。"
+    },
+    {
+      "task_id": "synthetic-task:verify",
+      "source_id": 3,
+      "source_unique_id": 169008442,
+      "source_guid": "839fa995-e828-5138-b890-d1b5ae18425c",
+      "parent_task_id": "synthetic-task:phase-b",
+      "wbs": "1.2.1",
+      "outline_level": 3,
+      "name": "合成验证任务",
+      "task_type": "activity",
+      "active": true,
+      "scheduling_mode": "automatic",
+      "project_task_type": "FIXED_UNITS",
+      "calendar_id": null,
+      "effective_calendar_id": "calendar:synthetic-standard",
+      "planned_start": "2026-09-16T08:00:00+08:00",
+      "planned_finish": "2026-09-20T17:00:00+08:00",
+      "duration_minutes": 480,
+      "source_work_minutes": 0,
+      "percent_complete": 0,
+      "actual_start": null,
+      "actual_finish": null,
+      "deadline": null,
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "source_calculation": {
+        "early_start": "2026-09-16T08:00:00+08:00",
+        "early_finish": "2026-09-20T17:00:00+08:00",
+        "late_start": "2026-09-16T08:00:00+08:00",
+        "late_finish": "2026-09-20T17:00:00+08:00",
+        "total_slack_minutes": 0,
+        "free_slack_minutes": 0,
+        "critical": false
+      },
+      "source_resource_names_text": null,
+      "notes": "仅用于 synthetic 协议回归，不代表真实业务计划。"
+    },
+    {
+      "task_id": "synthetic-task:handover",
+      "source_id": 3,
+      "source_unique_id": 29277836,
+      "source_guid": "169cbe07-41cf-506b-a8f8-cfbdcdfa57e8",
+      "parent_task_id": "synthetic-task:phase-b",
+      "wbs": "1.2.2",
+      "outline_level": 3,
+      "name": "合成交付任务",
+      "task_type": "activity",
+      "active": true,
+      "scheduling_mode": "automatic",
+      "project_task_type": "FIXED_UNITS",
+      "calendar_id": null,
+      "effective_calendar_id": "calendar:synthetic-standard",
+      "planned_start": "2026-09-21T08:00:00+08:00",
+      "planned_finish": "2026-09-30T17:00:00+08:00",
+      "duration_minutes": 480,
+      "source_work_minutes": 0,
+      "percent_complete": 0,
+      "actual_start": null,
+      "actual_finish": null,
+      "deadline": null,
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "source_calculation": {
+        "early_start": "2026-09-21T08:00:00+08:00",
+        "early_finish": "2026-09-30T17:00:00+08:00",
+        "late_start": "2026-09-21T08:00:00+08:00",
+        "late_finish": "2026-09-30T17:00:00+08:00",
+        "total_slack_minutes": 0,
+        "free_slack_minutes": 0,
+        "critical": false
+      },
+      "source_resource_names_text": null,
+      "notes": "仅用于 synthetic 协议回归，不代表真实业务计划。"
+    }
+  ],
+  "dependencies": [
+    {
+      "dependency_id": "synthetic-dependency:design-build-a",
+      "predecessor_task_id": "synthetic-task:design",
+      "successor_task_id": "synthetic-task:build-a",
+      "type": "FS",
+      "source_type_code": 1,
+      "lag_minutes": 0,
+      "lag_calendar_policy": "UNSPECIFIED_REQUIRES_ENGINE_PROFILE"
+    },
+    {
+      "dependency_id": "synthetic-dependency:build-a-build-b",
+      "predecessor_task_id": "synthetic-task:build-a",
+      "successor_task_id": "synthetic-task:build-b",
+      "type": "SS",
+      "source_type_code": 3,
+      "lag_minutes": 0,
+      "lag_calendar_policy": "UNSPECIFIED_REQUIRES_ENGINE_PROFILE"
+    },
+    {
+      "dependency_id": "synthetic-dependency:phase-a-verify",
+      "predecessor_task_id": "synthetic-task:phase-a",
+      "successor_task_id": "synthetic-task:verify",
+      "type": "FF",
+      "source_type_code": 0,
+      "lag_minutes": 0,
+      "lag_calendar_policy": "UNSPECIFIED_REQUIRES_ENGINE_PROFILE"
+    },
+    {
+      "dependency_id": "synthetic-dependency:verify-handover",
+      "predecessor_task_id": "synthetic-task:verify",
+      "successor_task_id": "synthetic-task:handover",
+      "type": "SF",
+      "source_type_code": 2,
+      "lag_minutes": 0,
+      "lag_calendar_policy": "UNSPECIFIED_REQUIRES_ENGINE_PROFILE"
+    },
+    {
+      "dependency_id": "synthetic-dependency:build-b-handover",
+      "predecessor_task_id": "synthetic-task:build-b",
+      "successor_task_id": "synthetic-task:handover",
+      "type": "FS",
+      "source_type_code": 1,
+      "lag_minutes": 480,
+      "lag_calendar_policy": "UNSPECIFIED_REQUIRES_ENGINE_PROFILE"
+    }
+  ],
+  "assignments": [],
+  "validation": {
+    "schema_version": "schedule_validation_report_v2.2",
+    "snapshot_id": "snapshot:synthetic-case-s-v1",
+    "generated_at": "2026-08-13T00:00:00+08:00",
+    "source_sha256": "fa40db2bc98062dc38d980acb2c791ba18400b23728592809bef0592a018596a",
+    "summary": {
+      "status": "blocked_for_recalculation",
+      "issue_count": 0,
+      "blocker_count": 0,
+      "warning_count": 0,
+      "source_fidelity_valid": true,
+      "recalculation_allowed": false,
+      "display_allowed": true
+    },
+    "source_fidelity_checks": {
+      "tasks_match_source": true,
+      "dependencies_match_source": true,
+      "calendars_match_source": true,
+      "resources_match_source": true,
+      "assignments_match_source": true,
+      "synthetic_project_summary_added": false,
+      "synthetic_resources_added": false,
+      "synthetic_assignments_added": false,
+      "project_dates_resolved_from_source_summary": true
+    },
+    "network_quality": {
+      "open_start_task_ids": [
+        "synthetic-task:design"
+      ],
+      "open_finish_task_ids": [
+        "synthetic-task:handover"
+      ],
+      "summary_task_dependency_ids": [
+        "synthetic-dependency:phase-a-verify"
+      ],
+      "source_schedule_violations": []
+    },
+    "capabilities": {
+      "gantt_display": {
+        "allowed": true,
+        "reasons": []
+      },
+      "source_schedule_review": {
+        "allowed": true,
+        "reasons": []
+      },
+      "cpm_recalculation": {
+        "allowed": false,
+        "reasons": [
+          "SUMMARY_TASK_DEPENDENCIES"
+        ]
+      },
+      "resource_leveling": {
+        "allowed": false,
+        "reasons": [
+          "NO_SOURCE_ASSIGNMENTS"
+        ]
+      },
+      "resource_cost_optimization": {
+        "allowed": false,
+        "reasons": [
+          "NO_SOURCE_ASSIGNMENTS"
+        ]
+      }
+    },
+    "source_vs_conversion_assessment": {
+      "source_mpp_findings": [],
+      "source_format_limitations": [],
+      "conversion_defects_fixed_in_v2_2": [],
+      "engine_contract_decisions_required": []
+    },
+    "issues": []
+  }
+}

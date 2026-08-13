@@ -11,6 +11,7 @@ from sqlalchemy.orm import declarative_base
 from yuxi.storage.postgres.models_business import AGENT_RUN_TERMINAL_STATUSES
 from yuxi.storage.postgres.models_business import Base as BusinessBase
 from yuxi.storage.postgres.models_knowledge import Base as KnowledgeBase
+
 # Importing the module registers Schedule tables on the shared business metadata
 # before startup invokes metadata.create_all().
 from yuxi.storage.postgres import models_schedule as _models_schedule  # noqa: F401
@@ -380,10 +381,127 @@ class PostgresManager(metaclass=SingletonMeta):
         """确保业务 schema 包含后续新增字段（运行时 schema 演进）。"""
         self._check_initialized()
         stmts = [
-            (
-                "ALTER TABLE IF EXISTS schedule_snapshots "
-                "ADD COLUMN IF NOT EXISTS execution_started_at TIMESTAMP"
-            ),
+            """
+            CREATE TABLE IF NOT EXISTS schedule_dependency_decisions (
+                decision_id VARCHAR(64) PRIMARY KEY,
+                owner_uid VARCHAR(64) NOT NULL,
+                issue_id VARCHAR(64) NOT NULL UNIQUE REFERENCES schedule_issues(issue_id) ON DELETE CASCADE,
+                schedule_snapshot_id VARCHAR(64) NOT NULL,
+                status VARCHAR(16) NOT NULL DEFAULT 'draft',
+                resolution VARCHAR(32) NOT NULL,
+                predecessor_task_ids JSONB NOT NULL DEFAULT '[]'::jsonb,
+                successor_task_ids JSONB NOT NULL DEFAULT '[]'::jsonb,
+                dependency_type VARCHAR(2),
+                lag_minutes INTEGER,
+                reason TEXT NOT NULL DEFAULT '',
+                created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                confirmed_at TIMESTAMP
+            )
+            """,
+            """
+            CREATE INDEX IF NOT EXISTS ix_schedule_dependency_decisions_owner_uid
+            ON schedule_dependency_decisions(owner_uid)
+            """,
+            """
+            CREATE INDEX IF NOT EXISTS ix_schedule_dependency_decisions_snapshot
+            ON schedule_dependency_decisions(schedule_snapshot_id)
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS schedule_optimization_runs (
+                optimization_id VARCHAR(64) PRIMARY KEY,
+                candidate_snapshot_id VARCHAR(64) NOT NULL UNIQUE,
+                owner_uid VARCHAR(64) NOT NULL,
+                request_id VARCHAR(128) NOT NULL,
+                dependency_decision_id VARCHAR(64)
+                    REFERENCES schedule_dependency_decisions(decision_id) ON DELETE RESTRICT,
+                base_schedule_snapshot_id VARCHAR(64) NOT NULL,
+                base_snapshot_content_sha256 VARCHAR(80) NOT NULL,
+                strategy_id VARCHAR(64) NOT NULL,
+                status VARCHAR(16) NOT NULL DEFAULT 'creating',
+                requested_patch JSONB,
+                failure_code VARCHAR(64),
+                created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                CONSTRAINT uq_schedule_optimization_owner_request UNIQUE (owner_uid, request_id),
+                CONSTRAINT uq_schedule_optimization_dependency_decision UNIQUE (dependency_decision_id)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS schedule_candidates (
+                candidate_snapshot_id VARCHAR(64) PRIMARY KEY,
+                owner_uid VARCHAR(64) NOT NULL,
+                optimization_id VARCHAR(64) NOT NULL UNIQUE
+                    REFERENCES schedule_optimization_runs(optimization_id) ON DELETE CASCADE,
+                dependency_decision_id VARCHAR(64),
+                base_schedule_snapshot_id VARCHAR(64) NOT NULL,
+                candidate_schema_version VARCHAR(64) NOT NULL,
+                candidate_kind VARCHAR(64) NOT NULL,
+                candidate_status VARCHAR(16) NOT NULL,
+                minio_bucket VARCHAR(128) NOT NULL,
+                minio_object VARCHAR(1024) NOT NULL,
+                effective_patch JSONB NOT NULL,
+                comparison JSONB NOT NULL,
+                candidate_audit JSONB NOT NULL,
+                created_at TIMESTAMP NOT NULL DEFAULT NOW()
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS schedule_candidate_decisions (
+                candidate_decision_id VARCHAR(64) PRIMARY KEY,
+                owner_uid VARCHAR(64) NOT NULL,
+                request_id VARCHAR(128) NOT NULL,
+                candidate_snapshot_id VARCHAR(64) NOT NULL
+                    REFERENCES schedule_candidates(candidate_snapshot_id) ON DELETE CASCADE,
+                attitude VARCHAR(16) NOT NULL,
+                comment TEXT NOT NULL DEFAULT '',
+                created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                CONSTRAINT uq_schedule_candidate_decision_request UNIQUE (
+                    owner_uid, candidate_snapshot_id, request_id
+                )
+            )
+            """,
+            """
+            CREATE INDEX IF NOT EXISTS ix_schedule_optimization_runs_owner_uid
+            ON schedule_optimization_runs(owner_uid)
+            """,
+            """
+            CREATE INDEX IF NOT EXISTS ix_schedule_optimization_runs_snapshot
+            ON schedule_optimization_runs(base_schedule_snapshot_id)
+            """,
+            """
+            CREATE INDEX IF NOT EXISTS ix_schedule_candidates_owner_uid
+            ON schedule_candidates(owner_uid)
+            """,
+            """
+            CREATE INDEX IF NOT EXISTS ix_schedule_candidates_snapshot
+            ON schedule_candidates(base_schedule_snapshot_id)
+            """,
+            """
+            CREATE INDEX IF NOT EXISTS ix_schedule_candidate_decisions_owner_uid
+            ON schedule_candidate_decisions(owner_uid)
+            """,
+            """
+            CREATE INDEX IF NOT EXISTS ix_schedule_candidate_decisions_candidate
+            ON schedule_candidate_decisions(candidate_snapshot_id)
+            """,
+            """
+            ALTER TABLE IF EXISTS schedule_candidates
+            ADD COLUMN IF NOT EXISTS candidate_audit JSONB NOT NULL DEFAULT '{}'::jsonb
+            """,
+            """
+            ALTER TABLE IF EXISTS schedule_optimization_runs
+            ALTER COLUMN dependency_decision_id DROP NOT NULL
+            """,
+            """
+            ALTER TABLE IF EXISTS schedule_candidates
+            ALTER COLUMN dependency_decision_id DROP NOT NULL
+            """,
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_schedule_optimization_dependency_decision
+            ON schedule_optimization_runs(dependency_decision_id)
+            """,
+            ("ALTER TABLE IF EXISTS schedule_snapshots ADD COLUMN IF NOT EXISTS execution_started_at TIMESTAMP"),
             "ALTER TABLE IF EXISTS schedule_snapshots ALTER COLUMN source_snapshot_id TYPE TEXT",
             "ALTER TABLE IF EXISTS schedule_issues ALTER COLUMN sort_key TYPE TEXT",
             "ALTER TABLE IF EXISTS skills ADD COLUMN IF NOT EXISTS tool_dependencies JSONB DEFAULT '[]'::jsonb",

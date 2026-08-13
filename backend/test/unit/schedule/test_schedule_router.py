@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from server.utils.auth_middleware import get_required_user
 from yuxi.services.schedule_audit_service import ScheduleConflictError, ScheduleNotFoundError
+from yuxi.services.schedule_optimization_service import ScheduleOptimizationConflictError
 
 schedule_module = importlib.import_module("server.routers.schedule_router")
 
@@ -34,9 +35,66 @@ class FakeService:
     async def get_snapshot(self, owner_uid, snapshot_id):
         raise ScheduleNotFoundError
 
+    async def save_dependency_decision(self, owner_uid, issue_id, draft):
+        return {
+            "decision_id": "decision-1",
+            "issue_id": issue_id,
+            "status": "draft",
+            **draft.model_dump(mode="json"),
+        }
+
+    async def confirm_dependency_decision(self, owner_uid, issue_id):
+        return {"decision_id": "decision-1", "issue_id": issue_id, "status": "confirmed"}
+
+
+class FakeOptimizationService:
+    def __init__(self) -> None:
+        self.replay = False
+        self.conflict = False
+
+    async def create_candidate(self, owner_uid, snapshot_id, request):
+        if self.conflict:
+            raise ScheduleOptimizationConflictError
+        return (
+            {
+                "candidate_snapshot_id": "candidate-1",
+                "base_schedule_snapshot_id": snapshot_id,
+                "dependency_decision_id": request.dependency_decision_id,
+                "candidate_status": "valid",
+            },
+            not self.replay,
+        )
+
+    async def create_forward_candidate(self, owner_uid, snapshot_id, request):
+        if self.conflict:
+            raise ScheduleOptimizationConflictError
+        return (
+            {
+                "candidate_snapshot_id": "candidate-forward-1",
+                "base_schedule_snapshot_id": snapshot_id,
+                "candidate_status": "valid",
+                "candidate_kind": "automatic_forward_recalculation",
+                "engine_result": {"status": "calculated"},
+            },
+            not self.replay,
+        )
+
+    async def get_candidate(self, owner_uid, candidate_snapshot_id):
+        return {"candidate_snapshot_id": candidate_snapshot_id, "candidate_status": "valid"}
+
+    async def record_decision(self, owner_uid, candidate_snapshot_id, request):
+        return {"candidate_snapshot_id": candidate_snapshot_id, **request.model_dump(mode="json")}, True
+
+    async def get_delivery(self, owner_uid, candidate_snapshot_id):
+        return {"candidate_snapshot_id": candidate_snapshot_id, "application_allowed": True}
+
+    async def get_acceptance_evidence(self, owner_uid, candidate_snapshot_id):
+        return {"candidate_snapshot_id": candidate_snapshot_id, "status": "passed", "checks": []}
+
 
 def _client(monkeypatch, service: FakeService) -> TestClient:
     monkeypatch.setattr(schedule_module, "schedule_service", service)
+    monkeypatch.setattr(schedule_module, "optimization_service", FakeOptimizationService())
     app = FastAPI()
     app.include_router(schedule_module.schedule_router, prefix="/api")
 
@@ -101,3 +159,80 @@ def test_schedule_read_hides_missing_and_unauthorized_resources(monkeypatch) -> 
 
     assert response.status_code == 404
     assert response.json()["detail"]["code"] == "SCHEDULE_NOT_FOUND"
+
+
+def test_dependency_decision_save_and_confirm_contract(monkeypatch) -> None:
+    client = _client(monkeypatch, FakeService())
+    payload = {
+        "resolution": "replace_with_leaf_tasks",
+        "predecessor_task_ids": ["task:1"],
+        "successor_task_ids": ["task:2"],
+        "dependency_type": "FS",
+        "lag_minutes": 0,
+        "reason": "业务已确认阶段出口和入口",
+    }
+
+    saved = client.put("/api/schedule/issues/issue-1/dependency-decision", json=payload)
+    confirmed = client.post("/api/schedule/issues/issue-1/dependency-decision/confirm")
+
+    assert saved.status_code == 200
+    assert saved.json()["status"] == "draft"
+    assert confirmed.status_code == 200
+    assert confirmed.json()["status"] == "confirmed"
+
+
+def test_dependency_decision_rejects_fields_for_defer(monkeypatch) -> None:
+    client = _client(monkeypatch, FakeService())
+
+    response = client.put(
+        "/api/schedule/issues/issue-1/dependency-decision",
+        json={
+            "resolution": "defer",
+            "predecessor_task_ids": ["task:1"],
+            "reason": "暂不处理",
+        },
+    )
+
+    assert response.status_code == 422
+
+
+def test_dependency_optimization_candidate_decision_and_delivery_contract(monkeypatch) -> None:
+    client = _client(monkeypatch, FakeService())
+    payload = {
+        "request_id": "optimization-request-1",
+        "dependency_decision_id": "decision-1",
+        "base_snapshot_content_sha256": "sha256:" + "a" * 64,
+    }
+
+    created = client.post("/api/schedule/snapshots/snapshot-1/optimizations", json=payload)
+    candidate = client.get("/api/schedule/candidates/candidate-1")
+    reviewed = client.post(
+        "/api/schedule/candidates/candidate-1/decisions",
+        json={"request_id": "candidate-review-1", "attitude": "accepted", "comment": "同意交付"},
+    )
+    delivery = client.get("/api/schedule/candidates/candidate-1/delivery")
+    evidence = client.get("/api/schedule/candidates/candidate-1/acceptance-evidence")
+
+    assert created.status_code == 201
+    assert candidate.json()["candidate_status"] == "valid"
+    assert reviewed.status_code == 201
+    assert reviewed.json()["attitude"] == "accepted"
+    assert delivery.json()["application_allowed"] is True
+    assert evidence.status_code == 200
+    assert evidence.json()["status"] == "passed"
+
+
+def test_forward_recalculation_candidate_contract(monkeypatch) -> None:
+    client = _client(monkeypatch, FakeService())
+
+    response = client.post(
+        "/api/schedule/snapshots/snapshot-1/recalculate-automatic-downstream",
+        json={
+            "request_id": "forward-request-1",
+            "base_snapshot_content_sha256": "sha256:" + "a" * 64,
+        },
+    )
+
+    assert response.status_code == 201
+    assert response.json()["candidate_status"] == "valid"
+    assert response.json()["candidate_kind"] == "automatic_forward_recalculation"

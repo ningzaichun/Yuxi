@@ -9,12 +9,14 @@
 - 幂等提交、查询和隔离排期快照；
 - 任务层级、依赖网络、零 Lag 日期关系和管理完整性审查；
 - Statistics、Capability、Issue、证据和直接上下游查看；
+- 对单一统一项目日历、FS/SS/FF/SF 零/正 Lag、ASAP/SNET/FNET 自动活动任务执行正向重算，并生成只读 Candidate；
 - 通过具备 Schedule 工具的智能体解释已有 Issue。
 
 当前版本不支持：
 
-- 计算非零 Lag 日期关系；
-- CPM、关键路径、总浮时或自由浮时重算；
+- 计算负 Lag 日期关系；
+- 负 Lag、多日历、日历例外、约束、手工任务或实际进度的重算；
+- 汇总日期滚动、反向浮时或关键路径计算；
 - 自动修改任务日期、依赖、日历或约束；
 - 资源均衡、成本优化或 MPP 回写；
 - 把 Candidate 直接应用为生效计划。
@@ -85,9 +87,54 @@ Yuxi 的内容哈希只基于通过校验后的 `snapshot`，不包含请求信�
 5. 点击“证据”查看对象、确定性证据和直接上下游；
 6. 点击“Agent 解释”进入具备两个 Schedule 工具的智能体。
 
-页面是只读界面，不提供编辑、优化、重算或应用按钮。
+页面不编辑或应用来源计划。符合最小 CPM Profile 的来源可生成只读重算 Candidate；范围外输入只展示结构化阻断原因。
 
-### 4. 使用 Agent 解释 Issue
+### 4. 生成最小正向重算 Candidate
+
+页面中的“生成重算 Candidate”使用 Profile
+`yuxi-forward-unified-calendar-fs-ss-ff-sf-positive-lag-snet-fnet-manual-v5`。当前只计算单一无继承项目日历下
+FS/SS/FF/SF 零/正 Lag、ASAP/SNET/FNET 自动活动任务的最早开始与完成；正 Lag 按统一项目日历的工作
+分钟推进，支持多个工作时段、午休、周末
+和非工作时间归位。来源任务日期和 `source_calculation` 不变，Yuxi 日期只保存在 Candidate 的
+`engine_result`，人工接受后可从 Delivery 的 `simulation_result` 查看同一结果。
+
+包含多日历或日历例外、负 Lag、汇总依赖、手工/非活动任务、SNET/FNET 非法组合或实际进度的
+输入返回结构化 `blocked`，不生成近似 Candidate。S3 零 Lag、S4 正 Lag、SS/FF/SF 与 SNET/FNET 的
+Microsoft Project 黄金样例均已人工确认并通过门禁；这只证明当前受限 Profile，不代表生产适用或跨项目通用。
+
+仓库提供 `backend/test/data/schedule/microsoft_project_s3_golden_case.json` 作为最小人工对照输入。本机
+Microsoft Project 16.0 已通过独立 COM 会话建立案例并计算日期，结果保存在 `external_observation`；
+`backend/scripts/capture_ms_project_schedule_golden_observation.ps1` 可重复执行同一过程。脚本只向标准输出
+返回观测 JSON，不保存 MPP、不修改夹具 expected，也不会把 Yuxi 输出传给 Microsoft Project。
+
+用户已于 `2026-08-13T14:15:06+08:00` 确认 S3/S4 observation。两个黄金文件均已将独立
+Microsoft Project 观测原样回填到 `expected.task_dates`，并记录确认人、确认时间和 Microsoft Project
+版本。禁止把 Yuxi 的计算结果直接填入 expected；如需重新取证，使用以下 Windows PowerShell 命令：
+
+```powershell
+& 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe' `
+  -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass `
+  -File .\backend\scripts\capture_ms_project_schedule_golden_observation.ps1
+```
+
+在 `backend` 目录运行：
+
+```powershell
+.\.venv\Scripts\python.exe scripts\verify_schedule_golden_case.py
+```
+
+当前 S3 命令应返回退出码 `0`、`gate_status=PASSED` 和 `external_observation_status=PASSED`。
+退出码 `3` / `gate_status=PENDING` 表示新夹具的人工 expected 尚未确认；`1` / `FAILED` 表示夹具或日期
+不一致。S4 的每个新语义切片仍需单独建立和确认对应 expected。
+
+S4 首个正 Lag 切片的输入保存在
+`backend/test/data/schedule/microsoft_project_s4_positive_lag_golden_case.json`。语义仅限统一项目日历、
+FS 正 Lag 和 ASAP 自动任务，Lag 按项目日历的工作分钟推进；Microsoft Project 16.0 黄金 expected 覆盖
+`+120m` 跨夜间、`+600m` 跨完整工作日和 `+480m` 跨周末/午休边界。使用同一校验脚本的
+`--case test/data/schedule/microsoft_project_s4_positive_lag_golden_case.json` 参数复核，当前同样应返回
+`PASSED`；负 Lag 继续明确 blocked。
+
+### 5. 使用 Agent 解释 Issue
 
 目标智能体的工具配置必须同时包含：
 
@@ -126,7 +173,7 @@ Agent 只能读取已持久化的 Yuxi Audit 和 Issue。它不能自行计算�
 | `MILESTONE_MISSING` | 没有里程碑 | warning |
 | `NO_SOURCE_ASSIGNMENTS` | 来源 Assignment 为空 | warning |
 | `RESOURCE_SEMANTICS_UNCLASSIFIED` | 资源业务语义未分类 | warning |
-| `LAG_CALENDAR_POLICY_UNSPECIFIED` | 非零 Lag 的日历策略未冻结 | blocker |
+| `LAG_CALENDAR_POLICY_UNSPECIFIED` | 来源 Audit 缺少非零 Lag 日期检查语义 | blocker |
 
 零 Lag 日期关系使用以下精确定义：
 
@@ -137,7 +184,9 @@ Agent 只能读取已持久化的 Yuxi Audit 和 Issue。它不能自行计算�
 | FF | `successor.finish >= predecessor.finish` |
 | SF | `successor.finish >= predecessor.start` |
 
-非零 Lag 统一记为 skipped，不执行近似判断或“明显不合理”回退。
+第一阶段来源 Audit 对非零 Lag 统一记为 skipped，不执行近似判断或“明显不合理”回退。这与 v2 CPM
+引擎按统一项目日历计算 FS 正 Lag 是两个独立能力边界：引擎可重算受支持输入，不表示来源日期已经通过
+非零 Lag 合规检查。
 
 ## 查询 API
 
@@ -149,6 +198,7 @@ Agent 只能读取已持久化的 Yuxi Audit 和 Issue。它不能自行计算�
 | GET | `/api/schedule/snapshots/{id}/audit` | 读取 Statistics、Capability 和摘要 |
 | GET | `/api/schedule/snapshots/{id}/issues` | 按分类、等级分页读取 Issue |
 | GET | `/api/schedule/issues/{issue_id}` | 读取 Issue、任务和直接上下游证据 |
+| POST | `/api/schedule/snapshots/{id}/recalculate-automatic-downstream` | 生成最小正向重算 Candidate 或返回 blocked |
 | GET | `/api/schedule/agents` | 列出具备两个 Schedule 工具的可访问 Agent |
 
 错误响应统一放在 `detail`：
@@ -235,6 +285,51 @@ pnpm build
 
 页面只显示 `ready`。检查 `schedule_snapshots.submission_status` 和 `failure_code`，再检查 PostgreSQL 与 MinIO 连接。`failed` 记录应使用原请求重试。
 
+### 第二个及后续真实案例预检
+
+新案例提交前先运行结构预检。预检只校验 `canonical_schedule_v2.2` 并输出内容指纹、数量、树深度、关系类型/Lag 分布、汇总依赖所在端和相对基线的结构差异；不会输出项目名、任务名或对象 ID，也不会提交 Snapshot、生成 Candidate 或应用 Delivery。
+
+```powershell
+cd backend
+& '.venv\Scripts\python.exe' scripts/preflight_schedule_case.py `
+  'D:\private\case-b.json' `
+  --case-type real `
+  --baseline 'test\data\schedule\schedule_v2_2_sanitized.json'
+```
+
+`--case-type` 必须显式选择：
+
+- `real`：独立真实业务来源，才有资格进入业务迁移验收；
+- `sanitized`：脱敏回归样例，只能验证工程协议；
+- `synthetic`：合成边界样例，只能验证工程协议。
+
+当暂时没有第二个真实案例时，可以生成确定性的合成案例 S，继续验证协议迁移能力：
+
+```powershell
+cd backend
+& '.venv\Scripts\python.exe' scripts/generate_synthetic_schedule_case.py `
+  --output test/data/schedule/schedule_v2_2_synthetic_case_s.json
+& '.venv\Scripts\python.exe' scripts/preflight_schedule_case.py `
+  test/data/schedule/schedule_v2_2_synthetic_case_s.json `
+  --case-type synthetic `
+  --purpose protocol-regression `
+  --baseline test/data/schedule/schedule_v2_2_sanitized.json
+```
+
+预检现在区分两个结论：`engineering_protocol_precheck_passed` 用于工程协议回归，`automated_migration_precheck_passed` / `business_migration_eligible` 用于真实业务迁移。结构合格的 `synthetic` 案例可以让协议回归命令返回 `0`，但业务迁移仍返回 `3`，并明确输出 `CANNOT_REPLACE_INDEPENDENT_REAL_CASE_B`。生成数据自身声明 `format=SYNTHETIC_TEST_DATA`；即使命令行错误改标为 `real`，也会被 `DECLARED_SYNTHETIC_SOURCE` 阻断。不得用它关闭案例 B 或 G2/生产通用性门禁；案例 B 缺失不阻塞 S3 工程迭代。
+
+脱敏 Fixture 与案例 A 结构一致，可作为不暴露私有内容的结构基线，但不能计作第二个真实案例。案例 B 自动预检通过还不代表业务验收通过；仍需人工确认来源确实独立、工作台任务名称可读，并通过同一页面完成 `Issue → 确认 → Candidate → Audit/Diff → Decision → Delivery → 新 Source`。
+
+脚本退出码：`0` 表示所选 `--purpose` 的预检通过，`2` 表示 JSON 或契约无效，`3` 表示契约有效但所选用途的门禁未通过。真实 Snapshot 提交流水线必须使用默认的 `business-migration`，只允许真实案例退出码 `0` 进入提交阶段；`protocol-regression` 只用于自动测试或受控工程验证。
+
+新 Source 回流后，在原 Candidate Drawer 点击“查看回流验收证据”。只读接口 `GET /api/schedule/candidates/{candidate_snapshot_id}/acceptance-evidence` 聚合基础 Snapshot、Candidate、Decision、最新 Snapshot、Patch 和两次 Audit，返回：
+
+- `pending`：尚未发现新的 Source Snapshot；
+- `passed`：16 项检查全部通过，包括 Candidate 有效且已接受、未运行 Engine、基础 Source Hash 未变、基础与回流对象 Hash 均匹配数据库记录、回流使用新的 request/external snapshot/external revision/source snapshot 身份、Patch 准确落地、目标问题消失、无统计/能力漂移、无新增 Blocker、旧 Candidate 已过期；
+- `failed`：已存在新 Snapshot，但至少一项检查失败。
+
+验收证据只读，不会自动接受 Candidate、应用 Delivery 或修改 Source。它要求四类版本身份全部变化，避免把同项目任意一个较新的 Snapshot 误认成本次 Delivery 回流；案例 B 业务验收要求该状态为 `passed`，同时保留业务人员对来源独立性、任务名称可读性和关系合理性的人工确认。
+
 ### Agent 列表为空
 
 确认用户可访问目标 Agent，并在该 Agent 的工具配置中同时启用两个 Schedule 工具。只启用其中一个不会进入候选列表。
@@ -253,4 +348,140 @@ CandidateSnapshot 暂不冻结为长期稳定外部契约。后续首个可运�
 - 历史 Candidate 按原 draft 版本读取；
 - 业务端首版只读取、展示和评价 Delivery Package，不依赖 draft 内部字段的长期稳定性。
 
-进入确定性排程开发前，必须先通过第一阶段业务验收，并冻结 Lag 日历、汇总依赖、手工任务、约束、关键任务阈值和 Microsoft Project 黄金样例。
+S3 零 Lag、S4 正 Lag、SS/FF/SF、SNET/FNET 与手工/locked task 已按 v5 受限 Profile 完成。下一切片为汇总任务日期滚动；开始编码前必须先取得并确认对应 Microsoft Project expected value。之后直接进入反向计算、浮时和关键路径；案例 B 和完整生产治理在 G2 关闭。
+
+### 如何建立 Microsoft Project expected（SS/FF/SF 示例）
+
+SS/FF/SF 黄金夹具位于
+`backend/test/data/schedule/microsoft_project_s4_relation_types_golden_case.json`，目标 Profile 为
+`yuxi-forward-unified-calendar-fs-ss-ff-sf-positive-lag-snet-fnet-v4`。夹具使用统一项目日历和 8 个合成任务，
+分别覆盖 SS/FF/SF 的零 Lag 与 `+120m`，不包含真实业务数据。
+
+从仓库根目录独立重放 Microsoft Project：
+
+```powershell
+& 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe' `
+  -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass `
+  -File .\backend\scripts\capture_ms_project_schedule_golden_observation.ps1 `
+  -CasePath .\backend\test\data\schedule\microsoft_project_s4_relation_types_golden_case.json
+```
+
+脚本新建不保存的 Project，按夹具设置日历、任务、关系和 Lag，调用 Project 自身重算，并输出：
+
+- `task_relations`：Project 实际接受的 Predecessors，例如 `2SS+120 分钟工时`；
+- `task_dates`：每个任务的 Start/Finish；
+- Microsoft Project 版本、日历和捕获时间。
+
+脚本不调用 Yuxi 引擎、不读取 Yuxi 结果、不修改夹具，也不保存 MPP。重放后先校验 observation：
+
+```powershell
+Set-Location backend
+& '.venv\Scripts\python.exe' scripts\verify_schedule_golden_case.py `
+  --case test/data/schedule/microsoft_project_s4_relation_types_golden_case.json `
+  --observation-only
+```
+
+当前 expected 已人工确认；完整门禁（不带 `--observation-only`）应返回退出码 `0`、
+`gate_status=PASSED`、`external_observation_status=PASSED`。Microsoft Project 16.0 黄金结果为：
+
+| 任务 | 关系 | 工期 | Start | Finish |
+|---|---|---:|---|---|
+| A-种子任务 | 无 | 480m | 2026-09-01 08:00 | 2026-09-01 17:00 |
+| B-关系前置任务 | A FS+0m | 480m | 2026-09-02 08:00 | 2026-09-02 17:00 |
+| C-SS零Lag | B SS+0m | 240m | 2026-09-02 08:00 | 2026-09-02 12:00 |
+| D-SS正Lag | B SS+120m | 240m | 2026-09-02 10:00 | 2026-09-02 15:00 |
+| E-FF零Lag | B FF+0m | 240m | 2026-09-02 13:00 | 2026-09-02 17:00 |
+| F-FF正Lag | B FF+120m | 240m | 2026-09-02 15:00 | 2026-09-03 10:00 |
+| G-SF零Lag | B SF+0m | 240m | 2026-09-01 13:00 | 2026-09-02 08:00 |
+| H-SF正Lag | B SF+120m | 240m | 2026-09-01 15:00 | 2026-09-02 10:00 |
+
+以上时间均为 `Asia/Shanghai`。本次建立 expected 的过程为：
+
+1. 将 `external_observation.task_dates` 原样复制到 `expected.task_dates`；
+2. 将状态改为 `CONFIRMED_BY_MS_PROJECT`；
+3. 填写确认人、确认时间和 Microsoft Project 版本；
+4. 运行 `--observation-only`，返回 `PASSED` 和退出码 `0`；
+5. 实现对应 Profile 后去掉 `--observation-only` 运行同一门禁，Yuxi 与 expected 一致并返回 `PASSED`。
+
+禁止手算日期后填写 expected，也禁止从 Yuxi 输出复制 expected。后续手工/locked task 等切片沿用相同流程；
+若重放产生日期漂移、关系回显不含预期语义，先调查 Microsoft Project 输入和语义，不开始对应切片编码。
+
+### SNET/FNET 已确认 observation
+
+SNET/FNET 夹具位于
+`backend/test/data/schedule/microsoft_project_s4_constraints_golden_case.json`，目标 Profile 为
+`yuxi-forward-unified-calendar-fs-ss-ff-sf-positive-lag-snet-fnet-v4`。夹具覆盖 SNET/FNET 分别晚于和早于
+FS 依赖下界的组合，用于确认最终日期取约束与依赖中的更严格下界。
+
+重放命令：
+
+```powershell
+& 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe' `
+  -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass `
+  -File .\backend\scripts\capture_ms_project_schedule_golden_observation.ps1 `
+  -CasePath .\backend\test\data\schedule\microsoft_project_s4_constraints_golden_case.json
+```
+
+脚本除关系和任务日期外，还回显 Microsoft Project 实际保存的约束：ASAP=`0`、SNET=`4`、FNET=`6`。
+当前 Microsoft Project 16.0 observation 已三次稳定重放：
+
+| 任务 | 约束 | FS 依赖 | Start | Finish |
+|---|---|---|---|---|
+| A-种子任务 | ASAP | 无 | 2026-09-01 08:00 | 2026-09-01 17:00 |
+| B-ASAP依赖基线 | ASAP | A FS+0m | 2026-09-02 08:00 | 2026-09-02 12:00 |
+| C-SNET晚于依赖 | SNET 2026-09-03 13:00 | A FS+0m | 2026-09-03 13:00 | 2026-09-03 17:00 |
+| D-SNET早于依赖 | SNET 2026-09-01 13:00 | A FS+0m | 2026-09-02 08:00 | 2026-09-02 12:00 |
+| E-FNET晚于依赖 | FNET 2026-09-04 12:00 | A FS+0m | 2026-09-04 08:00 | 2026-09-04 12:00 |
+| F-FNET早于依赖 | FNET 2026-09-01 17:00 | A FS+0m | 2026-09-02 08:00 | 2026-09-02 12:00 |
+
+以上时间均为 `Asia/Shanghai`。在 `backend` 目录运行：
+
+```powershell
+& '.venv\Scripts\python.exe' scripts\verify_schedule_golden_case.py `
+  --case test/data/schedule/microsoft_project_s4_constraints_golden_case.json `
+  --observation-only
+```
+
+用户已于 `2026-08-13T15:41:21+08:00` 确认上表、统一日历、6 个任务工期、5 条 FS 关系，
+以及 Project 回显的约束类型和日期；observation 已原样回填 expected。完整 v4 门禁当前返回退出码 `0`、
+`gate_status=PASSED`、`external_observation_status=PASSED`。后续切片仍须建立各自的
+Microsoft Project observation/expected，不能复用本表推断语义。
+
+### 手工/locked task 与冲突已确认 observation
+
+下一切片夹具位于
+`backend/test/data/schedule/microsoft_project_s4_manual_locked_golden_case.json`，目标 Profile 暂定为
+`yuxi-forward-unified-calendar-fs-ss-ff-sf-positive-lag-snet-fnet-manual-v5`。该夹具冻结两条 Project 原生行为：
+
+- 无入边手工任务保留用户输入日期，并作为自动后续任务的 FS 锚点；
+- 手工任务输入日期早于 FS 依赖下界时，Project 将其调整到依赖下界，自动后续任务继续从调整后日期传播。
+
+Microsoft Project 16.0 COM 已三次独立重放一致：
+
+| 任务 | 模式 | FS 依赖 | 输入 Start | Project Start | Project Finish |
+|---|---|---|---|---|---|
+| A-自动种子任务 | 自动 | 无 | - | 2026-09-01 08:00 | 2026-09-01 17:00 |
+| B-无入边手工日期锚点 | 手工 | 无 | 2026-09-03 08:00 | 2026-09-03 08:00 | 2026-09-03 12:00 |
+| C-手工锚点后的自动任务 | 自动 | B FS+0m | - | 2026-09-03 13:00 | 2026-09-03 17:00 |
+| D-手工任务早于依赖冲突 | 手工 | A FS+0m | 2026-09-01 08:00 | 2026-09-02 08:00 | 2026-09-02 12:00 |
+| E-冲突手工任务后的自动任务 | 自动 | D FS+0m | - | 2026-09-02 13:00 | 2026-09-02 17:00 |
+
+重放与证据校验：
+
+```powershell
+& 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe' `
+  -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass `
+  -File .\backend\scripts\capture_ms_project_schedule_golden_observation.ps1 `
+  -CasePath .\backend\test\data\schedule\microsoft_project_s4_manual_locked_golden_case.json
+
+Set-Location backend
+& '.venv\Scripts\python.exe' scripts\verify_schedule_golden_case.py `
+  --case test\data\schedule\microsoft_project_s4_manual_locked_golden_case.json `
+  --observation-only
+```
+
+用户已于 `2026-08-13T16:30:48+08:00` 确认 observation，expected 已从 Project 结果原样回填。
+完整 v5 门禁当前返回退出码 `0`、`gate_status=PASSED`、`external_observation_status=PASSED`。这里的
+`locked_task_ids` 不是 Microsoft Project 原生字段，而是 Yuxi 重算请求的授权边界：locked 日期不得移动，
+为满足依赖必须移动 locked task 时 Candidate 为 `invalid` 且 Delivery 不允许应用。普通手工任务按 Project
+基线计算，Source 日期仍不原地修改。下一切片为汇总任务日期滚动。

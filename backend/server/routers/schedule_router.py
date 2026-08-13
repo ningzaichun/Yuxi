@@ -9,20 +9,37 @@ from pydantic import ValidationError
 
 from server.utils.auth_middleware import get_required_user
 from yuxi.schedule.contracts.envelope import ScheduleSnapshotSubmission
+from yuxi.schedule.contracts.dependency_decision import DependencyDecisionDraft
 from yuxi.schedule.contracts.errors import validation_error_to_schedule_detail
+from yuxi.schedule.contracts.optimization import (
+    CandidateDecisionRequest,
+    DependencyOptimizationRequest,
+    ForwardRecalculationRequest,
+)
 from yuxi.services.schedule_audit_service import (
     ScheduleAuditService,
     ScheduleConflictError,
     ScheduleDependencyError,
+    ScheduleDecisionConflictError,
+    ScheduleDecisionInvalidError,
     ScheduleNotFoundError,
     ScheduleSubmissionInProgressError,
     list_schedule_capable_agents,
+)
+from yuxi.services.schedule_optimization_service import (
+    ScheduleOptimizationConflictError,
+    ScheduleOptimizationDependencyError,
+    ScheduleOptimizationInProgressError,
+    ScheduleOptimizationInvalidError,
+    ScheduleOptimizationNotFoundError,
+    ScheduleOptimizationService,
 )
 from yuxi.storage.postgres.models_business import User
 
 MAX_BODY_BYTES = 10 * 1024 * 1024
 schedule_router = APIRouter(prefix="/schedule", tags=["schedule"])
 schedule_service = ScheduleAuditService()
+optimization_service = ScheduleOptimizationService()
 
 
 @schedule_router.post("/snapshots")
@@ -96,6 +113,150 @@ async def list_issues(
 @schedule_router.get("/issues/{issue_id}")
 async def get_issue(issue_id: str, current_user: User = Depends(get_required_user)):
     return await _read(schedule_service.get_issue_context(str(current_user.uid), issue_id))
+
+
+@schedule_router.get("/issues/{issue_id}/dependency-workbench")
+async def get_dependency_workbench(issue_id: str, current_user: User = Depends(get_required_user)):
+    return await _read(schedule_service.get_dependency_workbench(str(current_user.uid), issue_id))
+
+
+@schedule_router.put("/issues/{issue_id}/dependency-decision")
+async def save_dependency_decision(
+    issue_id: str,
+    draft: DependencyDecisionDraft,
+    current_user: User = Depends(get_required_user),
+):
+    try:
+        return await schedule_service.save_dependency_decision(str(current_user.uid), issue_id, draft)
+    except ScheduleNotFoundError as exc:
+        raise _error(404, "SCHEDULE_NOT_FOUND", "排期资源不存在") from exc
+    except ScheduleDecisionConflictError as exc:
+        raise _error(409, "SCHEDULE_DECISION_CONFIRMED", "已确认的依赖决策不可修改") from exc
+    except ScheduleDecisionInvalidError as exc:
+        raise _error(422, "SCHEDULE_DECISION_INVALID", "依赖决策不符合当前工作台范围") from exc
+
+
+@schedule_router.post("/issues/{issue_id}/dependency-decision/confirm")
+async def confirm_dependency_decision(issue_id: str, current_user: User = Depends(get_required_user)):
+    try:
+        return await schedule_service.confirm_dependency_decision(str(current_user.uid), issue_id)
+    except ScheduleNotFoundError as exc:
+        raise _error(404, "SCHEDULE_NOT_FOUND", "排期资源不存在") from exc
+    except ScheduleDecisionInvalidError as exc:
+        raise _error(422, "SCHEDULE_DECISION_INVALID", "请补全替代关系和业务理由后再确认") from exc
+
+
+@schedule_router.post("/snapshots/{snapshot_id}/optimizations")
+async def create_optimization(
+    snapshot_id: str,
+    request: DependencyOptimizationRequest,
+    response: Response,
+    current_user: User = Depends(get_required_user),
+):
+    try:
+        candidate, created = await optimization_service.create_candidate(str(current_user.uid), snapshot_id, request)
+    except ScheduleOptimizationNotFoundError as exc:
+        raise _error(404, "SCHEDULE_NOT_FOUND", "排期资源不存在") from exc
+    except ScheduleOptimizationConflictError as exc:
+        raise _error(409, "SCHEDULE_OPTIMIZATION_CONFLICT", "基础版本、Hash 或幂等请求不一致") from exc
+    except ScheduleOptimizationInProgressError as exc:
+        raise _error(409, "SCHEDULE_OPTIMIZATION_IN_PROGRESS", "相同优化请求正在处理中") from exc
+    except ScheduleOptimizationInvalidError as exc:
+        raise _error(422, "SCHEDULE_OPTIMIZATION_INVALID", "仅支持已确认的汇总依赖替代关系") from exc
+    except ScheduleOptimizationDependencyError as exc:
+        raise _error(500, "SCHEDULE_OPTIMIZATION_FAILURE", "候选方案生成失败") from exc
+    response.status_code = 201 if created else 200
+    return candidate
+
+
+@schedule_router.post("/snapshots/{snapshot_id}/recalculate-automatic-downstream")
+async def create_forward_recalculation(
+    snapshot_id: str,
+    request: ForwardRecalculationRequest,
+    response: Response,
+    current_user: User = Depends(get_required_user),
+):
+    try:
+        candidate, created = await optimization_service.create_forward_candidate(
+            str(current_user.uid), snapshot_id, request
+        )
+    except ScheduleOptimizationNotFoundError as exc:
+        raise _error(404, "SCHEDULE_NOT_FOUND", "排期资源不存在") from exc
+    except ScheduleOptimizationConflictError as exc:
+        raise _error(409, "SCHEDULE_OPTIMIZATION_CONFLICT", "基础版本、Hash 或幂等请求不一致") from exc
+    except ScheduleOptimizationInProgressError as exc:
+        raise _error(409, "SCHEDULE_OPTIMIZATION_IN_PROGRESS", "相同重算请求正在处理中") from exc
+    except ScheduleOptimizationDependencyError as exc:
+        raise _error(500, "SCHEDULE_OPTIMIZATION_FAILURE", "正向重算候选生成失败") from exc
+    response.status_code = 201 if created else 200
+    return candidate
+
+
+@schedule_router.get("/optimizations/{optimization_id}")
+async def get_optimization(optimization_id: str, current_user: User = Depends(get_required_user)):
+    try:
+        return await optimization_service.get_optimization(str(current_user.uid), optimization_id)
+    except ScheduleOptimizationNotFoundError as exc:
+        raise _error(404, "SCHEDULE_NOT_FOUND", "排期资源不存在") from exc
+
+
+@schedule_router.get("/candidates/{candidate_snapshot_id}")
+async def get_candidate(candidate_snapshot_id: str, current_user: User = Depends(get_required_user)):
+    try:
+        return await optimization_service.get_candidate(str(current_user.uid), candidate_snapshot_id)
+    except ScheduleOptimizationNotFoundError as exc:
+        raise _error(404, "SCHEDULE_NOT_FOUND", "排期资源不存在") from exc
+    except ScheduleOptimizationDependencyError as exc:
+        raise _error(500, "SCHEDULE_OPTIMIZATION_FAILURE", "候选方案读取失败") from exc
+
+
+@schedule_router.post("/candidates/{candidate_snapshot_id}/decisions")
+async def record_candidate_decision(
+    candidate_snapshot_id: str,
+    request: CandidateDecisionRequest,
+    response: Response,
+    current_user: User = Depends(get_required_user),
+):
+    try:
+        decision, created = await optimization_service.record_decision(
+            str(current_user.uid), candidate_snapshot_id, request
+        )
+    except ScheduleOptimizationNotFoundError as exc:
+        raise _error(404, "SCHEDULE_NOT_FOUND", "排期资源不存在") from exc
+    except ScheduleOptimizationConflictError as exc:
+        raise _error(409, "SCHEDULE_OPTIMIZATION_CONFLICT", "相同 request_id 已用于不同的候选态度") from exc
+    response.status_code = 201 if created else 200
+    return decision
+
+
+@schedule_router.get("/candidates/{candidate_snapshot_id}/delivery")
+async def get_candidate_delivery(
+    candidate_snapshot_id: str,
+    current_user: User = Depends(get_required_user),
+):
+    try:
+        return await optimization_service.get_delivery(str(current_user.uid), candidate_snapshot_id)
+    except ScheduleOptimizationNotFoundError as exc:
+        raise _error(404, "SCHEDULE_NOT_FOUND", "排期资源不存在") from exc
+    except ScheduleOptimizationInvalidError as exc:
+        raise _error(409, "SCHEDULE_DELIVERY_NOT_READY", "候选尚未接受或不满足交付条件") from exc
+    except ScheduleOptimizationDependencyError as exc:
+        raise _error(500, "SCHEDULE_OPTIMIZATION_FAILURE", "交付包读取失败") from exc
+
+
+@schedule_router.get("/candidates/{candidate_snapshot_id}/acceptance-evidence")
+async def get_candidate_acceptance_evidence(
+    candidate_snapshot_id: str,
+    current_user: User = Depends(get_required_user),
+):
+    try:
+        return await optimization_service.get_acceptance_evidence(str(current_user.uid), candidate_snapshot_id)
+    except ScheduleOptimizationNotFoundError as exc:
+        raise _error(404, "SCHEDULE_NOT_FOUND", "排期资源不存在") from exc
+    except ScheduleOptimizationInvalidError as exc:
+        raise _error(409, "SCHEDULE_ACCEPTANCE_EVIDENCE_NOT_APPLICABLE", "该 Candidate 不使用回流验收证据") from exc
+    except ScheduleOptimizationDependencyError as exc:
+        raise _error(500, "SCHEDULE_OPTIMIZATION_FAILURE", "验收证据读取失败") from exc
 
 
 @schedule_router.get("/agents")

@@ -1,0 +1,249 @@
+{
+  "schema_version": "microsoft_project_schedule_golden_case_v1",
+  "case_id": "s4-snet-fnet-unified-calendar-v1",
+  "purpose": "S4 统一项目日历下 SNET/FNET 与 FS 依赖下界交互的 Microsoft Project 人工对照",
+  "engine_profile_id": "yuxi-forward-unified-calendar-fs-ss-ff-sf-positive-lag-snet-fnet-manual-v5",
+  "expected_value_source": "MICROSOFT_PROJECT_MANUAL_CONFIRMATION",
+  "lag_calendar_policy": "UNIFIED_PROJECT_CALENDAR_WORKING_MINUTES",
+  "project_start": "2026-09-01T08:00:00+08:00",
+  "time_zone": "Asia/Shanghai",
+  "calendar": {
+    "working_weekdays": [
+      "MONDAY",
+      "TUESDAY",
+      "WEDNESDAY",
+      "THURSDAY",
+      "FRIDAY"
+    ],
+    "working_intervals": [
+      {
+        "start": "08:00",
+        "finish": "12:00"
+      },
+      {
+        "start": "13:00",
+        "finish": "17:00"
+      }
+    ],
+    "exceptions": []
+  },
+  "tasks": [
+    {
+      "task_id": "constraint-task:seed",
+      "name": "A-种子任务",
+      "duration_minutes": 480,
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      }
+    },
+    {
+      "task_id": "constraint-task:asap-successor",
+      "name": "B-ASAP依赖基线",
+      "duration_minutes": 240,
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      }
+    },
+    {
+      "task_id": "constraint-task:snet-later",
+      "name": "C-SNET晚于依赖",
+      "duration_minutes": 240,
+      "constraint": {
+        "type": "START_NO_EARLIER_THAN",
+        "date": "2026-09-03T13:00:00+08:00"
+      }
+    },
+    {
+      "task_id": "constraint-task:snet-earlier",
+      "name": "D-SNET早于依赖",
+      "duration_minutes": 240,
+      "constraint": {
+        "type": "START_NO_EARLIER_THAN",
+        "date": "2026-09-01T13:00:00+08:00"
+      }
+    },
+    {
+      "task_id": "constraint-task:fnet-later",
+      "name": "E-FNET晚于依赖",
+      "duration_minutes": 240,
+      "constraint": {
+        "type": "FINISH_NO_EARLIER_THAN",
+        "date": "2026-09-04T12:00:00+08:00"
+      }
+    },
+    {
+      "task_id": "constraint-task:fnet-earlier",
+      "name": "F-FNET早于依赖",
+      "duration_minutes": 240,
+      "constraint": {
+        "type": "FINISH_NO_EARLIER_THAN",
+        "date": "2026-09-01T17:00:00+08:00"
+      }
+    }
+  ],
+  "dependencies": [
+    {
+      "predecessor_task_id": "constraint-task:seed",
+      "successor_task_id": "constraint-task:asap-successor",
+      "type": "FS",
+      "lag_minutes": 0
+    },
+    {
+      "predecessor_task_id": "constraint-task:seed",
+      "successor_task_id": "constraint-task:snet-later",
+      "type": "FS",
+      "lag_minutes": 0
+    },
+    {
+      "predecessor_task_id": "constraint-task:seed",
+      "successor_task_id": "constraint-task:snet-earlier",
+      "type": "FS",
+      "lag_minutes": 0
+    },
+    {
+      "predecessor_task_id": "constraint-task:seed",
+      "successor_task_id": "constraint-task:fnet-later",
+      "type": "FS",
+      "lag_minutes": 0
+    },
+    {
+      "predecessor_task_id": "constraint-task:seed",
+      "successor_task_id": "constraint-task:fnet-earlier",
+      "type": "FS",
+      "lag_minutes": 0
+    }
+  ],
+  "external_observation": {
+    "observation_status": "CAPTURED_BY_MS_PROJECT_COM",
+    "captured_at": "2026-08-13T15:14:00+08:00",
+    "capture_method": "WINDOWS_POWERSHELL_MS_PROJECT_COM_READ_ONLY_RESULT",
+    "microsoft_project_version": "16.0",
+    "calendar_name": "标准",
+    "task_relations": [
+      {
+        "task_id": "constraint-task:asap-successor",
+        "microsoft_project_predecessors": "1"
+      },
+      {
+        "task_id": "constraint-task:snet-later",
+        "microsoft_project_predecessors": "1"
+      },
+      {
+        "task_id": "constraint-task:snet-earlier",
+        "microsoft_project_predecessors": "1"
+      },
+      {
+        "task_id": "constraint-task:fnet-later",
+        "microsoft_project_predecessors": "1"
+      },
+      {
+        "task_id": "constraint-task:fnet-earlier",
+        "microsoft_project_predecessors": "1"
+      }
+    ],
+    "task_constraints": [
+      {
+        "task_id": "constraint-task:seed",
+        "microsoft_project_constraint_type": 0,
+        "microsoft_project_constraint_date": null
+      },
+      {
+        "task_id": "constraint-task:asap-successor",
+        "microsoft_project_constraint_type": 0,
+        "microsoft_project_constraint_date": null
+      },
+      {
+        "task_id": "constraint-task:snet-later",
+        "microsoft_project_constraint_type": 4,
+        "microsoft_project_constraint_date": "2026-09-03T13:00:00+08:00"
+      },
+      {
+        "task_id": "constraint-task:snet-earlier",
+        "microsoft_project_constraint_type": 4,
+        "microsoft_project_constraint_date": "2026-09-01T13:00:00+08:00"
+      },
+      {
+        "task_id": "constraint-task:fnet-later",
+        "microsoft_project_constraint_type": 6,
+        "microsoft_project_constraint_date": "2026-09-04T12:00:00+08:00"
+      },
+      {
+        "task_id": "constraint-task:fnet-earlier",
+        "microsoft_project_constraint_type": 6,
+        "microsoft_project_constraint_date": "2026-09-01T17:00:00+08:00"
+      }
+    ],
+    "task_dates": [
+      {
+        "task_id": "constraint-task:seed",
+        "early_start": "2026-09-01T08:00:00+08:00",
+        "early_finish": "2026-09-01T17:00:00+08:00"
+      },
+      {
+        "task_id": "constraint-task:asap-successor",
+        "early_start": "2026-09-02T08:00:00+08:00",
+        "early_finish": "2026-09-02T12:00:00+08:00"
+      },
+      {
+        "task_id": "constraint-task:snet-later",
+        "early_start": "2026-09-03T13:00:00+08:00",
+        "early_finish": "2026-09-03T17:00:00+08:00"
+      },
+      {
+        "task_id": "constraint-task:snet-earlier",
+        "early_start": "2026-09-02T08:00:00+08:00",
+        "early_finish": "2026-09-02T12:00:00+08:00"
+      },
+      {
+        "task_id": "constraint-task:fnet-later",
+        "early_start": "2026-09-04T08:00:00+08:00",
+        "early_finish": "2026-09-04T12:00:00+08:00"
+      },
+      {
+        "task_id": "constraint-task:fnet-earlier",
+        "early_start": "2026-09-02T08:00:00+08:00",
+        "early_finish": "2026-09-02T12:00:00+08:00"
+      }
+    ]
+  },
+  "expected": {
+    "confirmation_status": "CONFIRMED_BY_MS_PROJECT",
+    "confirmed_by": "用户在 Codex 任务中确认 SNET/FNET observation",
+    "confirmed_at": "2026-08-13T15:41:21+08:00",
+    "microsoft_project_version": "16.0",
+    "task_dates": [
+      {
+        "task_id": "constraint-task:seed",
+        "early_start": "2026-09-01T08:00:00+08:00",
+        "early_finish": "2026-09-01T17:00:00+08:00"
+      },
+      {
+        "task_id": "constraint-task:asap-successor",
+        "early_start": "2026-09-02T08:00:00+08:00",
+        "early_finish": "2026-09-02T12:00:00+08:00"
+      },
+      {
+        "task_id": "constraint-task:snet-later",
+        "early_start": "2026-09-03T13:00:00+08:00",
+        "early_finish": "2026-09-03T17:00:00+08:00"
+      },
+      {
+        "task_id": "constraint-task:snet-earlier",
+        "early_start": "2026-09-02T08:00:00+08:00",
+        "early_finish": "2026-09-02T12:00:00+08:00"
+      },
+      {
+        "task_id": "constraint-task:fnet-later",
+        "early_start": "2026-09-04T08:00:00+08:00",
+        "early_finish": "2026-09-04T12:00:00+08:00"
+      },
+      {
+        "task_id": "constraint-task:fnet-earlier",
+        "early_start": "2026-09-02T08:00:00+08:00",
+        "early_finish": "2026-09-02T12:00:00+08:00"
+      }
+    ]
+  }
+}

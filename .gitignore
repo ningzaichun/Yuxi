@@ -62,6 +62,8 @@ cache
 *.nogit*
 *_private
 *.private
+beihengjing_schedule_v2.2_JSON/
+schedule_snapshot_v2.2.private.json
 # *.local* 保留用于本地配置文件
 *.local.py
 *.local.js

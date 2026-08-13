@@ -73,7 +73,6 @@
     "cpm_recalculation": {
       "allowed": false,
       "reasons": [
-        "LAG_CALENDAR_POLICY_UNSPECIFIED",
         "SUMMARY_TASK_DEPENDENCIES"
       ]
     },
@@ -5199,7 +5198,6 @@
       "cpm_recalculation": {
         "allowed": false,
         "reasons": [
-          "LAG_CALENDAR_POLICY_UNSPECIFIED",
           "SUMMARY_TASK_DEPENDENCIES"
         ]
       },

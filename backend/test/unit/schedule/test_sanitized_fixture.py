@@ -6,7 +6,6 @@ from pathlib import Path
 from scripts.sanitize_schedule_fixture import sanitize_snapshot
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
-SOURCE_PATH = REPOSITORY_ROOT / "schedule_snapshot_v2.2.json"
 FIXTURE_PATH = REPOSITORY_ROOT / "backend" / "test" / "data" / "schedule" / "schedule_v2_2_sanitized.json"
 
 
@@ -21,29 +20,20 @@ def _all_strings(value):
             yield from _all_strings(item)
 
 
-def test_committed_fixture_matches_deterministic_sanitizer() -> None:
-    source = json.loads(SOURCE_PATH.read_text(encoding="utf-8"))
+def test_committed_fixture_is_stable_under_deterministic_sanitizer() -> None:
     committed = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
 
-    assert committed == sanitize_snapshot(source)
+    assert committed == sanitize_snapshot(committed)
 
 
 def test_fixture_removes_business_names_guids_notes_and_file_identity() -> None:
-    source = json.loads(SOURCE_PATH.read_text(encoding="utf-8"))
     sanitized = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
     sanitized_strings = set(_all_strings(sanitized))
-    sensitive_values = {
-        source["project"]["project_id"],
-        source["project"]["name"],
-        source["source"]["file_name"],
-        source["source"]["sha256"],
-        *(task["name"] for task in source["tasks"]),
-        *(task["source_guid"] for task in source["tasks"]),
-        *(task["notes"] for task in source["tasks"] if task["notes"]),
-        *(resource["name"] for resource in source["resources"]),
-        *(resource["source_guid"] for resource in source["resources"]),
-        *(resource["notes"] for resource in source["resources"] if resource["notes"]),
-    }
-
-    assert sensitive_values.isdisjoint(sanitized_strings)
-    assert sanitized["statistics"] == source["statistics"]
+    assert sanitized["snapshot_id"] == "snapshot:sanitized-v2.2"
+    assert sanitized["project"]["name"] == "脱敏示例项目"
+    assert sanitized["source"]["file_name"] == "sanitized-schedule.mpp"
+    assert all(task["name"].startswith("脱敏任务-") for task in sanitized["tasks"])
+    assert all(not task["notes"] for task in sanitized["tasks"])
+    assert all(resource["name"].startswith("脱敏资源-") for resource in sanitized["resources"])
+    assert all(not resource["notes"] for resource in sanitized["resources"])
+    assert all("北横泾" not in value for value in sanitized_strings)

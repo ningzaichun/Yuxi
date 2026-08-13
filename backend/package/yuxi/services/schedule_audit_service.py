@@ -12,6 +12,7 @@ from typing import Any
 from yuxi.repositories.schedule_repository import ScheduleRepository
 from yuxi.schedule.audit.engine import audit_schedule
 from yuxi.schedule.contracts.envelope import ScheduleSnapshotSubmission
+from yuxi.schedule.contracts.dependency_decision import DependencyDecisionDraft
 from yuxi.schedule.importers.canonical_v2_2 import import_canonical_schedule_v2_2
 from yuxi.schedule.storage import SCHEDULE_BUCKET, ScheduleSnapshotStore
 from yuxi.utils.datetime_utils import utc_now_naive
@@ -33,6 +34,14 @@ class ScheduleSubmissionInProgressError(Exception):
 
 
 class ScheduleDependencyError(Exception):
+    pass
+
+
+class ScheduleDecisionConflictError(Exception):
+    pass
+
+
+class ScheduleDecisionInvalidError(Exception):
     pass
 
 
@@ -266,6 +275,148 @@ class ScheduleAuditService:
             },
         }
 
+    async def get_dependency_workbench(self, owner_uid: str, issue_id: str) -> dict[str, Any]:
+        issue, snapshot = await self._load_summary_dependency_issue(owner_uid, issue_id)
+        tasks_by_id = {task["task_id"]: task for task in snapshot["tasks"]}
+        dependency = next(
+            item for item in snapshot["dependencies"] if item["dependency_id"] == issue.object_refs[0]
+        )
+        predecessor_ids = _subtree_task_ids(tasks_by_id, dependency["predecessor_task_id"])
+        successor_ids = _subtree_task_ids(tasks_by_id, dependency["successor_task_id"])
+        predecessor_candidates = _boundary_leaf_ids(
+            tasks_by_id, snapshot["dependencies"], predecessor_ids, boundary="exit"
+        )
+        successor_candidates = _boundary_leaf_ids(
+            tasks_by_id, snapshot["dependencies"], successor_ids, boundary="entry"
+        )
+        context_ids = predecessor_ids | successor_ids
+        decision = await self._repository.get_dependency_decision(owner_uid, issue_id)
+        candidate = (
+            await self._repository.get_candidate_by_dependency_decision(owner_uid, decision.decision_id)
+            if decision and decision.status == "confirmed"
+            else None
+        )
+        return {
+            "issue": _issue_record(issue),
+            "source_dependency": dependency,
+            "predecessor": {
+                "root_task_id": dependency["predecessor_task_id"],
+                "tasks": [
+                    _workbench_task(task) for task in snapshot["tasks"] if task["task_id"] in predecessor_ids
+                ],
+                "candidate_task_ids": predecessor_candidates,
+            },
+            "successor": {
+                "root_task_id": dependency["successor_task_id"],
+                "tasks": [
+                    _workbench_task(task) for task in snapshot["tasks"] if task["task_id"] in successor_ids
+                ],
+                "candidate_task_ids": successor_candidates,
+            },
+            "direct_network": [
+                item
+                for item in snapshot["dependencies"]
+                if item["dependency_id"] != dependency["dependency_id"]
+                and (
+                    item["predecessor_task_id"] in context_ids
+                    or item["successor_task_id"] in context_ids
+                )
+            ],
+            "decision": _dependency_decision_record(decision) if decision else None,
+            "candidate": _dependency_candidate_summary(candidate) if candidate else None,
+        }
+
+    async def save_dependency_decision(
+        self, owner_uid: str, issue_id: str, draft: DependencyDecisionDraft
+    ) -> dict[str, Any]:
+        issue, snapshot = await self._load_summary_dependency_issue(owner_uid, issue_id)
+        self._validate_dependency_decision(issue, snapshot, draft, require_complete=False)
+        try:
+            record = await self._repository.save_dependency_decision(
+                owner_uid,
+                issue,
+                draft.model_dump(mode="json"),
+            )
+        except ValueError as exc:
+            raise ScheduleDecisionConflictError from exc
+        return _dependency_decision_record(record)
+
+    async def confirm_dependency_decision(self, owner_uid: str, issue_id: str) -> dict[str, Any]:
+        issue, snapshot = await self._load_summary_dependency_issue(owner_uid, issue_id)
+        record = await self._repository.get_dependency_decision(owner_uid, issue_id)
+        if record is None:
+            raise ScheduleDecisionInvalidError
+        draft = DependencyDecisionDraft.model_validate(
+            {
+                "resolution": record.resolution,
+                "predecessor_task_ids": record.predecessor_task_ids,
+                "successor_task_ids": record.successor_task_ids,
+                "dependency_type": record.dependency_type,
+                "lag_minutes": record.lag_minutes,
+                "reason": record.reason,
+            }
+        )
+        self._validate_dependency_decision(issue, snapshot, draft, require_complete=True)
+        confirmed = await self._repository.confirm_dependency_decision(owner_uid, issue_id)
+        if confirmed is None:
+            raise ScheduleDecisionInvalidError
+        return _dependency_decision_record(confirmed)
+
+    async def _load_summary_dependency_issue(
+        self, owner_uid: str, issue_id: str
+    ) -> tuple[Any, dict[str, Any]]:
+        issue = await self._repository.get_issue(owner_uid, issue_id)
+        if issue is None or issue.rule_id != "SUMMARY_TASK_DEPENDENCY" or not issue.object_refs:
+            raise ScheduleNotFoundError
+        record = await self._repository.get_ready(owner_uid, issue.schedule_snapshot_id)
+        if record is None:
+            raise ScheduleNotFoundError
+        try:
+            snapshot = json.loads((await self._store.download(record.minio_object)).decode("utf-8"))
+        except Exception as exc:
+            raise ScheduleDependencyError from exc
+        dependency_ids = {item["dependency_id"] for item in snapshot["dependencies"]}
+        if issue.object_refs[0] not in dependency_ids:
+            raise ScheduleDependencyError
+        return issue, snapshot
+
+    def _validate_dependency_decision(
+        self,
+        issue: Any,
+        snapshot: dict[str, Any],
+        draft: DependencyDecisionDraft,
+        *,
+        require_complete: bool,
+    ) -> None:
+        if draft.resolution != "replace_with_leaf_tasks":
+            if require_complete and not draft.reason.strip():
+                raise ScheduleDecisionInvalidError
+            return
+        tasks_by_id = {task["task_id"]: task for task in snapshot["tasks"]}
+        dependency = next(
+            item for item in snapshot["dependencies"] if item["dependency_id"] == issue.object_refs[0]
+        )
+        predecessor_ids = _subtree_task_ids(tasks_by_id, dependency["predecessor_task_id"])
+        successor_ids = _subtree_task_ids(tasks_by_id, dependency["successor_task_id"])
+        allowed_predecessors = set(
+            _boundary_leaf_ids(tasks_by_id, snapshot["dependencies"], predecessor_ids, boundary="exit")
+        )
+        allowed_successors = set(
+            _boundary_leaf_ids(tasks_by_id, snapshot["dependencies"], successor_ids, boundary="entry")
+        )
+        if not set(draft.predecessor_task_ids) <= allowed_predecessors or not set(
+            draft.successor_task_ids
+        ) <= allowed_successors:
+            raise ScheduleDecisionInvalidError
+        if require_complete and (
+            not draft.predecessor_task_ids
+            or not draft.successor_task_ids
+            or draft.dependency_type is None
+            or draft.lag_minutes is None
+            or not draft.reason.strip()
+        ):
+            raise ScheduleDecisionInvalidError
+
 
 def _submission_response(content_sha256: str, execution, *, idempotent_replay: bool) -> dict[str, Any]:
     result = execution.result
@@ -360,6 +511,80 @@ def _rule_context(rule_id: str) -> dict[str, str]:
         "rule_id": rule_id,
         "description": descriptions.get(rule_id, "确定性 Schedule 审查规则。"),
         "authority": "YUXI_AUDIT",
+    }
+
+
+def _subtree_task_ids(tasks_by_id: dict[str, dict[str, Any]], root_task_id: str) -> set[str]:
+    task_ids = {root_task_id}
+    while True:
+        children = {
+            task_id
+            for task_id, task in tasks_by_id.items()
+            if task["parent_task_id"] in task_ids and task_id not in task_ids
+        }
+        if not children:
+            return task_ids
+        task_ids.update(children)
+
+
+def _boundary_leaf_ids(
+    tasks_by_id: dict[str, dict[str, Any]],
+    dependencies: list[dict[str, Any]],
+    task_ids: set[str],
+    *,
+    boundary: str,
+) -> list[str]:
+    leaf_ids = {task_id for task_id in task_ids if tasks_by_id[task_id]["task_type"] != "summary"}
+    if boundary == "entry":
+        connected = {
+            item["successor_task_id"]
+            for item in dependencies
+            if item["predecessor_task_id"] in task_ids and item["successor_task_id"] in task_ids
+        }
+    else:
+        connected = {
+            item["predecessor_task_id"]
+            for item in dependencies
+            if item["predecessor_task_id"] in task_ids and item["successor_task_id"] in task_ids
+        }
+    return sorted(leaf_ids - connected)
+
+
+def _workbench_task(task: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "task_id": task["task_id"],
+        "parent_task_id": task["parent_task_id"],
+        "name": task["name"],
+        "wbs": task["wbs"],
+        "outline_level": task["outline_level"],
+        "task_type": task["task_type"],
+    }
+
+
+def _dependency_decision_record(record: Any) -> dict[str, Any]:
+    return {
+        "decision_id": record.decision_id,
+        "issue_id": record.issue_id,
+        "schedule_snapshot_id": record.schedule_snapshot_id,
+        "status": record.status,
+        "resolution": record.resolution,
+        "predecessor_task_ids": record.predecessor_task_ids,
+        "successor_task_ids": record.successor_task_ids,
+        "dependency_type": record.dependency_type,
+        "lag_minutes": record.lag_minutes,
+        "reason": record.reason,
+        "created_at": record.created_at,
+        "updated_at": record.updated_at,
+        "confirmed_at": record.confirmed_at,
+    }
+
+
+def _dependency_candidate_summary(record: Any) -> dict[str, Any]:
+    return {
+        "candidate_snapshot_id": record.candidate_snapshot_id,
+        "candidate_status": record.candidate_status,
+        "candidate_kind": record.candidate_kind,
+        "created_at": record.created_at,
     }
 
 

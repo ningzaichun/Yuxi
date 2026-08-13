@@ -5,11 +5,11 @@ from __future__ import annotations
 import hashlib
 import json
 import uuid
+from argparse import ArgumentParser
 from pathlib import Path
 from typing import Any
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
-SOURCE_PATH = REPOSITORY_ROOT / "schedule_snapshot_v2.2.json"
 FIXTURE_PATH = REPOSITORY_ROOT / "backend" / "test" / "data" / "schedule" / "schedule_v2_2_sanitized.json"
 SANITIZE_NAMESPACE = uuid.UUID("b7205d95-4d0e-43a0-a156-2e2ebf8128fc")
 
@@ -57,10 +57,14 @@ def sanitize_snapshot(source: dict[str, Any]) -> dict[str, Any]:
 
 
 def main() -> None:
-    source = json.loads(SOURCE_PATH.read_text(encoding="utf-8"))
+    parser = ArgumentParser(description="从私有 Schedule Snapshot 生成可提交的脱敏回归 Fixture")
+    parser.add_argument("source", type=Path, help="私有 canonical_schedule_v2.2 JSON 路径")
+    parser.add_argument("--output", type=Path, default=FIXTURE_PATH, help="脱敏 Fixture 输出路径")
+    args = parser.parse_args()
+    source = json.loads(args.source.read_text(encoding="utf-8"))
     fixture = sanitize_snapshot(source)
-    FIXTURE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    FIXTURE_PATH.write_text(json.dumps(fixture, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(fixture, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":
