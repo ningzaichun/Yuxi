@@ -35,14 +35,14 @@
 
 ### 1. 选择提交路径
 
-推荐新调用方把已从 MPP 或其他系统提取完成、带 `schema_version` 的来源 JSON 提交到 `/api/schedule/imports`。Yuxi 根据版本选择 Adapter，保留来源原文，并生成严格 Canonical。
+推荐新调用方把已从 MPP 或其他系统提取完成、带 `schema_version` 的来源 JSON 提交到 `/api/schedule/imports`。Yuxi 根据版本选择 Adapter，保存来源 JSON 数据语义副本，并生成严格 Canonical。保存的来源对象不是原始 HTTP 请求字节，空白、缩进和对象字段顺序不会保留。
 
 已经能够稳定生成完整 `canonical_schedule_v2.2` 的调用方，可以继续使用 `/api/schedule/snapshots`。Canonical 结构契约以 Pydantic 模型和随代码导出的 JSON Schema 为准：
 
 - 模型：`backend/package/yuxi/schedule/contracts/canonical_v2_2.py`
 - Schema：`backend/package/yuxi/schedule/contracts/schemas/canonical_schedule_v2_2.schema.json`
 
-两种入口都要求日期时间包含时区偏移、ID 唯一、引用存在且父子层级不成环。单次最多 5,000 个任务和 25,000 条依赖，请求正文最大 10 MiB。来源 JSON 可以包含未定义字段，内部 Canonical 仍严格禁止未知字段。
+两种入口都要求日期时间包含时区偏移，Task、Dependency、Calendar 等对象主 ID 唯一，引用存在且父子层级不成环。单次最多 5,000 个任务和 25,000 条依赖，请求正文最大 10 MiB。来源 JSON 可以包含未定义字段，内部 Canonical 仍严格禁止未知字段。
 
 ### 2A. 提交版本化来源 JSON
 
@@ -66,7 +66,9 @@ Content-Type: application/json
 
 `document` 必须是完整来源文档。当前只注册水泵站协议回归使用的 `microsoft_project_interchange_mock_v1.1`；它不是任意 Microsoft Project 文件的通用格式。详细契约、固定结果和测试命令见[排期外部 JSON 导入指南](./schedule-import-guide.md)。
 
-Import 幂等同时检查来源哈希和 Canonical 哈希。同一 `request_id` 的来源原文发生任何变化都会返回 `409`，即使变化字段没有进入 Canonical。首次成功为 `201`，相同来源重放为 `200`。
+Import 幂等同时检查来源哈希和 Canonical 哈希。同一 `request_id` 的来源 JSON 数据语义发生变化会返回 `409`，即使变化字段没有进入 Canonical；仅改变空白、缩进或对象字段顺序不会改变来源哈希。首次成功为 `201`，相同来源重放为 `200`。
+
+当前实现尚未把 `external_project_id`、`external_snapshot_id` 和 `external_revision` 纳入内容冲突判断。相同 `request_id` 只改变这些信封身份时，服务可能重放旧记录。调用方重试必须保持整个信封一致；任何外部身份或版本变化都必须使用新的 `request_id`。在服务端修复前，不得把成功重放视为信封身份一致性已经验证。
 
 ### 2B. 直接提交 Canonical Snapshot
 
@@ -104,12 +106,14 @@ Content-Type: application/json
 
 直接 Canonical 入口的内容哈希只基于通过校验后的 `snapshot`，不包含请求信封字段，也不信任来源 `source.sha256` 作为幂等依据。
 
+Import 入口同样不把信封身份写入来源或 Canonical 内容哈希。`document.source.mpp_sha256` 是外部声明且不会由 Yuxi 复算；`source_document_sha256` 是来源 `document` 的排序紧凑 JSON 哈希；`canonical_snapshot_sha256` 是 Adapter 输出的严格 Canonical 哈希。
+
 ### 3. 在页面查看结果
 
 登录后从左侧导航进入“排期审查”：
 
 1. 在左侧选择来源快照；
-2. 对 Import 快照先查看“外部接入、来源审查、CPM 重算”三个独立状态；
+2. 对 Import 快照先查看“外部接入、来源审查、CPM 重算”三个独立状态；来源审查只审查 Adapter 生成的 Canonical，不证明 MPP 提取过程可信；
 3. 查看来源版本、Adapter 版本和规范化摘要；页面只显示字段数量和 unsupported 原因，不显示未知字段值；
 4. 查看任务、依赖、开放起点/终点和日期检查统计；
 5. 查看 Capability。Capability 阻断和 Issue 严重等级是两个维度；
@@ -118,6 +122,8 @@ Content-Type: application/json
 8. 点击“Agent 解释”进入具备两个 Schedule 工具的智能体。
 
 页面不编辑或应用来源计划。符合最小 CPM Profile 的来源可生成只读重算 Candidate；范围外输入只展示结构化阻断原因。
+
+Capability 决定某项 Yuxi 能力是否允许，normalization report 只描述字段处置。若两者矛盾，应停止验收并记录缺陷；不得用 report 中单个 unsupported 条目覆盖 Capability，也不得忽略 Capability 的阻断原因。
 
 ### 4. 生成受限 CPM 重算 Candidate
 
@@ -250,7 +256,7 @@ Agent 只能读取已持久化的 Yuxi Audit 和 Issue。它不能自行计算�
 }
 ```
 
-错误路径使用 JSON Pointer，响应和日志不会回显无效输入值、Notes 或完整计划正文。Import 契约错误使用 `/document/...` 路径，并区分 `SCHEDULE_IMPORT_CONTRACT_INVALID`、`SCHEDULE_IMPORT_VERSION_UNSUPPORTED` 和 `SCHEDULE_IMPORT_SEMANTICS_UNSUPPORTED`。
+错误路径使用 JSON Pointer，响应和日志不会回显 Notes 或完整计划正文。部分结构错误消息可能包含用于定位的对象 ID；对象 ID 不应承载密码、Token 或其他敏感值。Import 契约错误使用 `/document/...` 路径，并区分 `SCHEDULE_IMPORT_CONTRACT_INVALID`、`SCHEDULE_IMPORT_VERSION_UNSUPPORTED` 和 `SCHEDULE_IMPORT_SEMANTICS_UNSUPPORTED`。
 
 ## 数据存储与恢复
 
@@ -267,7 +273,7 @@ Import 的来源文档与规范化 Snapshot 分别保存到私有 MinIO Bucket `
 {owner_uid}/{schedule_snapshot_id}/snapshot.json
 ```
 
-直接 Canonical 提交只保存 `snapshot.json`。该 Bucket 不生成公开 URL；普通用户接口不返回来源原文或对象路径。Source Snapshot 在应用层不可变，审查流程不会原地修改它。
+直接 Canonical 提交只保存 `snapshot.json`。该 Bucket 不生成公开 URL；普通用户接口不返回外部来源对象正文或对象路径。Import 的 `source-document.json` 是来源 JSON 数据语义副本，`snapshot.json` 是 Adapter 生成并供 Yuxi 使用的严格 Canonical；两者都不是 MPP 文件。Canonical Source Snapshot 在应用层不可变，审查流程不会原地修改它。
 
 提交状态：
 
@@ -305,6 +311,8 @@ pnpm build
 
 涉及真实 PostgreSQL、MinIO 和 HTTP 时，应按本地开发指南启动 API/Web，并运行 Schedule 集成测试。
 
+当前 Schedule 集成测试尚未统一自动清理数据库快照和 MinIO 对象，只能在隔离的开发测试环境运行。执行后应按本次测试用户和 Snapshot ID 清理 `source-document.json`、`snapshot.json` 及数据库记录；E2E 用例自带清理流程。不得在共享生产基础设施运行这些测试。
+
 ## 常见问题
 
 ### 提交返回 422
@@ -314,6 +322,8 @@ pnpm build
 ### 相同 request_id 返回 409
 
 调用方重复使用了同一用户下的幂等键，但来源文档或 Snapshot 内容发生变化，或者在 `/imports` 与 `/snapshots` 之间交叉复用了键。不要覆盖旧请求；为新的业务提交生成新的 `request_id`。
+
+仅改变 `external_project_id`、`external_snapshot_id` 或 `external_revision` 当前不一定返回 `409`，而可能得到旧记录的幂等重放。排障时必须同时核对响应中的 Snapshot ID 和数据库内已保存的外部身份。
 
 ### 页面看不到刚提交的记录
 

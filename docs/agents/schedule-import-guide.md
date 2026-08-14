@@ -28,6 +28,17 @@ microsoft_project_interchange_mock_v1.1
 
 它用于当前水泵站案例及对应协议回归，不代表已经支持任意 Microsoft Project 文件。新增真实来源格式时，必须注册独立 `schema_version` 和版本化 Adapter，不能把不同结构伪装成当前 mock 版本。
 
+### 1.1 当前契约的事实来源
+
+当前 Import 契约仍是项目内部、面向 mock 协议回归的实现契约，尚未冻结为可长期兼容的对外标准。事实来源按以下顺序判断：
+
+1. Pydantic 模型：`backend/package/yuxi/schedule/contracts/import_v1.py`；
+2. Adapter：`backend/package/yuxi/schedule/importers/microsoft_project_interchange_v1_1.py`；
+3. 水泵站完整样例及 `manifest.json`；
+4. 本指南中的业务边界说明。
+
+当前没有单独发布稳定的 Import JSON Schema。外部团队在正式对接前，必须先与 Yuxi 维护者冻结来源版本、必填字段、枚举、语义映射和兼容策略；不能只复制水泵站样例后自行扩展并视为长期协议。
+
 ## 2. 两种提交方式
 
 ### 2.1 推荐：提交版本化来源 JSON
@@ -63,6 +74,18 @@ Microsoft_Project_水泵站排期_MOCK_v1.1/
   README.md
 ```
 
+信封字段的用途：
+
+| 字段 | 必填 | 用途 |
+| --- | --- | --- |
+| `request_id` | 是 | 当前用户下的幂等键 |
+| `external_project_id` | 是 | 外部系统中的稳定项目身份，用于版本归组 |
+| `external_snapshot_id` | 是 | 外部系统中的来源快照身份 |
+| `external_revision` | 是 | 外部系统中的可读版本号 |
+| `document` | 是 | 带 `schema_version` 的完整来源 JSON |
+
+当前 mock 来源文档至少包含 `source`、`semantics`、`project`、`calendars`、`tasks` 和 `dependencies`；`statistics`、`capabilities`、`validation` 只是来源自报信息，不作为 Yuxi 结论。完整嵌套字段、枚举和限制以 Pydantic 模型为准。
+
 来源文档允许未定义字段，但必须满足以下规则：
 
 - `schema_version` 必须存在且为非空字符串；
@@ -72,6 +95,8 @@ Microsoft_Project_水泵站排期_MOCK_v1.1/
 - 未定义字段会保存在私有来源对象中，但不会自动参与 Audit 或 CPM；
 - 来源自报 Statistics、Capabilities 和 Validation 不作为 Yuxi 结论。
 
+通过上述契约只代表“JSON 结构可被当前 Adapter 处理”，不代表 MPP 提取过程已经可信，也不代表每个已定义字段都已参与计算。当前 mock Adapter 不会独立验证 MPP 文件、COM 提取过程或 `opened_after_save`、`project_recalculated_after_reopen` 等提取证据；这些事实仍由外部转换服务和案例 manifest 负责。不得把 `source_fidelity_valid` 或“来源审查允许”单独作为 MPP 与 JSON 一致的证明。
+
 ### 2.2 兼容：直接提交严格 Canonical
 
 已经能够稳定生成完整 `canonical_schedule_v2.2` 的调用方，可以继续使用：
@@ -80,7 +105,7 @@ Microsoft_Project_水泵站排期_MOCK_v1.1/
 POST /api/schedule/snapshots
 ```
 
-该入口保持严格，不允许未知字段，也不经过来源 Adapter。不要为了让外部文档通过校验而把所有来源扩展字段塞进 Canonical；需要保留来源原文时应使用 `/imports`。
+该入口保持严格，不允许未知字段，也不经过来源 Adapter。不要为了让外部文档通过校验而把所有来源扩展字段塞进 Canonical；需要保留来源 JSON 数据语义副本及扩展字段时应使用 `/imports`。
 
 ## 3. 成功响应与三种状态
 
@@ -107,11 +132,13 @@ POST /api/schedule/snapshots
 
 必须分别判断三种状态：
 
-1. **外部接入成功**：来源 JSON 已校验、适配并保存；
-2. **来源审查允许**：Yuxi 能基于内部 Canonical 执行确定性 Audit；
+1. **外部接入成功**：来源 JSON 已通过当前契约、完成适配并保存；它不证明 MPP 提取正确；
+2. **来源审查允许**：Yuxi 能基于 Adapter 生成的内部 Canonical 执行确定性 Audit；它不审查外部提取程序本身；
 3. **CPM 重算允许**：当前完整语义落在受支持的 CPM Profile 内。
 
 接入成功不等于全部来源字段都参与了审查，也不等于 CPM 可以运行。页面中的“外部 JSON 接入边界”会独立显示三个状态。
+
+Capability 是“是否允许执行某项 Yuxi 能力”的事实来源；normalization report 只说明字段如何保留、忽略或标记为 unsupported。两者出现矛盾时必须停止验收并记录缺陷，不能任选一个有利结论继续。当前 mock Adapter 的报告仍需补齐条件化一致性验证，因此不能仅凭 `unsupported_semantics` 列表判断 CPM 是否允许。
 
 ## 4. 幂等、双对象和双哈希
 
@@ -122,6 +149,8 @@ POST /api/schedule/snapshots
 - 即使两个不同来源文档生成相同 Canonical，只要来源哈希不同，仍视为冲突；
 - `/imports` 和 `/snapshots` 不能交叉复用同一个 `request_id`。
 
+当前实现只用来源哈希和 Canonical 哈希判断内容冲突，`external_project_id`、`external_snapshot_id`、`external_revision` 单独变化时不会触发 `409`，而可能重放旧记录。调用方重试时必须保持整个信封完全一致；任何外部身份或版本变化都必须使用新的 `request_id`。该限制尚待服务端收紧，不能把成功重放解释为信封身份已经校验一致。
+
 私有对象存储中分别保存：
 
 ```text
@@ -129,7 +158,15 @@ POST /api/schedule/snapshots
 {owner_uid}/{schedule_snapshot_id}/snapshot.json
 ```
 
-`source_document_sha256` 用于来源追溯和导入幂等，`canonical_snapshot_sha256` 用于内部版本、Audit 和 Candidate。普通用户接口不会返回 `source-document.json` 原文或对象路径。
+三个容易混淆的哈希：
+
+| 字段 | 实际含义 |
+| --- | --- |
+| `document.source.mpp_sha256` | 外部转换服务声明的 MPP 文件哈希；Yuxi 当前不会读取 MPP，因此不会独立复算 |
+| `source_document_sha256` | Yuxi 对 `document` 解析后按键排序、紧凑序列化得到的 JSON 字节计算的哈希 |
+| `canonical_snapshot_sha256` | Adapter 生成的严格 Canonical JSON 哈希，用于 Audit、Candidate 和内部版本比较 |
+
+`source-document.json` 保存的是来源 `document` 的 JSON 数据语义副本，不是原始 HTTP 请求字节；空白、缩进和对象字段顺序不会保留。普通用户接口不会返回该对象正文或对象路径。
 
 ## 5. 当前水泵站案例的预期结果
 
@@ -147,7 +184,7 @@ POST /api/schedule/snapshots
 | CPM 重算 | 阻断，原因 `MILESTONE_UNSUPPORTED` |
 | 资源能力 | 阻断，来源没有 Assignment |
 
-水泵站案例验证的是导入、规范化、Audit 和阻断行为。由于包含 4 个零工期里程碑，它不用于验证当前 CPM 成功主路径。
+水泵站案例验证的是该固定样例的导入、规范化、Audit 和阻断行为。它的 manifest 记录了 MPP、JSON 和观测文件哈希，但 Yuxi 导入接口本身不会复算 MPP 哈希。由于包含 4 个零工期里程碑，它不用于验证当前 CPM 成功主路径，也不能覆盖提取证据为 false、无里程碑或外部身份变化等负向边界。
 
 ## 6. 推荐测试流程
 
@@ -161,6 +198,8 @@ POST /api/schedule/snapshots
 
 重点验证缺少必填字段失败、未知字段保留、未知引用和父子环拒绝、适配结果确定性，以及来源声明不参与 Yuxi 结论。
 
+正式扩展来源格式前还必须补充：提取证据为 false、来源类型码与关系类型不一致、日历解析策略不一致、无里程碑时报告条件化、同一请求改变信封身份等回归。当前固定水泵站测试通过不代表这些边界已经验证。
+
 ### 6.2 真实 API、PostgreSQL 和 MinIO
 
 ```powershell
@@ -168,6 +207,8 @@ POST /api/schedule/snapshots
 ```
 
 Import 用例覆盖首次 `201`、重放 `200`、冲突 `409`、双对象、双哈希、用户隔离和来源对象私有访问。
+
+当前集成测试会写入真实开发用 PostgreSQL 和 MinIO，但尚未统一自动清理 Schedule 快照与对象。只能在隔离的开发测试环境运行；运行后应由维护者按本次测试用户和 Snapshot ID 清理双对象及数据库记录，禁止在共享生产基础设施直接执行。E2E 用例已有自己的清理流程。
 
 ### 6.3 Import 到 Agent 端到端测试
 
@@ -184,7 +225,7 @@ Import 用例覆盖首次 `201`、重放 `200`、冲突 `409`、双对象、双�
 3. 确认“外部接入”为已接入；
 4. 确认“来源审查”为允许；
 5. 确认“CPM 重算”为阻断且原因是 `MILESTONE_UNSUPPORTED`；
-6. 核对 preserved、ignored 和 unsupported 的数量；
+6. 核对 preserved、ignored 和 unsupported 的数量，并确认 Capability 与报告没有矛盾；
 7. 确认页面没有展示来源未知字段值；
 8. 点击“Agent 解释”，确认只生成草稿且不会自动发送。
 
@@ -200,7 +241,7 @@ Import 用例覆盖首次 `201`、重放 `200`、冲突 `409`、双对象、双�
 | 409 | `SCHEDULE_SUBMISSION_IN_PROGRESS` | 相同请求仍在处理中，稍后原样重试 |
 | 500 | `SCHEDULE_DEPENDENCY_FAILURE` | PostgreSQL 或 MinIO 保存失败；使用同一请求重试 |
 
-错误路径使用 JSON Pointer，例如 `/document/project/default_calendar_id`。响应和日志不会回显无效输入值或完整来源正文。
+错误路径使用 JSON Pointer，例如 `/document/project/default_calendar_id`。响应和日志不会回显完整来源正文；部分结构错误消息可能包含用于定位的 Task、Dependency 或 Calendar ID，因此这些 ID 不应承载密码、Token 或其他敏感值。
 
 ## 8. 回写 MPP 的责任边界
 
@@ -217,7 +258,7 @@ Yuxi 当前不会生成或修改 MPP。后续如需把 Delivery 写回 Microsoft
 
 ## 9. 安全与发布边界
 
-- 来源原文只保存在私有对象存储，不提供普通用户读取接口；
+- 来源 JSON 数据语义副本只保存在私有对象存储，不提供普通用户读取接口；
 - 页面只显示扩展字段数量、原因代码和影响对象数量，不显示未知字段值；
 - 日志不得记录 Token、来源全文、Notes 或未知字段值；
 - 当前 mock Adapter 和单个水泵站案例不代表任意 Microsoft Project 项目可生产接入；
