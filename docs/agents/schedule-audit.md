@@ -1,14 +1,15 @@
 # 排期审查模块操作与维护手册
 
-排期审查模块用于接收业务系统转换后的 `canonical_schedule_v2.2`，保存不可变来源快照，并由 Yuxi 独立执行确定性审查。它不会修改来源计划，也不会把来源转换器的 Validation 当作 Yuxi 审查结论。
+排期审查模块既可以接收带 `schema_version` 的外部来源 JSON 并适配为严格 `canonical_schedule_v2.2`，也兼容调用方直接提交完整 Canonical。Yuxi 保存不可变来源证据并独立执行确定性审查，不会修改来源计划，也不会把来源转换器的 Validation 当作 Yuxi 审查结论。
 
-业务用户、测试人员和试点组织者请优先阅读[排期审查与 CPM 重算用户及测试手册](./schedule-cpm-user-guide.md)；本文侧重接口、契约、门禁和运维维护。
+外部系统接入请先阅读[排期外部 JSON 导入指南](./schedule-import-guide.md)；业务用户、测试人员和试点组织者请阅读[排期审查与 CPM 重算用户及测试手册](./schedule-cpm-user-guide.md)。本文侧重接口、契约、门禁和运维维护。
 
 ## 能力边界
 
 当前版本支持：
 
 - 幂等提交、查询和隔离排期快照；
+- 对已注册来源版本执行边界校验、Adapter 规范化、双对象存储和双哈希追溯；
 - 任务层级、依赖网络、零 Lag 日期关系和管理完整性审查；
 - Statistics、Capability、Issue、证据和直接上下游查看；
 - 对单一统一项目日历、FS/SS/FF/SF 零/正 Lag、ASAP/SNET/FNET、手工/locked 活动任务执行正向和反向计算，自底向上滚动汇总任务日期，输出总浮时、自由浮时和关键标识，并生成只读 Candidate；
@@ -19,10 +20,10 @@
 - 计算负 Lag 日期关系；
 - 负 Lag、多日历、日历例外、非法约束组合或实际进度的重算；
 - 自动修改任务日期、依赖、日历或约束；
-- 资源均衡、成本优化或 MPP 回写；
+- 在 Yuxi 内直接解析 MPP/XML，或执行资源均衡、成本优化和 MPP 回写；
 - 把 Candidate 直接应用为生效计划。
 
-因此，审查结果中的“68 条已检查、22 条未检查”不能表述成“90 条依赖全部验证通过”。
+因此，审查结果中的“已检查”和“未检查”必须分别陈述。例如水泵站 Import 案例为 16 条 checked、3 条 skipped，不能表述成“19 条依赖全部验证通过”。
 
 ## 角色与数据归属
 
@@ -32,16 +33,42 @@
 
 ## 业务操作流程
 
-### 1. 在业务系统生成 Canonical Snapshot
+### 1. 选择提交路径
 
-业务系统或转换服务先把来源计划转换为 `canonical_schedule_v2.2`。结构契约以 Pydantic 模型和随代码导出的 JSON Schema 为准：
+推荐新调用方把已从 MPP 或其他系统提取完成、带 `schema_version` 的来源 JSON 提交到 `/api/schedule/imports`。Yuxi 根据版本选择 Adapter，保留来源原文，并生成严格 Canonical。
+
+已经能够稳定生成完整 `canonical_schedule_v2.2` 的调用方，可以继续使用 `/api/schedule/snapshots`。Canonical 结构契约以 Pydantic 模型和随代码导出的 JSON Schema 为准：
 
 - 模型：`backend/package/yuxi/schedule/contracts/canonical_v2_2.py`
 - Schema：`backend/package/yuxi/schedule/contracts/schemas/canonical_schedule_v2_2.schema.json`
 
-日期时间必须包含时区偏移。Task、Dependency、Calendar 和 Resource ID 必须唯一，引用必须存在，任务父子层级不能成环。单次最多 5,000 个任务和 25,000 条依赖，请求正文最大 10 MiB。
+两种入口都要求日期时间包含时区偏移、ID 唯一、引用存在且父子层级不成环。单次最多 5,000 个任务和 25,000 条依赖，请求正文最大 10 MiB。来源 JSON 可以包含未定义字段，内部 Canonical 仍严格禁止未知字段。
 
-### 2. 提交来源快照
+### 2A. 提交版本化来源 JSON
+
+```http
+POST /api/schedule/imports
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+```json
+{
+  "request_id": "schedule-import-20260814-001",
+  "external_project_id": "project-001",
+  "external_snapshot_id": "project-001-v1.1",
+  "external_revision": "v1.1",
+  "document": {
+    "schema_version": "microsoft_project_interchange_mock_v1.1"
+  }
+}
+```
+
+`document` 必须是完整来源文档。当前只注册水泵站协议回归使用的 `microsoft_project_interchange_mock_v1.1`；它不是任意 Microsoft Project 文件的通用格式。详细契约、固定结果和测试命令见[排期外部 JSON 导入指南](./schedule-import-guide.md)。
+
+Import 幂等同时检查来源哈希和 Canonical 哈希。同一 `request_id` 的来源原文发生任何变化都会返回 `409`，即使变化字段没有进入 Canonical。首次成功为 `201`，相同来源重放为 `200`。
+
+### 2B. 直接提交 Canonical Snapshot
 
 请求：
 
@@ -75,18 +102,20 @@ Content-Type: application/json
 
 `creating` 使用 60 秒执行租约。若 API 进程在上传或最终落库前异常退出，同一请求在租约到期后可接管原 Snapshot ID；正常的并发请求不会重复上传。HTTP 请求被主动取消时会立即释放租约并标记为 `failed`。
 
-Yuxi 的内容哈希只基于通过校验后的 `snapshot`，不包含请求信封字段，也不信任来源 `source.sha256` 作为幂等依据。
+直接 Canonical 入口的内容哈希只基于通过校验后的 `snapshot`，不包含请求信封字段，也不信任来源 `source.sha256` 作为幂等依据。
 
 ### 3. 在页面查看结果
 
 登录后从左侧导航进入“排期审查”：
 
 1. 在左侧选择来源快照；
-2. 查看任务、依赖、开放起点/终点和日期检查统计；
-3. 查看 Capability。Capability 阻断和 Issue 严重等级是两个维度；
-4. 按等级或分类过滤 Issue；
-5. 点击“证据”查看对象、确定性证据和直接上下游；
-6. 点击“Agent 解释”进入具备两个 Schedule 工具的智能体。
+2. 对 Import 快照先查看“外部接入、来源审查、CPM 重算”三个独立状态；
+3. 查看来源版本、Adapter 版本和规范化摘要；页面只显示字段数量和 unsupported 原因，不显示未知字段值；
+4. 查看任务、依赖、开放起点/终点和日期检查统计；
+5. 查看 Capability。Capability 阻断和 Issue 严重等级是两个维度；
+6. 按等级或分类过滤 Issue；
+7. 点击“证据”查看对象、确定性证据和直接上下游；
+8. 点击“Agent 解释”进入具备两个 Schedule 工具的智能体。
 
 页面不编辑或应用来源计划。符合最小 CPM Profile 的来源可生成只读重算 Candidate；范围外输入只展示结构化阻断原因。
 
@@ -147,12 +176,12 @@ FS 正 Lag 和 ASAP 自动任务，Lag 按项目日历的工作分钟推进；Mi
 页面进入 Agent 后只预填以下消息，不会自动发送：
 
 ```text
-请解释排期审查问题 issue_id=<issue-id>，并说明证据、影响和需要工程人员确认的事项。
+请解释排期审查问题 issue_id=<issue-id>，并说明证据、影响和需要工程人员确认的事项。只能依据 Schedule 工具返回的 YUXI_AUDIT 事实；不得把来源 Validation，或 normalization report 中 ignored/unsupported 的字段描述成已参与审查或计算。
 ```
 
 用户发送或清空预填内容后，页面会移除 URL 中的 `agent_id` 与 `schedule_issue_id`，避免刷新后重复消费。
 
-Agent 只能读取已持久化的 Yuxi Audit 和 Issue。它不能自行计算日期、关键路径或 Patch，也不能把来源 Validation 描述成 Yuxi 结论。
+Agent 只能读取已持久化的 Yuxi Audit 和 Issue。它不能自行计算日期、关键路径或 Patch，也不能把来源 Validation 或 ignored/unsupported 字段描述成已参与 Yuxi 审查或计算。
 
 ## 审查规则
 
@@ -193,6 +222,7 @@ Agent 只能读取已持久化的 Yuxi Audit 和 Issue。它不能自行计算�
 
 | 方法 | 路径 | 用途 |
 |---|---|---|
+| POST | `/api/schedule/imports` | 校验版本化来源 JSON，经 Adapter 生成 Canonical 并审查 |
 | POST | `/api/schedule/snapshots` | 提交并审查 Snapshot |
 | GET | `/api/schedule/snapshots` | 分页列出当前用户的 ready Snapshot |
 | GET | `/api/schedule/snapshots/{id}` | 读取 Snapshot 元数据和规范化正文 |
@@ -220,23 +250,24 @@ Agent 只能读取已持久化的 Yuxi Audit 和 Issue。它不能自行计算�
 }
 ```
 
-错误路径使用 JSON Pointer，响应和日志不会回显无效输入值、Notes 或完整计划正文。
+错误路径使用 JSON Pointer，响应和日志不会回显无效输入值、Notes 或完整计划正文。Import 契约错误使用 `/document/...` 路径，并区分 `SCHEDULE_IMPORT_CONTRACT_INVALID`、`SCHEDULE_IMPORT_VERSION_UNSUPPORTED` 和 `SCHEDULE_IMPORT_SEMANTICS_UNSUPPORTED`。
 
 ## 数据存储与恢复
 
 PostgreSQL 表：
 
-- `schedule_snapshots`：归属、幂等键、内容哈希、对象地址和提交状态；
+- `schedule_snapshots`：归属、幂等键、Canonical 哈希、来源版本、Adapter、来源哈希、规范化报告、对象地址和提交状态；
 - `schedule_audit_runs`：规则集、独立统计、Capability 和 Issue 摘要；
 - `schedule_issues`：稳定 `issue_key`、证据、对象、消息和排序键。
 
-规范化 Snapshot 保存到私有 MinIO Bucket `schedule-snapshots`：
+Import 的来源文档与规范化 Snapshot 分别保存到私有 MinIO Bucket `schedule-snapshots`：
 
 ```text
+{owner_uid}/{schedule_snapshot_id}/source-document.json
 {owner_uid}/{schedule_snapshot_id}/snapshot.json
 ```
 
-该 Bucket 不生成公开 URL。Source Snapshot 在应用层不可变，审查流程不会原地修改它。
+直接 Canonical 提交只保存 `snapshot.json`。该 Bucket 不生成公开 URL；普通用户接口不返回来源原文或对象路径。Source Snapshot 在应用层不可变，审查流程不会原地修改它。
 
 提交状态：
 
@@ -259,6 +290,8 @@ cd backend
 & '.venv\Scripts\python.exe' scripts/export_schedule_schema.py
 & '.venv\Scripts\python.exe' scripts/sanitize_schedule_fixture.py
 & '.venv\Scripts\python.exe' -m pytest test/unit/schedule test/unit/toolkits/schedule -q
+& '.venv\Scripts\python.exe' -m pytest test/integration/api/test_schedule_router.py
+& '.venv\Scripts\python.exe' -m pytest test/e2e/test_schedule_audit_agent_e2e.py -m e2e
 & '.venv\Scripts\python.exe' -m ruff check package/yuxi/schedule package/yuxi/repositories/schedule_repository.py package/yuxi/services/schedule_audit_service.py server/routers/schedule_router.py
 ```
 
@@ -276,11 +309,11 @@ pnpm build
 
 ### 提交返回 422
 
-按 `detail.errors[].path` 定位字段。重点检查时区、枚举、重复 ID、丢失引用、父子环和数组规模。422 不会创建 Snapshot。
+按 `detail.errors[].path` 定位字段。Import 先检查 `/document/schema_version` 和当前 Adapter 的来源契约；直接 Canonical 提交检查 `/snapshot/...`。重点检查时区、枚举、重复 ID、丢失引用、父子环和数组规模。422 不会创建 Snapshot。
 
 ### 相同 request_id 返回 409
 
-调用方重复使用了同一用户下的幂等键，但 Snapshot 内容发生变化。不要覆盖旧请求；为新的业务提交生成新的 `request_id`。
+调用方重复使用了同一用户下的幂等键，但来源文档或 Snapshot 内容发生变化，或者在 `/imports` 与 `/snapshots` 之间交叉复用了键。不要覆盖旧请求；为新的业务提交生成新的 `request_id`。
 
 ### 页面看不到刚提交的记录
 
@@ -337,7 +370,7 @@ cd backend
 
 ### 为什么 blocker 仍可查看 Snapshot
 
-`blocker` 阻断具体计算能力，不等于整个 Snapshot 无法保存。只要外部契约边界有效，甘特展示和来源排期审查仍可允许。
+`blocker` 阻断具体计算能力，不等于整个 Snapshot 无法保存。Import 接入成功、来源审查允许和 CPM 允许是三个独立状态；水泵站案例可以成功接入并允许来源审查，同时因里程碑返回 `MILESTONE_UNSUPPORTED`。
 
 ## 后续候选方案约束
 
