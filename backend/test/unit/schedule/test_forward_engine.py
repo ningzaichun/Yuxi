@@ -11,6 +11,7 @@ from yuxi.schedule.contracts.canonical_v2_2 import CanonicalScheduleV22
 from scripts.verify_schedule_golden_case import _build_canonical_source, evaluate_golden_gate
 from yuxi.schedule.forward_engine import (
     ENGINE_PROFILE_ID,
+    REVERSE_FLOAT_ENGINE_PROFILE_ID,
     SUMMARY_ROLLUP_ENGINE_PROFILE_ID,
     UnifiedWorkCalendar,
     calculate_minimal_forward_schedule,
@@ -30,6 +31,12 @@ MANUAL_LOCKED_CASE_PATH = (
 )
 SUMMARY_ROLLUP_CASE_PATH = (
     Path(__file__).resolve().parents[2] / "data" / "schedule" / "microsoft_project_s4_summary_rollup_golden_case.json"
+)
+REVERSE_FLOAT_CASE_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "data"
+    / "schedule"
+    / "microsoft_project_s4_reverse_float_critical_golden_case.json"
 )
 
 
@@ -101,6 +108,13 @@ def test_work_calendar_moves_across_lunch_weekend_and_non_working_time() -> None
     assert calendar.subtract_working_minutes(
         datetime.fromisoformat("2026-09-03T10:00:00+08:00"), 240
     ) == datetime.fromisoformat("2026-09-02T15:00:00+08:00")
+    assert (
+        calendar.working_minutes_between(
+            datetime.fromisoformat("2026-09-02T12:00:00+08:00"),
+            datetime.fromisoformat("2026-09-03T12:00:00+08:00"),
+        )
+        == 480
+    )
 
 
 def test_forward_engine_calculates_fs_chain_and_latest_predecessor_without_mutating_source() -> None:
@@ -193,6 +207,62 @@ def test_forward_engine_rolls_up_nested_summaries_without_using_source_summary_d
     assert dates["task:1"]["early_finish"] == dates["task:2"]["early_finish"]
     assert dates["task:1"]["summary"] is True
     assert source.model_dump(mode="json") == before
+
+
+def test_forward_engine_matches_confirmed_reverse_float_and_critical_results() -> None:
+    case = json.loads(REVERSE_FLOAT_CASE_PATH.read_text(encoding="utf-8"))
+
+    result = evaluate_golden_gate(case)
+
+    assert result["gate_status"] == "PASSED"
+    assert result["external_observation_status"] == "PASSED"
+    assert result["engine_profile_id"] == REVERSE_FLOAT_ENGINE_PROFILE_ID
+
+
+def test_reverse_float_profile_inherits_all_confirmed_forward_and_rollup_dates() -> None:
+    for case_path in (
+        POSITIVE_LAG_CASE_PATH,
+        RELATION_TYPES_CASE_PATH,
+        CONSTRAINTS_CASE_PATH,
+        MANUAL_LOCKED_CASE_PATH,
+        SUMMARY_ROLLUP_CASE_PATH,
+    ):
+        case = json.loads(case_path.read_text(encoding="utf-8"))
+        result = calculate_minimal_forward_schedule(
+            _build_canonical_source(case),
+            engine_profile_id=REVERSE_FLOAT_ENGINE_PROFILE_ID,
+        )
+        actual_dates = {item["task_id"]: item for item in result["task_dates"]}
+
+        assert result["status"] == "calculated"
+        for expected in case["expected"]["task_dates"]:
+            assert actual_dates[expected["task_id"]]["early_start"] == expected["early_start"]
+            assert actual_dates[expected["task_id"]]["early_finish"] == expected["early_finish"]
+
+
+def test_reverse_float_profile_projects_nested_summary_results() -> None:
+    case = json.loads(SUMMARY_ROLLUP_CASE_PATH.read_text(encoding="utf-8"))
+    source = _build_canonical_source(case)
+
+    result = calculate_minimal_forward_schedule(source, engine_profile_id=REVERSE_FLOAT_ENGINE_PROFILE_ID)
+
+    dates = {item["task_id"]: item for item in result["task_dates"]}
+    assert result["status"] == "calculated"
+    assert dates["task:2"]["late_start"] == min(
+        dates["task:3"]["late_start"],
+        dates["task:4"]["late_start"],
+    )
+    assert dates["task:2"]["late_finish"] == max(
+        dates["task:3"]["late_finish"],
+        dates["task:4"]["late_finish"],
+    )
+    assert dates["task:2"]["total_slack_minutes"] == min(
+        dates["task:3"]["total_slack_minutes"],
+        dates["task:4"]["total_slack_minutes"],
+    )
+    assert dates["task:2"]["critical"] is (
+        dates["task:3"]["critical"] or dates["task:4"]["critical"]
+    )
 
 
 def test_summary_rollup_profile_blocks_summary_without_direct_children() -> None:

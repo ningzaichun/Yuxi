@@ -5,7 +5,11 @@ import json
 from pathlib import Path
 
 from scripts.verify_schedule_golden_case import evaluate_external_observation, evaluate_golden_gate, load_golden_case
-from yuxi.schedule.forward_engine import ENGINE_PROFILE_ID, SUMMARY_ROLLUP_ENGINE_PROFILE_ID
+from yuxi.schedule.forward_engine import (
+    ENGINE_PROFILE_ID,
+    REVERSE_FLOAT_ENGINE_PROFILE_ID,
+    SUMMARY_ROLLUP_ENGINE_PROFILE_ID,
+)
 
 POSITIVE_LAG_CASE_PATH = (
     Path(__file__).resolve().parents[2] / "data" / "schedule" / "microsoft_project_s4_positive_lag_golden_case.json"
@@ -21,6 +25,12 @@ MANUAL_LOCKED_CASE_PATH = (
 )
 SUMMARY_ROLLUP_CASE_PATH = (
     Path(__file__).resolve().parents[2] / "data" / "schedule" / "microsoft_project_s4_summary_rollup_golden_case.json"
+)
+REVERSE_FLOAT_CASE_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "data"
+    / "schedule"
+    / "microsoft_project_s4_reverse_float_critical_golden_case.json"
 )
 
 
@@ -189,3 +199,33 @@ def test_summary_rollup_slice_is_confirmed_for_v6_profile() -> None:
     assert result["gate_status"] == "PASSED"
     assert result["external_observation_status"] == "PASSED"
     assert result["errors"] == []
+
+
+def test_reverse_float_slice_is_confirmed_for_v7_profile() -> None:
+    case = json.loads(REVERSE_FLOAT_CASE_PATH.read_text(encoding="utf-8"))
+
+    result = evaluate_golden_gate(case)
+
+    assert case["engine_profile_id"] == REVERSE_FLOAT_ENGINE_PROFILE_ID
+    assert case["external_observation"]["slack_numeric_unit"] == "working_minutes"
+    assert case["external_observation"]["independent_recapture"]["result"] == (
+        "MATCHED_ALL_TASK_DATES_SLACK_AND_CRITICAL_FIELDS"
+    )
+    assert result["gate_status"] == "PASSED"
+    assert result["external_observation_status"] == "PASSED"
+    assert result["errors"] == []
+
+
+def test_reverse_float_gate_rejects_slack_or_critical_drift() -> None:
+    case = json.loads(REVERSE_FLOAT_CASE_PATH.read_text(encoding="utf-8"))
+    case["external_observation"]["task_dates"][1]["total_slack_minutes"] = 0
+    case["external_observation"]["task_dates"][1]["critical"] = True
+
+    result = evaluate_golden_gate(case)
+
+    assert result["gate_status"] == "FAILED"
+    assert result["external_observation_status"] == "FAILED"
+    assert result["errors"] == [
+        "EXTERNAL_OBSERVATION_DATE_MISMATCH:synthetic-task:short-work:total_slack_minutes",
+        "EXTERNAL_OBSERVATION_DATE_MISMATCH:synthetic-task:short-work:critical",
+    ]

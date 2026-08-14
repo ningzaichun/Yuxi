@@ -15,6 +15,11 @@ SUMMARY_ROLLUP_ENGINE_PROFILE_ID = (
     "yuxi-forward-unified-calendar-fs-ss-ff-sf-positive-lag-snet-fnet-manual-summary-rollup-v6"
 )
 SUMMARY_ROLLUP_ENGINE_VERSION = "6.0.0"
+REVERSE_FLOAT_ENGINE_PROFILE_ID = (
+    "yuxi-forward-unified-calendar-fs-ss-ff-sf-positive-lag-snet-fnet-manual-summary-rollup-"
+    "reverse-float-critical-v7"
+)
+REVERSE_FLOAT_ENGINE_VERSION = "7.0.0"
 WEEKDAYS = ("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")
 
 
@@ -94,6 +99,23 @@ class UnifiedWorkCalendar:
             current = self._previous_working_instant(active_start)
         return current
 
+    def working_minutes_between(self, start: datetime, finish: datetime) -> int:
+        if finish < start:
+            return -self.working_minutes_between(finish, start)
+        current_date = start.astimezone(self._time_zone).date()
+        finish_date = finish.astimezone(self._time_zone).date()
+        total = 0
+        while current_date <= finish_date:
+            for interval_start, interval_finish in self._intervals_for(current_date):
+                interval_start_at = datetime.combine(current_date, interval_start, self._time_zone)
+                interval_finish_at = datetime.combine(current_date, interval_finish, self._time_zone)
+                overlap_start = max(start, interval_start_at)
+                overlap_finish = min(finish, interval_finish_at)
+                if overlap_start < overlap_finish:
+                    total += int((overlap_finish - overlap_start).total_seconds() // 60)
+            current_date += timedelta(days=1)
+        return total
+
     def _previous_working_instant(self, value: datetime) -> datetime:
         current = value.astimezone(self._time_zone)
         current_date = current.date()
@@ -123,10 +145,17 @@ def calculate_minimal_forward_schedule(
         engine_version = ENGINE_VERSION
     elif engine_profile_id == SUMMARY_ROLLUP_ENGINE_PROFILE_ID:
         engine_version = SUMMARY_ROLLUP_ENGINE_VERSION
+    elif engine_profile_id == REVERSE_FLOAT_ENGINE_PROFILE_ID:
+        engine_version = REVERSE_FLOAT_ENGINE_VERSION
     else:
         raise ValueError(f"unsupported schedule engine profile: {engine_profile_id}")
 
-    blockers = _support_blockers(source, include_summary_rollup=engine_profile_id == SUMMARY_ROLLUP_ENGINE_PROFILE_ID)
+    include_summary_rollup = engine_profile_id in {
+        SUMMARY_ROLLUP_ENGINE_PROFILE_ID,
+        REVERSE_FLOAT_ENGINE_PROFILE_ID,
+    }
+    include_reverse_float = engine_profile_id == REVERSE_FLOAT_ENGINE_PROFILE_ID
+    blockers = _support_blockers(source, include_summary_rollup=include_summary_rollup)
     if blockers:
         return _blocked_result(blockers, engine_profile_id, engine_version)
 
@@ -154,7 +183,9 @@ def calculate_minimal_forward_schedule(
         incoming[dependency.successor_task_id].append(
             (dependency.predecessor_task_id, dependency.type, dependency.lag_minutes)
         )
-        outgoing[dependency.predecessor_task_id].append(dependency.successor_task_id)
+        outgoing[dependency.predecessor_task_id].append(
+            (dependency.successor_task_id, dependency.type, dependency.lag_minutes)
+        )
         indegree[dependency.successor_task_id] += 1
 
     ready = sorted(task_id for task_id, count in indegree.items() if count == 0)
@@ -162,7 +193,7 @@ def calculate_minimal_forward_schedule(
     while ready:
         task_id = ready.pop(0)
         order.append(task_id)
-        for successor_id in sorted(outgoing[task_id]):
+        for successor_id, _, _ in sorted(outgoing[task_id]):
             indegree[successor_id] -= 1
             if indegree[successor_id] == 0:
                 ready.append(successor_id)
@@ -228,7 +259,60 @@ def calculate_minimal_forward_schedule(
             finish = required_finish
         calculated[task_id] = (start, finish)
 
-    if engine_profile_id == SUMMARY_ROLLUP_ENGINE_PROFILE_ID:
+    reverse_dates: dict[str, tuple[datetime, datetime]] = {}
+    float_values: dict[str, tuple[int, int, bool]] = {}
+    if include_reverse_float:
+        project_finish = max(finish for _, finish in calculated.values())
+        for task_id in reversed(order):
+            task = activities[task_id]
+            late_start_candidates = []
+            for successor_id, dependency_type, lag_minutes in outgoing[task_id]:
+                successor_late_start, successor_late_finish = reverse_dates[successor_id]
+                successor_boundary = (
+                    successor_late_start if dependency_type in {"FS", "SS"} else successor_late_finish
+                )
+                dependency_boundary = (
+                    work_calendar.subtract_working_minutes(successor_boundary, lag_minutes)
+                    if lag_minutes
+                    else successor_boundary
+                )
+                if dependency_type in {"FS", "FF"}:
+                    dependency_boundary = work_calendar.subtract_working_minutes(
+                        dependency_boundary,
+                        task.duration_minutes,
+                    )
+                late_start_candidates.append(dependency_boundary)
+            late_start = (
+                min(late_start_candidates)
+                if late_start_candidates
+                else work_calendar.subtract_working_minutes(project_finish, task.duration_minutes)
+            )
+            late_finish = work_calendar.add_working_minutes(late_start, task.duration_minutes)
+            reverse_dates[task_id] = (late_start, late_finish)
+
+            early_start, early_finish = calculated[task_id]
+            free_slack_candidates = []
+            for successor_id, dependency_type, lag_minutes in outgoing[task_id]:
+                successor_start, successor_finish = calculated[successor_id]
+                source_boundary = early_finish if dependency_type in {"FS", "FF"} else early_start
+                constrained_boundary = (
+                    work_calendar.add_working_minutes(source_boundary, lag_minutes)
+                    if lag_minutes
+                    else source_boundary
+                )
+                successor_boundary = successor_start if dependency_type in {"FS", "SS"} else successor_finish
+                free_slack_candidates.append(
+                    work_calendar.working_minutes_between(constrained_boundary, successor_boundary)
+                )
+            total_slack = work_calendar.working_minutes_between(early_start, late_start)
+            free_slack = (
+                min(free_slack_candidates)
+                if free_slack_candidates
+                else work_calendar.working_minutes_between(early_finish, project_finish)
+            )
+            float_values[task_id] = (total_slack, free_slack, total_slack <= 0)
+
+    if include_summary_rollup:
         children_by_summary = {
             task.task_id: [child.task_id for child in source.tasks if child.parent_task_id == task.task_id]
             for task in source.tasks
@@ -244,10 +328,24 @@ def calculate_minimal_forward_schedule(
                 min(start for start, _ in child_dates),
                 max(finish for _, finish in child_dates),
             )
+            if include_reverse_float:
+                child_reverse_dates = [reverse_dates[child_id] for child_id in children_by_summary[summary.task_id]]
+                reverse_dates[summary.task_id] = (
+                    min(start for start, _ in child_reverse_dates),
+                    max(finish for _, finish in child_reverse_dates),
+                )
+                child_float_values = [float_values[child_id] for child_id in children_by_summary[summary.task_id]]
+                total_slack = min(total for total, _, _ in child_float_values)
+                free_slack = min(free for _, free, _ in child_float_values)
+                float_values[summary.task_id] = (
+                    total_slack,
+                    free_slack,
+                    any(critical for _, _, critical in child_float_values),
+                )
 
     task_dates = []
     output_tasks = (
-        source.tasks if engine_profile_id == SUMMARY_ROLLUP_ENGINE_PROFILE_ID else [activities[id] for id in order]
+        source.tasks if include_summary_rollup else [activities[id] for id in order]
     )
     for task in output_tasks:
         task_id = task.task_id
@@ -261,13 +359,25 @@ def calculate_minimal_forward_schedule(
             "start_changed": early_start != task.planned_start,
             "finish_changed": early_finish != task.planned_finish,
         }
-        if engine_profile_id == SUMMARY_ROLLUP_ENGINE_PROFILE_ID:
+        if include_summary_rollup:
             task_date.update(
                 {
                     "parent_task_id": task.parent_task_id,
                     "outline_level": task.outline_level,
                     "task_type": task.task_type,
                     "summary": task.task_type == "summary",
+                }
+            )
+        if include_reverse_float:
+            late_start, late_finish = reverse_dates[task_id]
+            total_slack, free_slack, critical = float_values[task_id]
+            task_date.update(
+                {
+                    "late_start": late_start.isoformat(),
+                    "late_finish": late_finish.isoformat(),
+                    "total_slack_minutes": total_slack,
+                    "free_slack_minutes": free_slack,
+                    "critical": critical,
                 }
             )
         task_dates.append(task_date)

@@ -139,6 +139,11 @@ try {
             task_id = [string]$taskSpec.task_id
             early_start = ([datetime]$task.Start).ToString("yyyy-MM-ddTHH:mm:sszzz")
             early_finish = ([datetime]$task.Finish).ToString("yyyy-MM-ddTHH:mm:sszzz")
+            late_start = ([datetime]$task.LateStart).ToString("yyyy-MM-ddTHH:mm:sszzz")
+            late_finish = ([datetime]$task.LateFinish).ToString("yyyy-MM-ddTHH:mm:sszzz")
+            total_slack_minutes = [int]$task.TotalSlack
+            free_slack_minutes = [int]$task.FreeSlack
+            critical = [bool]$task.Critical
         }
     }
     $taskRelations = foreach ($taskSpec in $case.tasks) {

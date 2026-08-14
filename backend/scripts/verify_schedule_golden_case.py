@@ -17,6 +17,7 @@ if str(BACKEND_ROOT / "package") not in sys.path:
 from yuxi.schedule.contracts.canonical_v2_2 import CanonicalScheduleV22  # noqa: E402
 from yuxi.schedule.forward_engine import (  # noqa: E402
     ENGINE_PROFILE_ID,
+    REVERSE_FLOAT_ENGINE_PROFILE_ID,
     SUMMARY_ROLLUP_ENGINE_PROFILE_ID,
     calculate_minimal_forward_schedule,
 )
@@ -119,7 +120,11 @@ def _validate_case(case: dict[str, Any]) -> list[str]:
     errors = []
     if case.get("schema_version") != "microsoft_project_schedule_golden_case_v1":
         errors.append("SCHEMA_VERSION_UNSUPPORTED")
-    if case.get("engine_profile_id") not in {ENGINE_PROFILE_ID, SUMMARY_ROLLUP_ENGINE_PROFILE_ID}:
+    if case.get("engine_profile_id") not in {
+        ENGINE_PROFILE_ID,
+        SUMMARY_ROLLUP_ENGINE_PROFILE_ID,
+        REVERSE_FLOAT_ENGINE_PROFILE_ID,
+    }:
         errors.append("ENGINE_PROFILE_MISMATCH")
     if case.get("expected_value_source") != "MICROSOFT_PROJECT_MANUAL_CONFIRMATION":
         errors.append("EXPECTED_VALUE_SOURCE_INVALID")
@@ -204,8 +209,13 @@ def _validate_external_case(case: dict[str, Any]) -> list[str]:
         observed_dates = observation.get("task_dates", [])
         if {item.get("task_id") for item in observed_dates} != known_task_ids:
             errors.append("EXTERNAL_OBSERVATION_TASK_SET_MISMATCH")
+        extended_fields_present = any("late_start" in item for item in observed_dates)
         for item in observed_dates:
-            for field in ("early_start", "early_finish"):
+            date_fields = ("early_start", "early_finish", "late_start", "late_finish") if extended_fields_present else (
+                "early_start",
+                "early_finish",
+            )
+            for field in date_fields:
                 try:
                     value = datetime.fromisoformat(item.get(field, ""))
                 except (TypeError, ValueError):
@@ -213,6 +223,12 @@ def _validate_external_case(case: dict[str, Any]) -> list[str]:
                     continue
                 if value.tzinfo is None:
                     errors.append(f"EXTERNAL_OBSERVATION_TIME_ZONE_REQUIRED:{item.get('task_id')}:{field}")
+            if extended_fields_present:
+                for field in ("total_slack_minutes", "free_slack_minutes"):
+                    if not isinstance(item.get(field), int):
+                        errors.append(f"EXTERNAL_OBSERVATION_SLACK_INVALID:{item.get('task_id')}:{field}")
+                if not isinstance(item.get("critical"), bool):
+                    errors.append(f"EXTERNAL_OBSERVATION_CRITICAL_INVALID:{item.get('task_id')}")
         successor_ids = {dependency.get("successor_task_id") for dependency in case.get("dependencies", [])}
         relations_by_task = {
             item.get("task_id"): item.get("microsoft_project_predecessors", "")
@@ -295,8 +311,20 @@ def _compare_dates(
     if set(dates_by_task) != task_ids:
         errors.append(f"{prefix}_TASK_SET_MISMATCH")
     for task_id in sorted(task_ids & set(dates_by_task)):
-        for field in ("early_start", "early_finish"):
-            if dates_by_task[task_id].get(field) != actual_dates[task_id][field]:
+        comparison = dates_by_task[task_id]
+        fields = (
+            "early_start",
+            "early_finish",
+            "late_start",
+            "late_finish",
+            "total_slack_minutes",
+            "free_slack_minutes",
+            "critical",
+        )
+        for field in fields:
+            if field not in comparison:
+                continue
+            if comparison[field] != actual_dates[task_id].get(field):
                 errors.append(f"{prefix}_DATE_MISMATCH:{task_id}:{field}")
     return errors
 

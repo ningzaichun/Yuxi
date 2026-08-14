@@ -19,7 +19,7 @@ from yuxi.schedule.audit.engine import audit_schedule
 from yuxi.schedule.contracts.canonical_v2_2 import CanonicalScheduleV22
 from yuxi.schedule.contracts.envelope import ScheduleSnapshotSubmission
 from yuxi.schedule.delivery_adapter import apply_delivery_to_source_copy
-from yuxi.schedule.forward_engine import SUMMARY_ROLLUP_ENGINE_PROFILE_ID
+from yuxi.schedule.forward_engine import REVERSE_FLOAT_ENGINE_PROFILE_ID
 from yuxi.schedule.importers.canonical_v2_2 import import_canonical_schedule_v2_2
 from yuxi.schedule.storage import SCHEDULE_BUCKET
 from yuxi.utils.datetime_utils import utc_now_naive
@@ -487,11 +487,22 @@ async def test_schedule_forward_recalculation_candidate_decision_delivery_and_bl
     assert delivery.status_code == 200, delivery.text
     assert candidate_payload["candidate_kind"] == "automatic_forward_recalculation"
     assert candidate_payload["candidate_snapshot"]["engine_result"]["status"] == "calculated"
-    assert candidate_payload["candidate_snapshot"]["engine_profile_id"] == SUMMARY_ROLLUP_ENGINE_PROFILE_ID
+    assert candidate_payload["candidate_snapshot"]["engine_profile_id"] == REVERSE_FLOAT_ENGINE_PROFILE_ID
     task_dates = candidate_payload["candidate_snapshot"]["engine_result"]["task_dates"]
     assert {item["task_id"] for item in task_dates} == {
         item["task_id"] for item in source_before.json()["snapshot"]["tasks"]
     }
+    assert all(
+        {
+            "late_start",
+            "late_finish",
+            "total_slack_minutes",
+            "free_slack_minutes",
+            "critical",
+        }
+        <= item.keys()
+        for item in task_dates
+    )
     assert any(item["summary"] for item in task_dates)
     assert delivery.json()["simulation_result"]["status"] == "calculated"
     assert source_after.json()["snapshot_content_sha256"] == source_before.json()["snapshot_content_sha256"]
