@@ -36,6 +36,28 @@ def validation_error_to_schedule_detail(error: ValidationError) -> ScheduleError
     )
 
 
+def validation_error_to_schedule_import_detail(
+    error: ValidationError,
+    *,
+    path_prefix: tuple[str | int, ...] = (),
+) -> ScheduleErrorDetail:
+    """Return import-boundary errors without exposing submitted source values."""
+
+    errors = [
+        ScheduleFieldError(
+            path=_json_pointer((*path_prefix, *item["loc"])),
+            code=_error_code(str(item["type"])),
+            message=str(item["msg"]),
+        )
+        for item in error.errors(include_url=False, include_context=False, include_input=False)
+    ]
+    return ScheduleErrorDetail(
+        code="SCHEDULE_IMPORT_CONTRACT_INVALID",
+        message="排期来源数据不符合声明的导入格式",
+        errors=errors,
+    )
+
+
 def _json_pointer(location: Iterable[str | int]) -> str:
     parts = [str(part).replace("~", "~0").replace("/", "~1") for part in location]
     return "/" + "/".join(parts) if parts else "/"

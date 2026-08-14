@@ -21,12 +21,17 @@ from yuxi.schedule.contracts.envelope import ScheduleSnapshotSubmission
 from yuxi.schedule.delivery_adapter import apply_delivery_to_source_copy
 from yuxi.schedule.forward_engine import REVERSE_FLOAT_ENGINE_PROFILE_ID
 from yuxi.schedule.importers.canonical_v2_2 import import_canonical_schedule_v2_2
-from yuxi.schedule.storage import SCHEDULE_BUCKET
+from yuxi.schedule.storage import SCHEDULE_BUCKET, ScheduleSnapshotStore
 from yuxi.utils.datetime_utils import utc_now_naive
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.integration]
 
 FIXTURE_PATH = Path(__file__).resolve().parents[2] / "data" / "schedule" / "schedule_v2_2_sanitized.json"
+IMPORT_CASE_PATH = (
+    Path(__file__).resolve().parents[4]
+    / "Microsoft_Project_水泵站排期_MOCK_v1.1"
+    / "Microsoft_Project_水泵站排期_MOCK_v1.1.json"
+)
 
 
 def _submission(request_id: str) -> dict:
@@ -36,6 +41,16 @@ def _submission(request_id: str) -> dict:
         "external_snapshot_id": f"pytest-snapshot-{request_id}",
         "external_revision": "V2.2",
         "snapshot": json.loads(FIXTURE_PATH.read_text(encoding="utf-8")),
+    }
+
+
+def _import_submission(request_id: str) -> dict:
+    return {
+        "request_id": request_id,
+        "external_project_id": f"pytest-water-pump-{request_id}",
+        "external_snapshot_id": f"pytest-water-pump-source-{request_id}",
+        "external_revision": "v1.1",
+        "document": json.loads(IMPORT_CASE_PATH.read_text(encoding="utf-8")),
     }
 
 
@@ -105,6 +120,69 @@ async def test_schedule_http_idempotency_audit_and_owner_isolation(
     assert audit.json()["dependency_date_checks"]["skipped"] == 22
     assert issues.status_code == 200, issues.text
     assert hidden.status_code == 404, hidden.text
+
+
+async def test_schedule_import_http_dual_storage_hashes_and_source_idempotency(
+    test_client,
+    standard_user,
+    admin_headers,
+):
+    headers = standard_user["headers"]
+    owner_uid = standard_user["user"]["uid"]
+    submission = _import_submission(f"pytest-import-{uuid.uuid4().hex}")
+
+    first, second = await asyncio.gather(
+        test_client.post("/api/schedule/imports", json=submission, headers=headers),
+        test_client.post("/api/schedule/imports", json=submission, headers=headers),
+    )
+    created = first if first.status_code == 201 else second
+    replay = second if first.status_code == 201 else first
+
+    assert sorted((first.status_code, second.status_code)) == [200, 201], (first.text, second.text)
+    result = created.json()
+    snapshot_id = result["schedule_snapshot_id"]
+    assert replay.json()["schedule_snapshot_id"] == snapshot_id
+    assert result["adapter_id"] == "microsoft_project_interchange_v1_1"
+    assert result["adapter_version"] == "1.0.0"
+    assert result["capabilities"]["cpm_recalculation"] == {
+        "allowed": False,
+        "reasons": ["MILESTONE_UNSUPPORTED"],
+    }
+    assert result["dependency_date_checks"]["checked"] == 16
+    assert result["dependency_date_checks"]["skipped"] == 3
+
+    store = ScheduleSnapshotStore()
+    source_object = f"{owner_uid}/{snapshot_id}/source-document.json"
+    canonical_object = f"{owner_uid}/{snapshot_id}/snapshot.json"
+    source_bytes = await store.download(source_object)
+    canonical_bytes = await store.download(canonical_object)
+    assert json.loads(source_bytes) == submission["document"]
+    assert result["source_document_sha256"] == f"sha256:{hashlib.sha256(source_bytes).hexdigest()}"
+    assert result["canonical_snapshot_sha256"] == f"sha256:{hashlib.sha256(canonical_bytes).hexdigest()}"
+
+    changed = copy.deepcopy(submission)
+    changed["document"]["vendor_extension"] = {"display_only": True}
+    conflict = await test_client.post("/api/schedule/imports", json=changed, headers=headers)
+    assert conflict.status_code == 409, conflict.text
+
+    invalid = copy.deepcopy(submission)
+    invalid["request_id"] = f"pytest-import-invalid-{uuid.uuid4().hex}"
+    del invalid["document"]["project"]["default_calendar_id"]
+    rejected = await test_client.post("/api/schedule/imports", json=invalid, headers=headers)
+    assert rejected.status_code == 422, rejected.text
+    assert rejected.json()["detail"]["errors"][0]["path"] == "/document/project/default_calendar_id"
+
+    detail = await test_client.get(f"/api/schedule/snapshots/{snapshot_id}", headers=headers)
+    hidden = await test_client.get(f"/api/schedule/snapshots/{snapshot_id}", headers=admin_headers)
+    assert detail.status_code == 200, detail.text
+    assert detail.json()["source_document_sha256"] == result["source_document_sha256"]
+    assert detail.json()["canonical_snapshot_sha256"] == result["canonical_snapshot_sha256"]
+    assert hidden.status_code == 404, hidden.text
+
+    minio_origin = (os.getenv("MINIO_PUBLIC_URI") or os.getenv("MINIO_URI") or "").rstrip("/")
+    assert minio_origin, "MINIO_PUBLIC_URI or MINIO_URI must be configured"
+    unauthenticated = await test_client.get(f"{minio_origin}/{SCHEDULE_BUCKET}/{source_object}")
+    assert unauthenticated.status_code in {401, 403}, unauthenticated.text
 
 
 async def test_schedule_http_contract_error_has_stable_pointer(test_client, standard_user):

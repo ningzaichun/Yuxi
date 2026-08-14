@@ -115,6 +115,31 @@ async def test_ensure_business_schema_creates_user_config_table():
 
 
 @pytest.mark.asyncio
+async def test_ensure_business_schema_adds_schedule_import_metadata():
+    manager = PostgresManager()
+    original_initialized = manager._initialized
+    original_engine = manager.async_engine
+    connection = _RecordingConnection()
+
+    manager._initialized = True
+    manager.async_engine = _RecordingEngine(connection)
+    try:
+        await manager.ensure_business_schema()
+    finally:
+        manager._initialized = original_initialized
+        manager.async_engine = original_engine
+
+    statements = "\n".join(connection.statements)
+
+    assert "ADD COLUMN IF NOT EXISTS source_schema_version VARCHAR(128)" in statements
+    assert "ADD COLUMN IF NOT EXISTS adapter_id VARCHAR(128)" in statements
+    assert "ADD COLUMN IF NOT EXISTS adapter_version VARCHAR(64)" in statements
+    assert "ADD COLUMN IF NOT EXISTS source_document_sha256 VARCHAR(80)" in statements
+    assert "ADD COLUMN IF NOT EXISTS source_document_object VARCHAR(1024)" in statements
+    assert "ADD COLUMN IF NOT EXISTS normalization_report JSONB" in statements
+
+
+@pytest.mark.asyncio
 async def test_ensure_business_schema_removes_unbound_api_keys_before_requiring_user_id():
     manager = PostgresManager()
     original_initialized = manager._initialized

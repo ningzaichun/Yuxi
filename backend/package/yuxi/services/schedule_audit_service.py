@@ -11,9 +11,11 @@ from typing import Any
 
 from yuxi.repositories.schedule_repository import ScheduleRepository
 from yuxi.schedule.audit.engine import audit_schedule
-from yuxi.schedule.contracts.envelope import ScheduleSnapshotSubmission
 from yuxi.schedule.contracts.dependency_decision import DependencyDecisionDraft
-from yuxi.schedule.importers.canonical_v2_2 import import_canonical_schedule_v2_2
+from yuxi.schedule.contracts.envelope import ScheduleSnapshotSubmission
+from yuxi.schedule.contracts.import_v1 import ScheduleImportEnvelope
+from yuxi.schedule.importers import build_default_schedule_import_registry, import_canonical_schedule_v2_2
+from yuxi.schedule.importers.registry import ScheduleImportAdapterRegistry
 from yuxi.schedule.storage import SCHEDULE_BUCKET, ScheduleSnapshotStore
 from yuxi.utils.datetime_utils import utc_now_naive
 
@@ -50,23 +52,67 @@ class ScheduleAuditService:
         self,
         repository: ScheduleRepository | None = None,
         store: ScheduleSnapshotStore | None = None,
+        import_registry: ScheduleImportAdapterRegistry | None = None,
     ) -> None:
         self._repository = repository or ScheduleRepository()
         self._store = store or ScheduleSnapshotStore()
+        self._import_registry = import_registry or build_default_schedule_import_registry()
 
     async def submit(self, owner_uid: str, submission: ScheduleSnapshotSubmission) -> dict[str, Any]:
-        snapshot_json = submission.snapshot.model_dump(mode="json", exclude_none=False)
-        canonical_bytes = json.dumps(
-            snapshot_json,
-            ensure_ascii=False,
-            sort_keys=True,
-            separators=(",", ":"),
-        ).encode("utf-8")
-        content_sha256 = f"sha256:{hashlib.sha256(canonical_bytes).hexdigest()}"
+        canonical_bytes = _canonical_json_bytes(submission.snapshot.model_dump(mode="json", exclude_none=False))
+        return await self._persist_submission(
+            owner_uid,
+            submission,
+            canonical_bytes=canonical_bytes,
+            content_sha256=_sha256(canonical_bytes),
+        )
+
+    async def submit_import(self, owner_uid: str, submission: ScheduleImportEnvelope) -> dict[str, Any]:
+        normalized = self._import_registry.normalize(submission.document)
+        canonical_bytes = _canonical_json_bytes(normalized.canonical.model_dump(mode="json", exclude_none=False))
+        source_document_bytes = _canonical_json_bytes(submission.document)
+        canonical_submission = ScheduleSnapshotSubmission(
+            request_id=submission.request_id,
+            external_project_id=submission.external_project_id,
+            external_snapshot_id=submission.external_snapshot_id,
+            external_revision=submission.external_revision,
+            snapshot=normalized.canonical,
+        )
+        report = normalized.normalization_report.model_dump(mode="json")
+        return await self._persist_submission(
+            owner_uid,
+            canonical_submission,
+            canonical_bytes=canonical_bytes,
+            content_sha256=_sha256(canonical_bytes),
+            source_document_bytes=source_document_bytes,
+            source_document_sha256=_sha256(source_document_bytes),
+            source_schema_version=normalized.normalization_report.source_schema_version,
+            adapter_id=normalized.normalization_report.adapter_id,
+            adapter_version=normalized.normalization_report.adapter_version,
+            normalization_report=report,
+        )
+
+    async def _persist_submission(
+        self,
+        owner_uid: str,
+        submission: ScheduleSnapshotSubmission,
+        *,
+        canonical_bytes: bytes,
+        content_sha256: str,
+        source_document_bytes: bytes | None = None,
+        source_document_sha256: str | None = None,
+        source_schema_version: str | None = None,
+        adapter_id: str | None = None,
+        adapter_version: str | None = None,
+        normalization_report: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         proposed_snapshot_id = uuid.uuid4().hex
         execution_token = uuid.uuid4().hex
         execution_started_at = utc_now_naive()
         object_name = f"{owner_uid}/{proposed_snapshot_id}/snapshot.json"
+        source_object_name = (
+            f"{owner_uid}/{proposed_snapshot_id}/source-document.json" if source_document_bytes is not None else None
+        )
 
         # Audit runs before external writes so a deterministic domain failure
         # cannot leave a reserved database row or an orphaned object.
@@ -87,6 +133,12 @@ class ScheduleAuditService:
                 "source_snapshot_id": submission.snapshot.snapshot_id,
                 "schema_version": submission.snapshot.schema_version,
                 "snapshot_content_sha256": content_sha256,
+                "source_schema_version": source_schema_version,
+                "adapter_id": adapter_id,
+                "adapter_version": adapter_version,
+                "source_document_sha256": source_document_sha256,
+                "source_document_object": source_object_name,
+                "normalization_report": normalization_report,
                 "minio_bucket": SCHEDULE_BUCKET,
                 "minio_object": object_name,
                 "submission_status": "creating",
@@ -95,6 +147,11 @@ class ScheduleAuditService:
             }
         )
         if record.snapshot_content_sha256 != content_sha256:
+            raise ScheduleConflictError
+        record_source_sha256 = getattr(record, "source_document_sha256", None)
+        if (record_source_sha256 is None) != (source_document_sha256 is None):
+            raise ScheduleConflictError
+        if source_document_sha256 is not None and record_source_sha256 != source_document_sha256:
             raise ScheduleConflictError
         if not created:
             replay = await self._resolve_existing(
@@ -107,6 +164,7 @@ class ScheduleAuditService:
                 return replay
             proposed_snapshot_id = record.schedule_snapshot_id
             object_name = record.minio_object
+            source_object_name = getattr(record, "source_document_object", None)
             execution = audit_schedule(
                 schedule,
                 schedule_snapshot_id=proposed_snapshot_id,
@@ -114,6 +172,8 @@ class ScheduleAuditService:
             )
 
         try:
+            if source_document_bytes is not None and source_object_name is not None:
+                await self._store.upload(source_object_name, source_document_bytes)
             await self._store.upload(object_name, canonical_bytes)
             await self._repository.finalize(proposed_snapshot_id, execution_token, execution)
         except asyncio.CancelledError:
@@ -130,7 +190,22 @@ class ScheduleAuditService:
         except Exception as exc:
             await self._repository.mark_failed(proposed_snapshot_id, execution_token, "SCHEDULE_DEPENDENCY_FAILURE")
             raise ScheduleDependencyError from exc
-        return _submission_response(content_sha256, execution, idempotent_replay=False)
+        return _submission_response(
+            content_sha256,
+            execution,
+            idempotent_replay=False,
+            import_metadata=(
+                {
+                    "source_schema_version": source_schema_version,
+                    "adapter_id": adapter_id,
+                    "adapter_version": adapter_version,
+                    "source_document_sha256": source_document_sha256,
+                    "normalization_report": normalization_report,
+                }
+                if source_document_sha256 is not None
+                else None
+            ),
+        )
 
     async def _resolve_existing(
         self,
@@ -173,7 +248,7 @@ class ScheduleAuditService:
         audit = await self._repository.get_audit(owner_uid, record.schedule_snapshot_id)
         if audit is None:
             raise ScheduleDependencyError
-        return {
+        response = {
             "schedule_snapshot_id": record.schedule_snapshot_id,
             "audit_run_id": audit.audit_run_id,
             "idempotent_replay": idempotent_replay,
@@ -182,6 +257,9 @@ class ScheduleAuditService:
             "dependency_date_checks": audit.dependency_date_checks,
             "issue_summary": audit.issue_summary,
         }
+        if getattr(record, "source_document_sha256", None) is not None:
+            response.update(_import_metadata(record))
+        return response
 
     async def list_snapshots(self, owner_uid: str, limit: int, offset: int) -> dict[str, Any]:
         records = await self._repository.list_ready(owner_uid, limit, offset)
@@ -244,13 +322,9 @@ class ScheduleAuditService:
         tasks_by_id = {task["task_id"]: task for task in snapshot["tasks"]}
         dependencies_by_id = {item["dependency_id"]: item for item in snapshot["dependencies"]}
         involved_task_ids = {ref for ref in issue["object_refs"] if ref in tasks_by_id}
-        involved_dependencies = [
-            dependencies_by_id[ref] for ref in issue["object_refs"] if ref in dependencies_by_id
-        ]
+        involved_dependencies = [dependencies_by_id[ref] for ref in issue["object_refs"] if ref in dependencies_by_id]
         for dependency in involved_dependencies:
-            involved_task_ids.update(
-                {dependency["predecessor_task_id"], dependency["successor_task_id"]}
-            )
+            involved_task_ids.update({dependency["predecessor_task_id"], dependency["successor_task_id"]})
         neighboring_dependencies = [
             dependency
             for dependency in snapshot["dependencies"]
@@ -278,9 +352,7 @@ class ScheduleAuditService:
     async def get_dependency_workbench(self, owner_uid: str, issue_id: str) -> dict[str, Any]:
         issue, snapshot = await self._load_summary_dependency_issue(owner_uid, issue_id)
         tasks_by_id = {task["task_id"]: task for task in snapshot["tasks"]}
-        dependency = next(
-            item for item in snapshot["dependencies"] if item["dependency_id"] == issue.object_refs[0]
-        )
+        dependency = next(item for item in snapshot["dependencies"] if item["dependency_id"] == issue.object_refs[0])
         predecessor_ids = _subtree_task_ids(tasks_by_id, dependency["predecessor_task_id"])
         successor_ids = _subtree_task_ids(tasks_by_id, dependency["successor_task_id"])
         predecessor_candidates = _boundary_leaf_ids(
@@ -301,26 +373,19 @@ class ScheduleAuditService:
             "source_dependency": dependency,
             "predecessor": {
                 "root_task_id": dependency["predecessor_task_id"],
-                "tasks": [
-                    _workbench_task(task) for task in snapshot["tasks"] if task["task_id"] in predecessor_ids
-                ],
+                "tasks": [_workbench_task(task) for task in snapshot["tasks"] if task["task_id"] in predecessor_ids],
                 "candidate_task_ids": predecessor_candidates,
             },
             "successor": {
                 "root_task_id": dependency["successor_task_id"],
-                "tasks": [
-                    _workbench_task(task) for task in snapshot["tasks"] if task["task_id"] in successor_ids
-                ],
+                "tasks": [_workbench_task(task) for task in snapshot["tasks"] if task["task_id"] in successor_ids],
                 "candidate_task_ids": successor_candidates,
             },
             "direct_network": [
                 item
                 for item in snapshot["dependencies"]
                 if item["dependency_id"] != dependency["dependency_id"]
-                and (
-                    item["predecessor_task_id"] in context_ids
-                    or item["successor_task_id"] in context_ids
-                )
+                and (item["predecessor_task_id"] in context_ids or item["successor_task_id"] in context_ids)
             ],
             "decision": _dependency_decision_record(decision) if decision else None,
             "candidate": _dependency_candidate_summary(candidate) if candidate else None,
@@ -362,9 +427,7 @@ class ScheduleAuditService:
             raise ScheduleDecisionInvalidError
         return _dependency_decision_record(confirmed)
 
-    async def _load_summary_dependency_issue(
-        self, owner_uid: str, issue_id: str
-    ) -> tuple[Any, dict[str, Any]]:
+    async def _load_summary_dependency_issue(self, owner_uid: str, issue_id: str) -> tuple[Any, dict[str, Any]]:
         issue = await self._repository.get_issue(owner_uid, issue_id)
         if issue is None or issue.rule_id != "SUMMARY_TASK_DEPENDENCY" or not issue.object_refs:
             raise ScheduleNotFoundError
@@ -393,9 +456,7 @@ class ScheduleAuditService:
                 raise ScheduleDecisionInvalidError
             return
         tasks_by_id = {task["task_id"]: task for task in snapshot["tasks"]}
-        dependency = next(
-            item for item in snapshot["dependencies"] if item["dependency_id"] == issue.object_refs[0]
-        )
+        dependency = next(item for item in snapshot["dependencies"] if item["dependency_id"] == issue.object_refs[0])
         predecessor_ids = _subtree_task_ids(tasks_by_id, dependency["predecessor_task_id"])
         successor_ids = _subtree_task_ids(tasks_by_id, dependency["successor_task_id"])
         allowed_predecessors = set(
@@ -404,9 +465,10 @@ class ScheduleAuditService:
         allowed_successors = set(
             _boundary_leaf_ids(tasks_by_id, snapshot["dependencies"], successor_ids, boundary="entry")
         )
-        if not set(draft.predecessor_task_ids) <= allowed_predecessors or not set(
-            draft.successor_task_ids
-        ) <= allowed_successors:
+        if (
+            not set(draft.predecessor_task_ids) <= allowed_predecessors
+            or not set(draft.successor_task_ids) <= allowed_successors
+        ):
             raise ScheduleDecisionInvalidError
         if require_complete and (
             not draft.predecessor_task_ids
@@ -418,9 +480,23 @@ class ScheduleAuditService:
             raise ScheduleDecisionInvalidError
 
 
-def _submission_response(content_sha256: str, execution, *, idempotent_replay: bool) -> dict[str, Any]:
+def _canonical_json_bytes(value: dict[str, Any]) -> bytes:
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+
+def _sha256(value: bytes) -> str:
+    return f"sha256:{hashlib.sha256(value).hexdigest()}"
+
+
+def _submission_response(
+    content_sha256: str,
+    execution,
+    *,
+    idempotent_replay: bool,
+    import_metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     result = execution.result
-    return {
+    response = {
         "schedule_snapshot_id": result.schedule_snapshot_id,
         "audit_run_id": result.audit_run_id,
         "idempotent_replay": idempotent_replay,
@@ -429,10 +505,25 @@ def _submission_response(content_sha256: str, execution, *, idempotent_replay: b
         "dependency_date_checks": result.dependency_date_checks.model_dump(mode="json"),
         "issue_summary": result.issue_summary.model_dump(mode="json"),
     }
+    if import_metadata is not None:
+        response.update(import_metadata)
+        response["canonical_snapshot_sha256"] = content_sha256
+    return response
+
+
+def _import_metadata(record: Any) -> dict[str, Any]:
+    return {
+        "source_schema_version": record.source_schema_version,
+        "adapter_id": record.adapter_id,
+        "adapter_version": record.adapter_version,
+        "source_document_sha256": record.source_document_sha256,
+        "canonical_snapshot_sha256": record.snapshot_content_sha256,
+        "normalization_report": record.normalization_report,
+    }
 
 
 def _snapshot_summary(record: Any) -> dict[str, Any]:
-    return {
+    summary = {
         "schedule_snapshot_id": record.schedule_snapshot_id,
         "external_project_id": record.external_project_id,
         "external_snapshot_id": record.external_snapshot_id,
@@ -443,6 +534,9 @@ def _snapshot_summary(record: Any) -> dict[str, Any]:
         "created_at": record.created_at,
         "ready_at": record.ready_at,
     }
+    if getattr(record, "source_document_sha256", None) is not None:
+        summary.update(_import_metadata(record))
+    return summary
 
 
 def _audit_record(record: Any) -> dict[str, Any]:

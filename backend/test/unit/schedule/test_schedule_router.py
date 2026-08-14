@@ -1,22 +1,31 @@
 from __future__ import annotations
 
 import importlib
+import json
+from pathlib import Path
 from types import SimpleNamespace
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from server.utils.auth_middleware import get_required_user
+from yuxi.schedule.importers.registry import UnsupportedScheduleImportVersionError
 from yuxi.services.schedule_audit_service import ScheduleConflictError, ScheduleNotFoundError
 from yuxi.services.schedule_optimization_service import ScheduleOptimizationConflictError
 
 schedule_module = importlib.import_module("server.routers.schedule_router")
+IMPORT_CASE_PATH = (
+    Path(__file__).resolve().parents[4]
+    / "Microsoft_Project_水泵站排期_MOCK_v1.1"
+    / "Microsoft_Project_水泵站排期_MOCK_v1.1.json"
+)
 
 
 class FakeService:
     def __init__(self) -> None:
         self.replay = False
         self.conflict = False
+        self.unsupported = False
 
     async def submit(self, owner_uid, submission):
         assert owner_uid == "owner-1"
@@ -27,6 +36,27 @@ class FakeService:
             "audit_run_id": "audit-1",
             "idempotent_replay": self.replay,
             "snapshot_content_sha256": "sha256:test",
+            "capabilities": {},
+            "dependency_date_checks": {},
+            "issue_summary": {},
+        }
+
+    async def submit_import(self, owner_uid, submission):
+        assert owner_uid == "owner-1"
+        if self.unsupported:
+            raise UnsupportedScheduleImportVersionError
+        if self.conflict:
+            raise ScheduleConflictError
+        return {
+            "schedule_snapshot_id": "snapshot-import-1",
+            "audit_run_id": "audit-import-1",
+            "idempotent_replay": self.replay,
+            "snapshot_content_sha256": "sha256:canonical",
+            "canonical_snapshot_sha256": "sha256:canonical",
+            "source_document_sha256": "sha256:source",
+            "adapter_id": "microsoft_project_interchange_v1_1",
+            "adapter_version": "1.0.0",
+            "normalization_report": {},
             "capabilities": {},
             "dependency_date_checks": {},
             "issue_summary": {},
@@ -115,6 +145,16 @@ def _request(canonical_schedule_payload: dict) -> dict:
     }
 
 
+def _import_request() -> dict:
+    return {
+        "request_id": "import-request-1",
+        "external_project_id": "water-pump-project",
+        "external_snapshot_id": "water-pump-source-v1.1",
+        "external_revision": "v1.1",
+        "document": json.loads(IMPORT_CASE_PATH.read_text(encoding="utf-8")),
+    }
+
+
 def test_schedule_post_statuses_and_error_contract(monkeypatch, canonical_schedule_payload: dict) -> None:
     service = FakeService()
     client = _client(monkeypatch, service)
@@ -129,6 +169,39 @@ def test_schedule_post_statuses_and_error_contract(monkeypatch, canonical_schedu
     assert replay.status_code == 200
     assert conflict.status_code == 409
     assert conflict.json()["detail"]["code"] == "SCHEDULE_IDEMPOTENCY_CONFLICT"
+
+
+def test_schedule_import_statuses_and_version_error(monkeypatch) -> None:
+    service = FakeService()
+    client = _client(monkeypatch, service)
+
+    created = client.post("/api/schedule/imports", json=_import_request())
+    service.replay = True
+    replay = client.post("/api/schedule/imports", json=_import_request())
+    service.conflict = True
+    conflict = client.post("/api/schedule/imports", json=_import_request())
+    service.conflict = False
+    service.unsupported = True
+    unsupported = client.post("/api/schedule/imports", json=_import_request())
+
+    assert created.status_code == 201
+    assert replay.status_code == 200
+    assert conflict.status_code == 409
+    assert conflict.json()["detail"]["code"] == "SCHEDULE_IDEMPOTENCY_CONFLICT"
+    assert unsupported.status_code == 422
+    assert unsupported.json()["detail"]["code"] == "SCHEDULE_IMPORT_VERSION_UNSUPPORTED"
+
+
+def test_schedule_import_requires_document_schema_version(monkeypatch) -> None:
+    client = _client(monkeypatch, FakeService())
+    payload = _import_request()
+    del payload["document"]["schema_version"]
+
+    response = client.post("/api/schedule/imports", json=payload)
+
+    assert response.status_code == 422
+    assert response.json()["detail"]["code"] == "SCHEDULE_IMPORT_CONTRACT_INVALID"
+    assert response.json()["detail"]["errors"][0]["path"] == "/document"
 
 
 def test_schedule_post_returns_stable_json_pointer(monkeypatch, canonical_schedule_payload: dict) -> None:

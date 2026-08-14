@@ -42,6 +42,9 @@ def test_schedule_tables_share_business_metadata() -> None:
         constraint.name == "uq_schedule_issues_run_key" for constraint in ScheduleIssueRecord.__table__.constraints
     )
     assert isinstance(ScheduleSnapshotRecord.source_snapshot_id.type, Text)
+    assert ScheduleSnapshotRecord.__table__.columns["source_document_sha256"].nullable is True
+    assert ScheduleSnapshotRecord.__table__.columns["source_document_object"].nullable is True
+    assert ScheduleSnapshotRecord.__table__.columns["adapter_id"].nullable is True
     assert isinstance(ScheduleIssueRecord.sort_key.type, Text)
     assert any(
         constraint.name is None and constraint.columns.keys() == ["issue_id"]

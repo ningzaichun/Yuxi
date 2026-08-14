@@ -10,7 +10,11 @@ from pydantic import ValidationError
 from server.utils.auth_middleware import get_required_user
 from yuxi.schedule.contracts.envelope import ScheduleSnapshotSubmission
 from yuxi.schedule.contracts.dependency_decision import DependencyDecisionDraft
-from yuxi.schedule.contracts.errors import validation_error_to_schedule_detail
+from yuxi.schedule.contracts.errors import (
+    validation_error_to_schedule_detail,
+    validation_error_to_schedule_import_detail,
+)
+from yuxi.schedule.contracts.import_v1 import ScheduleImportEnvelope
 from yuxi.schedule.contracts.optimization import (
     CandidateDecisionRequest,
     DependencyOptimizationRequest,
@@ -34,6 +38,7 @@ from yuxi.services.schedule_optimization_service import (
     ScheduleOptimizationNotFoundError,
     ScheduleOptimizationService,
 )
+from yuxi.schedule.importers.registry import UnsupportedScheduleImportVersionError
 from yuxi.storage.postgres.models_business import User
 
 MAX_BODY_BYTES = 10 * 1024 * 1024
@@ -66,6 +71,41 @@ async def submit_snapshot(
         raise _error(409, "SCHEDULE_SUBMISSION_IN_PROGRESS", "相同请求正在处理中，请稍后重试") from exc
     except ScheduleDependencyError as exc:
         raise _error(500, "SCHEDULE_DEPENDENCY_FAILURE", "排期快照保存失败，可使用同一请求重试") from exc
+    response.status_code = 200 if result["idempotent_replay"] else 201
+    return result
+
+
+@schedule_router.post("/imports")
+async def submit_import(
+    request: Request,
+    response: Response,
+    current_user: User = Depends(get_required_user),
+):
+    raw_body = await request.body()
+    if len(raw_body) > MAX_BODY_BYTES:
+        raise _error(413, "SCHEDULE_BODY_TOO_LARGE", "排期请求正文超过 10 MiB 限制")
+    try:
+        submission = ScheduleImportEnvelope.model_validate_json(raw_body)
+    except (ValidationError, json.JSONDecodeError) as exc:
+        if isinstance(exc, ValidationError):
+            detail = validation_error_to_schedule_import_detail(exc).model_dump(mode="json")
+            raise HTTPException(status_code=422, detail=detail) from exc
+        raise _error(422, "SCHEDULE_IMPORT_CONTRACT_INVALID", "排期来源数据不是有效 JSON") from exc
+    try:
+        result = await schedule_service.submit_import(str(current_user.uid), submission)
+    except ValidationError as exc:
+        detail = validation_error_to_schedule_import_detail(exc, path_prefix=("document",)).model_dump(mode="json")
+        raise HTTPException(status_code=422, detail=detail) from exc
+    except UnsupportedScheduleImportVersionError as exc:
+        raise _error(422, "SCHEDULE_IMPORT_VERSION_UNSUPPORTED", "不支持该排期来源格式版本") from exc
+    except ValueError as exc:
+        raise _error(422, "SCHEDULE_IMPORT_SEMANTICS_UNSUPPORTED", "排期来源包含当前适配器不支持的语义") from exc
+    except ScheduleConflictError as exc:
+        raise _error(409, "SCHEDULE_IDEMPOTENCY_CONFLICT", "相同 request_id 已用于不同的排期来源内容") from exc
+    except ScheduleSubmissionInProgressError as exc:
+        raise _error(409, "SCHEDULE_SUBMISSION_IN_PROGRESS", "相同请求正在处理中，请稍后重试") from exc
+    except ScheduleDependencyError as exc:
+        raise _error(500, "SCHEDULE_DEPENDENCY_FAILURE", "排期导入保存失败，可使用同一请求重试") from exc
     response.status_code = 200 if result["idempotent_replay"] else 201
     return result
 

@@ -11,7 +11,7 @@ from .audit import (
 )
 from .canonical_v2_2 import CanonicalScheduleV22
 from .envelope import ScheduleSnapshotSubmission
-from .errors import validation_error_to_schedule_detail
+from .errors import validation_error_to_schedule_detail, validation_error_to_schedule_import_detail
 from .import_v1 import (
     MicrosoftProjectInterchangeV11,
     ScheduleImportEnvelope,
@@ -32,4 +32,5 @@ __all__ = [
     "ScheduleNormalizationReport",
     "ScheduleSnapshotSubmission",
     "validation_error_to_schedule_detail",
+    "validation_error_to_schedule_import_detail",
 ]

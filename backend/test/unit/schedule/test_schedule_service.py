@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import asyncio
+import copy
 import hashlib
 import json
 from datetime import timedelta
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
 from yuxi.services import schedule_audit_service as schedule_audit_service_module
 from yuxi.schedule.contracts.envelope import ScheduleSnapshotSubmission
+from yuxi.schedule.contracts.import_v1 import ScheduleImportEnvelope
 from yuxi.services.schedule_audit_service import (
     SUBMISSION_LEASE_SECONDS,
     ScheduleAuditService,
@@ -17,6 +20,12 @@ from yuxi.services.schedule_audit_service import (
     ScheduleDependencyError,
 )
 from yuxi.utils.datetime_utils import utc_now_naive
+
+IMPORT_CASE_PATH = (
+    Path(__file__).resolve().parents[4]
+    / "Microsoft_Project_水泵站排期_MOCK_v1.1"
+    / "Microsoft_Project_水泵站排期_MOCK_v1.1.json"
+)
 
 
 class FakeScheduleRepository:
@@ -136,6 +145,18 @@ def _submission(payload: dict, request_id: str = "request-1") -> ScheduleSnapsho
     )
 
 
+def _import_submission(request_id: str = "import-request-1") -> ScheduleImportEnvelope:
+    return ScheduleImportEnvelope.model_validate(
+        {
+            "request_id": request_id,
+            "external_project_id": "water-pump-project",
+            "external_snapshot_id": "water-pump-source-v1.1",
+            "external_revision": "v1.1",
+            "document": json.loads(IMPORT_CASE_PATH.read_text(encoding="utf-8")),
+        }
+    )
+
+
 @pytest.mark.asyncio
 async def test_submit_is_idempotent_for_same_owner_request_and_content(canonical_schedule_payload: dict) -> None:
     repository = FakeScheduleRepository()
@@ -162,6 +183,50 @@ async def test_same_idempotency_key_with_different_content_conflicts(canonical_s
 
     with pytest.raises(ScheduleConflictError):
         await service.submit("owner-1", _submission(changed))
+
+
+@pytest.mark.asyncio
+async def test_import_persists_source_and_canonical_with_dual_hashes() -> None:
+    repository = FakeScheduleRepository()
+    store = FakeScheduleStore()
+    service = ScheduleAuditService(repository, store)
+    submission = _import_submission()
+
+    created = await service.submit_import("owner-1", submission)
+    replay = await service.submit_import("owner-1", submission)
+
+    record = repository.records[("owner-1", submission.request_id)]
+    uploads = {name: data for name, data in store.uploads}
+    assert created["idempotent_replay"] is False
+    assert replay["idempotent_replay"] is True
+    assert replay["schedule_snapshot_id"] == created["schedule_snapshot_id"]
+    assert replay["normalization_report"] == created["normalization_report"]
+    assert len(uploads) == 2
+    assert record.source_document_object in uploads
+    assert record.minio_object in uploads
+    assert (
+        created["source_document_sha256"]
+        == f"sha256:{hashlib.sha256(uploads[record.source_document_object]).hexdigest()}"
+    )
+    assert created["canonical_snapshot_sha256"] == f"sha256:{hashlib.sha256(uploads[record.minio_object]).hexdigest()}"
+    assert record.source_document_sha256 == created["source_document_sha256"]
+    assert record.snapshot_content_sha256 == created["canonical_snapshot_sha256"]
+    assert record.adapter_id == "microsoft_project_interchange_v1_1"
+    assert created["normalization_report"]["unsupported_semantics"]
+
+
+@pytest.mark.asyncio
+async def test_import_conflicts_when_source_changes_even_if_canonical_is_unchanged() -> None:
+    repository = FakeScheduleRepository()
+    service = ScheduleAuditService(repository, FakeScheduleStore())
+    submission = _import_submission()
+    await service.submit_import("owner-1", submission)
+    changed_document = copy.deepcopy(submission.document)
+    changed_document["vendor_extension"] = {"display_only": True}
+    changed = submission.model_copy(update={"document": changed_document})
+
+    with pytest.raises(ScheduleConflictError):
+        await service.submit_import("owner-1", changed)
 
 
 @pytest.mark.asyncio

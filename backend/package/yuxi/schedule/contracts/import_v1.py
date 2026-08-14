@@ -5,7 +5,17 @@ from __future__ import annotations
 from datetime import time
 from typing import Annotated, Any, Literal, Self
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr, model_validator
+from pydantic import (
+    AwareDatetime,
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictBool,
+    StrictInt,
+    StrictStr,
+    field_validator,
+    model_validator,
+)
 
 from .canonical_v2_2 import MAX_DEPENDENCIES, MAX_TASKS
 
@@ -25,6 +35,14 @@ class ScheduleImportEnvelope(BaseModel):
     external_snapshot_id: Annotated[StrictStr, Field(min_length=1, max_length=256)]
     external_revision: Annotated[StrictStr, Field(min_length=1, max_length=256)]
     document: dict[str, Any]
+
+    @field_validator("document")
+    @classmethod
+    def validate_document_version(cls, document: dict[str, Any]) -> dict[str, Any]:
+        schema_version = document.get("schema_version")
+        if not isinstance(schema_version, str) or not schema_version:
+            raise ValueError("document.schema_version must be a non-empty string")
+        return document
 
 
 class ImportDocumentModel(BaseModel):
