@@ -1,0 +1,222 @@
+{
+    "case_id":  "MSP-006-SUMMARY-ROLLUP",
+    "case_version":  2,
+    "capture":  {
+                    "method":  "Microsoft Project COM after save-close-reopen-recalculate; ActiveProject/Projects collection fallback",
+                    "product":  "Microsoft Project",
+                    "major_version":  "16.0",
+                    "product_version":  "16.0.17928.20148",
+                    "file_version":  "16.0.17928.20148",
+                    "calculation_mode":  "AUTOMATIC",
+                    "captured_at":  "2026-08-13T18:45:56.4851867+08:00",
+                    "timezone":  "Asia/Shanghai",
+                    "source_mpp_path":  "C:\\Users\\Administrator\\Documents\\Codex\\2026-08-07\\new-chat\\outputs\\MSP-006-SUMMARY-ROLLUP-v2_Yuxi-v6\\source\\case_006_nested_summary_rollup_v2.mpp"
+                },
+    "project":  {
+                    "name":  "case_006_nested_summary_rollup_v2.mpp",
+                    "project_start":  "2026-09-07T08:00:00+08:00",
+                    "project_finish":  "2026-09-11T17:00:00+08:00",
+                    "default_calendar_name":  "标准",
+                    "minutes_per_day":  480,
+                    "minutes_per_week":  2400,
+                    "days_per_month":  20
+                },
+    "calendars":  [
+                      {
+                          "calendar_id":  "calendar:yuxi-test-standard",
+                          "name":  "标准",
+                          "week_days":  [
+                                            {
+                                                "day":  "SUNDAY",
+                                                "working":  false,
+                                                "intervals":  [
+
+                                                              ]
+                                            },
+                                            {
+                                                "day":  "MONDAY",
+                                                "working":  true,
+                                                "intervals":  [
+                                                                  {
+                                                                      "start":  "08:00",
+                                                                      "finish":  "12:00"
+                                                                  },
+                                                                  {
+                                                                      "start":  "13:00",
+                                                                      "finish":  "17:00"
+                                                                  }
+                                                              ]
+                                            },
+                                            {
+                                                "day":  "TUESDAY",
+                                                "working":  true,
+                                                "intervals":  [
+                                                                  {
+                                                                      "start":  "08:00",
+                                                                      "finish":  "12:00"
+                                                                  },
+                                                                  {
+                                                                      "start":  "13:00",
+                                                                      "finish":  "17:00"
+                                                                  }
+                                                              ]
+                                            },
+                                            {
+                                                "day":  "WEDNESDAY",
+                                                "working":  true,
+                                                "intervals":  [
+                                                                  {
+                                                                      "start":  "08:00",
+                                                                      "finish":  "12:00"
+                                                                  },
+                                                                  {
+                                                                      "start":  "13:00",
+                                                                      "finish":  "17:00"
+                                                                  }
+                                                              ]
+                                            },
+                                            {
+                                                "day":  "THURSDAY",
+                                                "working":  true,
+                                                "intervals":  [
+                                                                  {
+                                                                      "start":  "08:00",
+                                                                      "finish":  "12:00"
+                                                                  },
+                                                                  {
+                                                                      "start":  "13:00",
+                                                                      "finish":  "17:00"
+                                                                  }
+                                                              ]
+                                            },
+                                            {
+                                                "day":  "FRIDAY",
+                                                "working":  true,
+                                                "intervals":  [
+                                                                  {
+                                                                      "start":  "08:00",
+                                                                      "finish":  "12:00"
+                                                                  },
+                                                                  {
+                                                                      "start":  "13:00",
+                                                                      "finish":  "17:00"
+                                                                  }
+                                                              ]
+                                            },
+                                            {
+                                                "day":  "SATURDAY",
+                                                "working":  false,
+                                                "intervals":  [
+
+                                                              ]
+                                            }
+                                        ],
+                          "exceptions":  [
+
+                                         ]
+                      }
+                  ],
+    "tasks":  [
+                  {
+                      "task_id":  "task:1",
+                      "source_id":  1,
+                      "source_unique_id":  1,
+                      "parent_task_id":  null,
+                      "wbs":  "1",
+                      "outline_level":  1,
+                      "name":  "总项目",
+                      "task_type":  "SUMMARY",
+                      "summary":  true,
+                      "scheduling_mode":  "AUTO",
+                      "duration_minutes":  null,
+                      "microsoft_project_duration_minutes":  2400,
+                      "start":  "2026-09-07T08:00:00+08:00",
+                      "finish":  "2026-09-11T17:00:00+08:00",
+                      "predecessors_text":  ""
+                  },
+                  {
+                      "task_id":  "task:2",
+                      "source_id":  2,
+                      "source_unique_id":  2,
+                      "parent_task_id":  "task:1",
+                      "wbs":  "1.1",
+                      "outline_level":  2,
+                      "name":  "基础施工阶段",
+                      "task_type":  "SUMMARY",
+                      "summary":  true,
+                      "scheduling_mode":  "AUTO",
+                      "duration_minutes":  null,
+                      "microsoft_project_duration_minutes":  2400,
+                      "start":  "2026-09-07T08:00:00+08:00",
+                      "finish":  "2026-09-11T17:00:00+08:00",
+                      "predecessors_text":  ""
+                  },
+                  {
+                      "task_id":  "task:3",
+                      "source_id":  3,
+                      "source_unique_id":  3,
+                      "parent_task_id":  "task:2",
+                      "wbs":  "1.1.1",
+                      "outline_level":  3,
+                      "name":  "场地准备",
+                      "task_type":  "TASK",
+                      "summary":  false,
+                      "scheduling_mode":  "AUTO",
+                      "duration_minutes":  960,
+                      "microsoft_project_duration_minutes":  960,
+                      "start":  "2026-09-07T08:00:00+08:00",
+                      "finish":  "2026-09-08T17:00:00+08:00",
+                      "predecessors_text":  ""
+                  },
+                  {
+                      "task_id":  "task:4",
+                      "source_id":  4,
+                      "source_unique_id":  4,
+                      "parent_task_id":  "task:2",
+                      "wbs":  "1.1.2",
+                      "outline_level":  3,
+                      "name":  "基坑开挖",
+                      "task_type":  "TASK",
+                      "summary":  false,
+                      "scheduling_mode":  "AUTO",
+                      "duration_minutes":  1440,
+                      "microsoft_project_duration_minutes":  1440,
+                      "start":  "2026-09-09T08:00:00+08:00",
+                      "finish":  "2026-09-11T17:00:00+08:00",
+                      "predecessors_text":  "3"
+                  },
+                  {
+                      "task_id":  "task:5",
+                      "source_id":  5,
+                      "source_unique_id":  5,
+                      "parent_task_id":  "task:1",
+                      "wbs":  "1.2",
+                      "outline_level":  2,
+                      "name":  "测量复核",
+                      "task_type":  "TASK",
+                      "summary":  false,
+                      "scheduling_mode":  "AUTO",
+                      "duration_minutes":  480,
+                      "microsoft_project_duration_minutes":  480,
+                      "start":  "2026-09-07T08:00:00+08:00",
+                      "finish":  "2026-09-07T17:00:00+08:00",
+                      "predecessors_text":  "3SS"
+                  }
+              ],
+    "dependencies":  [
+                         {
+                             "predecessor_task_id":  "task:3",
+                             "successor_task_id":  "task:5",
+                             "type":  "SS",
+                             "microsoft_project_type_code":  3,
+                             "lag_minutes":  0
+                         },
+                         {
+                             "predecessor_task_id":  "task:3",
+                             "successor_task_id":  "task:4",
+                             "type":  "FS",
+                             "microsoft_project_type_code":  1,
+                             "lag_minutes":  0
+                         }
+                     ]
+}

@@ -1,0 +1,70 @@
+{
+  "case_id": "MSP-006-SUMMARY-ROLLUP",
+  "case_version": 2,
+  "engine": {
+    "name": "Yuxi",
+    "version": "v6",
+    "profile": "yuxi_v6_nested_summary_rollup"
+  },
+  "result": {
+    "project_start": "<ISO-8601 minute with +08:00 offset>",
+    "project_finish": "<ISO-8601 minute with +08:00 offset>",
+    "tasks": [
+      {
+        "task_id": "task:1",
+        "parent_task_id": null,
+        "outline_level": 1,
+        "task_type": "SUMMARY",
+        "summary": true,
+        "scheduling_mode": "AUTO",
+        "duration_minutes": null,
+        "start": "<ISO-8601 minute with +08:00 offset>",
+        "finish": "<ISO-8601 minute with +08:00 offset>"
+      },
+      {
+        "task_id": "task:2",
+        "parent_task_id": "task:1",
+        "outline_level": 2,
+        "task_type": "SUMMARY",
+        "summary": true,
+        "scheduling_mode": "AUTO",
+        "duration_minutes": null,
+        "start": "<ISO-8601 minute with +08:00 offset>",
+        "finish": "<ISO-8601 minute with +08:00 offset>"
+      },
+      {
+        "task_id": "task:3",
+        "parent_task_id": "task:2",
+        "outline_level": 3,
+        "task_type": "TASK",
+        "summary": false,
+        "scheduling_mode": "AUTO",
+        "duration_minutes": 960,
+        "start": "<ISO-8601 minute with +08:00 offset>",
+        "finish": "<ISO-8601 minute with +08:00 offset>"
+      },
+      {
+        "task_id": "task:4",
+        "parent_task_id": "task:2",
+        "outline_level": 3,
+        "task_type": "TASK",
+        "summary": false,
+        "scheduling_mode": "AUTO",
+        "duration_minutes": 1440,
+        "start": "<ISO-8601 minute with +08:00 offset>",
+        "finish": "<ISO-8601 minute with +08:00 offset>"
+      },
+      {
+        "task_id": "task:5",
+        "parent_task_id": "task:1",
+        "outline_level": 2,
+        "task_type": "TASK",
+        "summary": false,
+        "scheduling_mode": "AUTO",
+        "duration_minutes": 480,
+        "start": "<ISO-8601 minute with +08:00 offset>",
+        "finish": "<ISO-8601 minute with +08:00 offset>"
+      }
+    ]
+  }
+}

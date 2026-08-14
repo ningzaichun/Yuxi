@@ -1,0 +1,207 @@
+{
+  "case_id": "MSP-006-SUMMARY-ROLLUP",
+  "case_version": 2,
+  "oracle_profile": "ms_project_external_observation_v2",
+  "target_engine_profile": "yuxi_v6_nested_summary_rollup",
+  "contract_status": {
+    "oracle_format": "self-contained external observation input",
+    "canonical_schedule_v2_2_adapter": "TO_BE_IMPLEMENTED_IN_YUXI_REPOSITORY",
+    "note": "Do not rename this document canonical_schedule_v2.2 until it is mapped against the repository's authoritative schema."
+  },
+  "timezone": "Asia/Shanghai",
+  "test_intent": "Validate bottom-up roll-up through two summary levels while preserving hierarchy.",
+  "project": {
+    "project_id": "project:msp-006-v2",
+    "name": "MSP-006 嵌套汇总任务滚算 v2",
+    "planned_start": "2026-09-07T08:00:00+08:00",
+    "default_calendar_id": "calendar:yuxi-test-standard",
+    "minutes_per_day": 480,
+    "minutes_per_week": 2400,
+    "days_per_month": 20,
+    "calculation_mode": "AUTOMATIC"
+  },
+  "calendars": [
+    {
+      "calendar_id": "calendar:yuxi-test-standard",
+      "name": "标准",
+      "week_days": [
+        {
+          "day": "SUNDAY",
+          "working": false,
+          "intervals": []
+        },
+        {
+          "day": "MONDAY",
+          "working": true,
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        {
+          "day": "TUESDAY",
+          "working": true,
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        {
+          "day": "WEDNESDAY",
+          "working": true,
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        {
+          "day": "THURSDAY",
+          "working": true,
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        {
+          "day": "FRIDAY",
+          "working": true,
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        {
+          "day": "SATURDAY",
+          "working": false,
+          "intervals": []
+        }
+      ],
+      "exceptions": []
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "task:1",
+      "source_id": 1,
+      "source_unique_id": 1,
+      "parent_task_id": null,
+      "wbs": "1",
+      "outline_level": 1,
+      "name": "总项目",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "scheduling_mode": "AUTO",
+      "duration_minutes": null,
+      "calendar_id": "calendar:yuxi-test-standard"
+    },
+    {
+      "task_id": "task:2",
+      "source_id": 2,
+      "source_unique_id": 2,
+      "parent_task_id": "task:1",
+      "wbs": "1.1",
+      "outline_level": 2,
+      "name": "基础施工阶段",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "scheduling_mode": "AUTO",
+      "duration_minutes": null,
+      "calendar_id": "calendar:yuxi-test-standard"
+    },
+    {
+      "task_id": "task:3",
+      "source_id": 3,
+      "source_unique_id": 3,
+      "parent_task_id": "task:2",
+      "wbs": "1.1.1",
+      "outline_level": 3,
+      "name": "场地准备",
+      "task_type": "TASK",
+      "summary": false,
+      "scheduling_mode": "AUTO",
+      "duration_minutes": 960,
+      "calendar_id": "calendar:yuxi-test-standard"
+    },
+    {
+      "task_id": "task:4",
+      "source_id": 4,
+      "source_unique_id": 4,
+      "parent_task_id": "task:2",
+      "wbs": "1.1.2",
+      "outline_level": 3,
+      "name": "基坑开挖",
+      "task_type": "TASK",
+      "summary": false,
+      "scheduling_mode": "AUTO",
+      "duration_minutes": 1440,
+      "calendar_id": "calendar:yuxi-test-standard"
+    },
+    {
+      "task_id": "task:5",
+      "source_id": 5,
+      "source_unique_id": 5,
+      "parent_task_id": "task:1",
+      "wbs": "1.2",
+      "outline_level": 2,
+      "name": "测量复核",
+      "task_type": "TASK",
+      "summary": false,
+      "scheduling_mode": "AUTO",
+      "duration_minutes": 480,
+      "calendar_id": "calendar:yuxi-test-standard"
+    }
+  ],
+  "dependencies": [
+    {
+      "dependency_id": "dep:1",
+      "predecessor_task_id": "task:3",
+      "successor_task_id": "task:5",
+      "type": "SS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "PROJECT_DEFAULT_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:2",
+      "predecessor_task_id": "task:3",
+      "successor_task_id": "task:4",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "PROJECT_DEFAULT_CALENDAR"
+    }
+  ],
+  "non_inputs": {
+    "summary_dates": "All summary start/finish values are intentionally absent and must be calculated bottom-up.",
+    "resources_assignments_constraints": "Out of scope.",
+    "calendar_exceptions": "None."
+  }
+}

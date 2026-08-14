@@ -1,0 +1,123 @@
+{
+  "case_id": "MSP-006-SUMMARY-ROLLUP",
+  "case_version": 2,
+  "oracle_profile": "ms_project_external_observation_v2",
+  "target_engine_profile": "yuxi_v6_nested_summary_rollup",
+  "oracle": {
+    "product": "Microsoft Project",
+    "major_version": "16.0",
+    "product_version": "16.0.17928.20148",
+    "file_version": "16.0.17928.20148",
+    "calculation_mode": "AUTOMATIC",
+    "timezone": "Asia/Shanghai",
+    "capture_method": "Microsoft Project COM after save-close-reopen-recalculate; ActiveProject/Projects collection fallback",
+    "captured_at": "2026-08-13T18:45:56.4851867+08:00",
+    "source_mpp": "source/case_006_nested_summary_rollup_v2.mpp",
+    "source_mpp_sha256": "90b0a3ae05b7b2c2f1b1b24e850246e56c2b84e02d686374e2622611a3b69f2d"
+  },
+  "expected": {
+    "project_start": "2026-09-07T08:00:00+08:00",
+    "project_finish": "2026-09-11T17:00:00+08:00",
+    "tasks": [
+      {
+        "task_id": "task:1",
+        "source_id": 1,
+        "source_unique_id": 1,
+        "parent_task_id": null,
+        "wbs": "1",
+        "outline_level": 1,
+        "name": "总项目",
+        "task_type": "SUMMARY",
+        "summary": true,
+        "scheduling_mode": "AUTO",
+        "duration_minutes": null,
+        "start": "2026-09-07T08:00:00+08:00",
+        "finish": "2026-09-11T17:00:00+08:00"
+      },
+      {
+        "task_id": "task:2",
+        "source_id": 2,
+        "source_unique_id": 2,
+        "parent_task_id": "task:1",
+        "wbs": "1.1",
+        "outline_level": 2,
+        "name": "基础施工阶段",
+        "task_type": "SUMMARY",
+        "summary": true,
+        "scheduling_mode": "AUTO",
+        "duration_minutes": null,
+        "start": "2026-09-07T08:00:00+08:00",
+        "finish": "2026-09-11T17:00:00+08:00"
+      },
+      {
+        "task_id": "task:3",
+        "source_id": 3,
+        "source_unique_id": 3,
+        "parent_task_id": "task:2",
+        "wbs": "1.1.1",
+        "outline_level": 3,
+        "name": "场地准备",
+        "task_type": "TASK",
+        "summary": false,
+        "scheduling_mode": "AUTO",
+        "duration_minutes": 960,
+        "start": "2026-09-07T08:00:00+08:00",
+        "finish": "2026-09-08T17:00:00+08:00"
+      },
+      {
+        "task_id": "task:4",
+        "source_id": 4,
+        "source_unique_id": 4,
+        "parent_task_id": "task:2",
+        "wbs": "1.1.2",
+        "outline_level": 3,
+        "name": "基坑开挖",
+        "task_type": "TASK",
+        "summary": false,
+        "scheduling_mode": "AUTO",
+        "duration_minutes": 1440,
+        "start": "2026-09-09T08:00:00+08:00",
+        "finish": "2026-09-11T17:00:00+08:00"
+      },
+      {
+        "task_id": "task:5",
+        "source_id": 5,
+        "source_unique_id": 5,
+        "parent_task_id": "task:1",
+        "wbs": "1.2",
+        "outline_level": 2,
+        "name": "测量复核",
+        "task_type": "TASK",
+        "summary": false,
+        "scheduling_mode": "AUTO",
+        "duration_minutes": 480,
+        "start": "2026-09-07T08:00:00+08:00",
+        "finish": "2026-09-07T17:00:00+08:00"
+      }
+    ]
+  },
+  "assertions": [
+    {
+      "assertion_id": "MSP-006-V2-A01",
+      "summary_task_id": "task:2",
+      "summary_name": "基础施工阶段",
+      "direct_child_task_ids": [
+        "task:3",
+        "task:4"
+      ],
+      "start_rule": "min(direct_children.start)",
+      "finish_rule": "max(direct_children.finish)"
+    },
+    {
+      "assertion_id": "MSP-006-V2-A02",
+      "summary_task_id": "task:1",
+      "summary_name": "总项目",
+      "direct_child_task_ids": [
+        "task:2",
+        "task:5"
+      ],
+      "start_rule": "min(direct_children.start)",
+      "finish_rule": "max(direct_children.finish)"
+    }
+  ]
+}

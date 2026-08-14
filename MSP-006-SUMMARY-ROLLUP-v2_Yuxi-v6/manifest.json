@@ -1,0 +1,56 @@
+{
+  "package_id": "MSP-006-SUMMARY-ROLLUP",
+  "case_version": 2,
+  "status": {
+    "msp_external_observation": "PASS",
+    "yuxi_v6_engineering_gate": "READY_FOR_CANONICAL_ADAPTER"
+  },
+  "source_of_truth": "expected.json captured from Microsoft Project after save-close-reopen-recalculate",
+  "files": [
+    {
+      "path": "canonical_schedule_v2.2_adapter_requirements.json",
+      "size_bytes": 1003,
+      "sha256": "1879cf4b3d659c72af972060a9af7a134ba45d7ea5c79f24d0ef627596fb46ff"
+    },
+    {
+      "path": "capture_msproject.ps1",
+      "size_bytes": 5646,
+      "sha256": "3a3c4f158172fd4298bf42c2cc214a1131a7957cc414f26489e70e0978049fa5"
+    },
+    {
+      "path": "expected.json",
+      "size_bytes": 3835,
+      "sha256": "1871a9548c5fc1116be7cb82e9c8c9428bdac35338b621af8faa675a91af1c85"
+    },
+    {
+      "path": "input.json",
+      "size_bytes": 5581,
+      "sha256": "99700ac389e17428f2f5abf3820f91640ffba66cf76d06e36f4e182fdb6f6052"
+    },
+    {
+      "path": "oracle_raw.json",
+      "size_bytes": 12087,
+      "sha256": "d3842d0929d11efe5febccd9109d8de6c99642ba60fdbbb3de3e75d8c4c8d58d"
+    },
+    {
+      "path": "README.md",
+      "size_bytes": 3000,
+      "sha256": "225217d0595f82d41245a344dc28149e65906c4adb16edab2b696c7acb3134d1"
+    },
+    {
+      "path": "source/case_006_nested_summary_rollup_v2.mpp",
+      "size_bytes": 240640,
+      "sha256": "90b0a3ae05b7b2c2f1b1b24e850246e56c2b84e02d686374e2622611a3b69f2d"
+    },
+    {
+      "path": "verify_yuxi_v6.py",
+      "size_bytes": 6754,
+      "sha256": "b8c36b4e96db38efe248e109a4adcdaa2f545b9d2bbc7fccd64779b780aaa18e"
+    },
+    {
+      "path": "yuxi_v6_output_template.json",
+      "size_bytes": 2140,
+      "sha256": "26f9484ecdb0d8b73367ffd20f62c3a67a35032660140cc440f38818e3431093"
+    }
+  ]
+}

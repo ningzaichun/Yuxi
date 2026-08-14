@@ -1,0 +1,20 @@
+{
+  "case_id": "MSP-006-SUMMARY-ROLLUP",
+  "case_version": 2,
+  "status": "REQUIRED_IN_YUXI_REPOSITORY",
+  "source_contract": "this package input.json",
+  "target_contract": "canonical_schedule_v2.2",
+  "target_profile": "new Yuxi v6 profile to be named by repository owner",
+  "required_mappings": [
+    "Preserve task_id and parent_task_id for all five tasks.",
+    "Preserve summary=true and task_type=SUMMARY for task:1 and task:2.",
+    "Do not construct summary tasks as schedulable activities with synthetic duration.",
+    "Map expected tasks to the repository's task_dates/engine-result representation.",
+    "Retain two assertions: task:2 rolls up task:3/task:4; task:1 rolls up task:2/task:5."
+  ],
+  "acceptance": [
+    "Existing golden runner loads five tasks and maximum hierarchy depth is three.",
+    "Engine result contains dates for task:1 through task:5.",
+    "The repository gate compares parent_task_id, summary/type, dates, and both roll-up assertions."
+  ]
+}
