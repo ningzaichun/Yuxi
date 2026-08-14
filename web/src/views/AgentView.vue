@@ -180,7 +180,7 @@ const consumeRouteAgentSelection = async () => {
     if (targetAgentId) await agentStore.selectAgent(targetAgentId)
     if (scheduleIssueId) {
       chatComponent.setDraftMessage?.(
-        `请解释排期审查问题 issue_id=${scheduleIssueId}，并说明证据、影响和需要工程人员确认的事项。`
+        `请解释排期审查问题 issue_id=${scheduleIssueId}，并说明证据、影响和需要工程人员确认的事项。只能依据 Schedule 工具返回的 YUXI_AUDIT 事实；不得把来源 Validation，或 normalization report 中 ignored/unsupported 的字段描述成已参与审查或计算。`
       )
     }
   } catch (error) {

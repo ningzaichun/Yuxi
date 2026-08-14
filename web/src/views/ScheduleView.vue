@@ -58,6 +58,84 @@
               <a-tag color="green">只读来源快照</a-tag>
             </div>
 
+            <section v-if="importOverview" class="content-card">
+              <div class="section-title">
+                <div>
+                  <h3>外部 JSON 接入边界</h3>
+                  <span>接入成功、来源审查和 CPM 是三个独立状态</span>
+                </div>
+                <a-tag color="blue">{{ importOverview.sourceSchemaVersion }}</a-tag>
+              </div>
+
+              <div class="import-stage-grid">
+                <article>
+                  <div class="import-stage-heading">
+                    <strong>1. 外部接入</strong>
+                    <a-tag color="green">已接入</a-tag>
+                  </div>
+                  <p>来源 JSON 已完成边界校验、适配和私有存储。</p>
+                  <code>{{ importOverview.adapterId }}@{{ importOverview.adapterVersion }}</code>
+                </article>
+                <article>
+                  <div class="import-stage-heading">
+                    <strong>2. 来源审查</strong>
+                    <a-tag :color="importOverview.sourceReview.allowed ? 'green' : 'orange'">
+                      {{ importOverview.sourceReview.allowed ? '允许' : '阻断' }}
+                    </a-tag>
+                  </div>
+                  <p>
+                    {{
+                      importOverview.sourceReview.allowed
+                        ? 'Yuxi 已重新计算审查事实，不采用来源自报结论。'
+                        : importOverview.sourceReview.reasons.join('、')
+                    }}
+                  </p>
+                </article>
+                <article>
+                  <div class="import-stage-heading">
+                    <strong>3. CPM 重算</strong>
+                    <a-tag :color="importOverview.cpm.allowed ? 'green' : 'orange'">
+                      {{ importOverview.cpm.allowed ? '允许' : '阻断' }}
+                    </a-tag>
+                  </div>
+                  <p>
+                    {{
+                      importOverview.cpm.allowed
+                        ? '当前 Canonical 语义在受支持的 CPM 范围内。'
+                        : importOverview.cpm.reasons.join('、')
+                    }}
+                  </p>
+                </article>
+              </div>
+
+              <div class="normalization-summary">
+                <div>
+                  <span>保留的来源扩展字段</span>
+                  <strong>{{ importOverview.preservedFieldCount }}</strong>
+                </div>
+                <div>
+                  <span>未参与审查的字段</span>
+                  <strong>{{ importOverview.ignoredAuditCount }}</strong>
+                </div>
+                <div>
+                  <span>未参与计算的字段</span>
+                  <strong>{{ importOverview.ignoredCalculationCount }}</strong>
+                </div>
+              </div>
+              <p class="normalization-note">
+                这里只显示字段数量和原因，不展示来源未知字段的完整值。
+              </p>
+              <div v-if="importOverview.unsupportedSemantics.length" class="unsupported-list">
+                <div v-for="item in importOverview.unsupportedSemantics" :key="item.code">
+                  <a-tag color="orange">{{ item.code }}</a-tag>
+                  <span>{{ unsupportedSemanticLabel(item.code) }}</span>
+                  <small v-if="item.object_refs.length"
+                    >影响 {{ item.object_refs.length }} 个对象</small
+                  >
+                </div>
+              </div>
+            </section>
+
             <div class="metric-grid">
               <article class="metric-card">
                 <span>零 Lag 已检查</span>
@@ -704,6 +782,25 @@ const acceptanceEvidenceAlert = computed(() => {
   }
   return { type: 'info', message: '尚未检测到新的 Source Snapshot，当前等待业务适配器回流。' }
 })
+const importOverview = computed(() => {
+  const detail = snapshotDetail.value
+  const report = detail?.normalization_report
+  if (!detail?.source_document_sha256 || !report) return null
+  return {
+    sourceSchemaVersion: detail.source_schema_version,
+    adapterId: detail.adapter_id,
+    adapterVersion: detail.adapter_version,
+    preservedFieldCount: (report.preserved_fields || []).length,
+    ignoredAuditCount: (report.ignored_for_audit || []).length,
+    ignoredCalculationCount: (report.ignored_for_calculation || []).length,
+    unsupportedSemantics: report.unsupported_semantics || [],
+    sourceReview: audit.value?.capabilities?.source_schedule_review || {
+      allowed: false,
+      reasons: []
+    },
+    cpm: audit.value?.capabilities?.cpm_recalculation || { allowed: false, reasons: [] }
+  }
+})
 const decisionConfirmed = computed(() => dependencyWorkbench.value?.decision?.status === 'confirmed')
 const candidateEligible = computed(
   () => decisionConfirmed.value && dependencyWorkbench.value?.decision?.resolution === 'replace_with_leaf_tasks'
@@ -1051,6 +1148,14 @@ const capabilityLabel = (name) =>
     resource_leveling: '资源均衡',
     resource_cost_optimization: '资源成本优化'
   })[name] || name
+const unsupportedSemanticLabel = (code) =>
+  ({
+    SOURCE_CALCULATION_UNAVAILABLE: '来源未提供可验证的计算字段',
+    BASELINE_UNAVAILABLE: '来源未提供基线数据',
+    PROJECT_CURRENT_DATE_UNAVAILABLE: '来源未提供项目当前日期',
+    MILESTONE_UNSUPPORTED: '当前 CPM 不支持零工期里程碑',
+    RESOURCE_ASSIGNMENTS_UNAVAILABLE: '来源未提供资源分配'
+  })[code] || '当前版本不支持该来源语义'
 const severityColor = (severity) => ({ blocker: 'red', warning: 'orange', info: 'blue' })[severity]
 const shortId = (value) => `${value.slice(0, 8)}…`
 const formatDate = (value) => (value ? new Date(value).toLocaleString() : '处理中')
@@ -1203,6 +1308,76 @@ onMounted(loadSnapshots)
 
 .content-card {
   margin-top: 16px;
+}
+
+.import-stage-grid,
+.normalization-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.import-stage-grid article,
+.normalization-summary > div {
+  padding: 14px;
+  border: 1px solid var(--gray-150);
+  border-radius: 8px;
+  background: var(--gray-10);
+}
+
+.import-stage-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.import-stage-grid p,
+.normalization-note,
+.unsupported-list small {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.import-stage-grid p {
+  min-height: 36px;
+  margin: 10px 0;
+}
+
+.import-stage-grid code {
+  word-break: break-all;
+}
+
+.normalization-summary span,
+.normalization-summary strong {
+  display: block;
+}
+
+.normalization-summary span {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.normalization-summary strong {
+  margin-top: 6px;
+  font-size: 22px;
+}
+
+.normalization-note {
+  margin: 10px 0 0;
+}
+
+.unsupported-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.unsupported-list > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .capability-grid article > div {
@@ -1365,8 +1540,19 @@ h4 {
   }
 
   .metric-grid,
-  .capability-grid {
+  .capability-grid,
+  .import-stage-grid,
+  .normalization-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .metric-grid,
+  .capability-grid,
+  .import-stage-grid,
+  .normalization-summary {
+    grid-template-columns: 1fr;
   }
 }
 </style>

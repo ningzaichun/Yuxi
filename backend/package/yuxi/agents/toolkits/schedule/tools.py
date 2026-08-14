@@ -31,7 +31,8 @@ async def get_schedule_audit(
     """读取 Yuxi 已持久化的确定性排期审查摘要。
 
     该工具不会重新计算日期、关键路径或补丁。非零 Lag 关系只能按返回统计说明为“未检查”，
-    不得描述成已验证无冲突。
+    不得描述成已验证无冲突；来源 Validation 以及规范化报告中 ignored/unsupported 的字段
+    不得描述成已参与 Yuxi 审查或计算。
     """
     uid = str(getattr(runtime.context, "uid", "") or "").strip()
     if not uid:
@@ -56,7 +57,7 @@ async def get_schedule_issue_context(
     """读取一个 Yuxi Schedule Issue 的证据和直接网络上下文。
 
     只解释返回的 YUXI_AUDIT 事实。不得自行生成日期、关键路径或 Patch，也不得把来源 Validation
-    当作 Yuxi 结论。
+    当作 Yuxi 结论；规范化报告中 ignored/unsupported 的字段也不得描述成已参与审查或计算。
     """
     uid = str(getattr(runtime.context, "uid", "") or "").strip()
     if not uid:

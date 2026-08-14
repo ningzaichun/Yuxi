@@ -94,8 +94,11 @@ def test_schedule_tool_descriptions_preserve_agent_behavior_boundaries() -> None
 
     assert "不会重新计算日期、关键路径或补丁" in audit_description
     assert "未检查" in audit_description
+    assert "ignored/unsupported" in audit_description
+    assert "不得描述成已参与 Yuxi 审查或计算" in audit_description
     assert "不得自行生成日期、关键路径或 Patch" in issue_description
     assert "YUXI_AUDIT" in issue_description
+    assert "ignored/unsupported" in issue_description
 
 
 @pytest.mark.asyncio

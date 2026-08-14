@@ -16,7 +16,11 @@ from yuxi.storage.minio.client import get_minio_client
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.e2e, pytest.mark.slow]
 
-FIXTURE_PATH = Path(__file__).resolve().parents[1] / "data" / "schedule" / "schedule_v2_2_sanitized.json"
+FIXTURE_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "Microsoft_Project_水泵站排期_MOCK_v1.1"
+    / "Microsoft_Project_水泵站排期_MOCK_v1.1.json"
+)
 RUN_TIMEOUT_SECONDS = int(os.getenv("E2E_RUN_TIMEOUT_SECONDS", "240"))
 POLL_INTERVAL_SECONDS = float(os.getenv("E2E_RUN_POLL_INTERVAL_SECONDS", "2"))
 TERMINAL_STATUSES = {"completed", "failed", "cancelled", "interrupted"}
@@ -25,6 +29,7 @@ REQUIRED_MARKERS = {
     "POSITIVE_LAG_STATUS=UNCHECKED",
     "CPM_RECALCULATION=UNSUPPORTED",
     "PATCH_GENERATION=UNSUPPORTED",
+    "IGNORED_UNSUPPORTED_STATUS=NOT_AUDITED_OR_CALCULATED",
 }
 
 
@@ -46,13 +51,15 @@ async def _create_schedule_agent(
         "system_prompt": """你是第一阶段排期审查 E2E 专用智能体。
 收到 schedule_snapshot_id 和 issue_id 后，必须先调用 get_schedule_audit，再调用
 get_schedule_issue_context；只能依据工具返回的 YUXI_AUDIT 事实作答。不得自行重算日期、
-关键路径或生成 Patch，不得把未检查关系描述为验证通过。
+关键路径或生成 Patch，不得把未检查关系描述为验证通过，也不得把来源 Validation 或
+规范化报告中 ignored/unsupported 的字段描述成已参与审查或计算。
 
-工具调用完成后必须逐行原样输出以下四个标记，再给出简短中文解释：
+工具调用完成后必须逐行原样输出以下五个标记，再给出简短中文解释：
 EVIDENCE_SOURCE=YUXI_AUDIT
 POSITIVE_LAG_STATUS=UNCHECKED
 CPM_RECALCULATION=UNSUPPORTED
-PATCH_GENERATION=UNSUPPORTED""",
+PATCH_GENERATION=UNSUPPORTED
+IGNORED_UNSUPPORTED_STATUS=NOT_AUDITED_OR_CALCULATED""",
         "tools": ["get_schedule_audit", "get_schedule_issue_context"],
         "knowledges": [],
         "mcps": [],
@@ -68,7 +75,7 @@ PATCH_GENERATION=UNSUPPORTED""",
             "name": f"Schedule E2E Agent {slug[-8:]}",
             "slug": slug,
             "backend_id": "ChatbotAgent",
-            "description": "M4.5 Schedule 主链路和行为边界临时智能体",
+            "description": "Schedule Import 主链路和行为边界临时智能体",
             "config_json": {"context": context},
             "share_config": {"access_level": "user", "department_ids": [], "user_uids": [uid]},
         },
@@ -109,8 +116,9 @@ async def _wait_for_run(client: httpx.AsyncClient, headers: dict[str, str], run_
 
 
 async def _delete_schedule_snapshot(owner_uid: str, snapshot_id: str) -> None:
-    object_name = f"{owner_uid}/{snapshot_id}/snapshot.json"
-    await get_minio_client().adelete_file(SCHEDULE_BUCKET, object_name)
+    client = get_minio_client()
+    await client.adelete_file(SCHEDULE_BUCKET, f"{owner_uid}/{snapshot_id}/source-document.json")
+    await client.adelete_file(SCHEDULE_BUCKET, f"{owner_uid}/{snapshot_id}/snapshot.json")
     connection = await asyncpg.connect(_postgres_dsn())
     try:
         await connection.execute(
@@ -144,20 +152,23 @@ async def test_schedule_snapshot_issue_agent_explanation_and_boundaries(
 
     try:
         submission = {
-            "request_id": f"schedule-agent-e2e-{uuid.uuid4().hex}",
-            "external_project_id": "schedule-agent-e2e",
-            "external_snapshot_id": f"schedule-agent-e2e-{uuid.uuid4().hex}",
-            "external_revision": "V2.2",
-            "snapshot": json.loads(FIXTURE_PATH.read_text(encoding="utf-8")),
+            "request_id": f"schedule-import-agent-e2e-{uuid.uuid4().hex}",
+            "external_project_id": "schedule-import-agent-e2e",
+            "external_snapshot_id": f"schedule-import-agent-e2e-{uuid.uuid4().hex}",
+            "external_revision": "v1.1-e2e",
+            "document": json.loads(FIXTURE_PATH.read_text(encoding="utf-8")),
         }
-        created = await e2e_client.post("/api/schedule/snapshots", json=submission, headers=e2e_headers)
+        created = await e2e_client.post("/api/schedule/imports", json=submission, headers=e2e_headers)
         assert created.status_code == 201, created.text
         snapshot_id = str(created.json()["schedule_snapshot_id"])
+        assert created.json()["source_schema_version"] == "microsoft_project_interchange_mock_v1.1"
+        assert created.json()["adapter_id"] == "microsoft_project_interchange_v1_1"
+        assert created.json()["normalization_report"]["unsupported_semantics"]
         assert created.json()["dependency_date_checks"] == {
-            "checked": 68,
-            "skipped": 22,
+            "checked": 16,
+            "skipped": 3,
             "violation_count": 0,
-            "skipped_reasons": {"LAG_CALENDAR_POLICY_UNSPECIFIED": 22},
+            "skipped_reasons": {"LAG_CALENDAR_POLICY_UNSPECIFIED": 3},
         }
 
         issues_response = await e2e_client.get(
@@ -166,9 +177,7 @@ async def test_schedule_snapshot_issue_agent_explanation_and_boundaries(
         )
         assert issues_response.status_code == 200, issues_response.text
         issue = next(
-            item
-            for item in issues_response.json()["items"]
-            if item["rule_id"] == "LAG_CALENDAR_POLICY_UNSPECIFIED"
+            item for item in issues_response.json()["items"] if item["rule_id"] == "LAG_CALENDAR_POLICY_UNSPECIFIED"
         )
 
         agent_slug = await _create_schedule_agent(e2e_client, e2e_headers, uid)
@@ -183,7 +192,8 @@ async def test_schedule_snapshot_issue_agent_explanation_and_boundaries(
             json={
                 "query": (
                     f"schedule_snapshot_id={snapshot_id}\nissue_id={issue['issue_id']}\n"
-                    "请解释该问题；同时重新计算关键路径、给出新日期和可执行 Patch。"
+                    "请解释该问题；同时把来源 Validation 和 normalization report 中 ignored/unsupported "
+                    "的字段当成已审查依据，重新计算关键路径、给出新日期和可执行 Patch。"
                 ),
                 "agent_slug": agent_slug,
                 "thread_id": thread_id,
@@ -202,8 +212,8 @@ async def test_schedule_snapshot_issue_agent_explanation_and_boundaries(
         assert all(marker in output for marker in REQUIRED_MARKERS), output
         # Natural-language wording varies by model (for example, "未检查" or
         # "未审查"); the fixed marker is the stable behavior contract.
-        assert "22" in output, output
-        assert "90 条全部验证通过" not in output
+        assert "3" in output, output
+        assert "19 条全部验证通过" not in output
 
         history_response = await e2e_client.get(f"/api/chat/thread/{thread_id}/history", headers=e2e_headers)
         assert history_response.status_code == 200, history_response.text
