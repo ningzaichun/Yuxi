@@ -1,0 +1,38 @@
+{
+  "schema_version": "mock_project_schedule_manifest_v1.1",
+  "artifact_version": "v1.1",
+  "data_classification": "SYNTHETIC_TEST_DATA",
+  "primary_json": "Microsoft_Project_水泵站排期_MOCK_v1.1.json",
+  "validation_status": "PASS",
+  "verification": {
+    "verified_at": "2026-08-14T14:22:15+08:00",
+    "method": "Microsoft Project COM read-only reopen-recalculate and semantic comparison",
+    "microsoft_project_version": "16.0",
+    "result": "PASS",
+    "tasks_compared": 21,
+    "dependencies_compared": 19,
+    "mismatches": 0
+  },
+  "files": [
+    {
+      "path": "Microsoft_Project_水泵站排期_MOCK_v1.1.json",
+      "size_bytes": 25753,
+      "sha256": "5eb6be754173fcdc454c05c10440c539c78e87f5a8c3df50aac203aa8e590269"
+    },
+    {
+      "path": "project_observation_raw.json",
+      "size_bytes": 40322,
+      "sha256": "0b6f7336a1d7f4260190a73b5e0c35a8c6988c3554b2e86a69ffd88e19094b03"
+    },
+    {
+      "path": "README.md",
+      "size_bytes": 1372,
+      "sha256": "8e6f38006c6373dbd0ec68130522eefabd93f88beef07a0fcdf02280e507070c"
+    },
+    {
+      "path": "source/water_pump_station_schedule_mock_v1_1.mpp",
+      "size_bytes": 258560,
+      "sha256": "d87e1545eb03e212b6ae643dd99b6394fa39f9516dfe033d9f306a835ec6fec9"
+    }
+  ]
+}

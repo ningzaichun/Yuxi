@@ -1,0 +1,2 @@
+# Preserve byte-for-byte test artifacts whose manifest records file hashes.
+Microsoft_Project_水泵站排期_MOCK_v1.1/** -text whitespace=cr-at-eol
