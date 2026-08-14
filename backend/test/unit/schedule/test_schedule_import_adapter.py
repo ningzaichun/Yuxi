@@ -164,6 +164,48 @@ def test_water_pump_adapter_preserves_extensions_and_ignores_source_claims(
     assert "SOURCE_CALCULATION_UNAVAILABLE" in {item.code for item in report.unsupported_semantics}
 
 
+@pytest.mark.parametrize("evidence_field", ["opened_after_save", "project_recalculated_after_reopen"])
+def test_adapter_blocks_source_review_when_reopen_evidence_is_false(
+    water_pump_import_document: dict,
+    evidence_field: str,
+) -> None:
+    document = copy.deepcopy(water_pump_import_document)
+    document["source"][evidence_field] = False
+
+    result = build_default_schedule_import_registry().normalize(document)
+    execution = audit_schedule(
+        import_canonical_schedule_v2_2(result.canonical),
+        schedule_snapshot_id=result.canonical.snapshot_id,
+        audit_run_id="audit:source-fidelity-invalid",
+    )
+
+    assert result.canonical.validation.summary.source_fidelity_valid is False
+    assert result.canonical.capabilities.source_schedule_review.model_dump() == {
+        "allowed": False,
+        "reasons": ["SOURCE_FIDELITY_INVALID"],
+    }
+    assert execution.result.capabilities["source_schedule_review"].model_dump() == {
+        "allowed": False,
+        "reasons": ["SOURCE_FIDELITY_INVALID"],
+    }
+    assert "SOURCE_FIDELITY_INVALID" in {item.code for item in result.normalization_report.unsupported_semantics}
+
+
+def test_adapter_omits_milestone_unsupported_when_source_has_no_milestones(
+    water_pump_import_document: dict,
+) -> None:
+    document = copy.deepcopy(water_pump_import_document)
+    for task in document["tasks"]:
+        if task["task_type"] == "MILESTONE":
+            task["task_type"] = "TASK"
+            task["duration_minutes"] = 480
+
+    result = build_default_schedule_import_registry().normalize(document)
+
+    assert result.canonical.capabilities.cpm_recalculation.allowed is True
+    assert "MILESTONE_UNSUPPORTED" not in {item.code for item in result.normalization_report.unsupported_semantics}
+
+
 def test_water_pump_adapter_is_deterministic_and_unknown_fields_do_not_change_canonical(
     water_pump_import_document: dict,
 ) -> None:

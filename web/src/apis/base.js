@@ -69,8 +69,6 @@ export async function apiRequest(url, options = {}, requiresAuth = true, respons
           console.error('422验证错误详情:', {
             url,
             requestMethod: requestOptions.method,
-            requestHeaders: requestOptions.headers,
-            requestBody: requestOptions.body,
             responseData: errorData
           })
         }

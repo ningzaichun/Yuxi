@@ -35,6 +35,8 @@
 
 ### 1. 选择提交路径
 
+人工操作可直接在“排期审查”页面点击“导入排期”，选择版本化来源 JSON 或严格 Canonical JSON。页面根据 `schema_version` 自动分流、预填外部身份并在成功后打开新快照；它只读取 JSON，不接受 MPP。
+
 推荐新调用方把已从 MPP 或其他系统提取完成、带 `schema_version` 的来源 JSON 提交到 `/api/schedule/imports`。Yuxi 根据版本选择 Adapter，保存来源 JSON 数据语义副本，并生成严格 Canonical。保存的来源对象不是原始 HTTP 请求字节，空白、缩进和对象字段顺序不会保留。
 
 已经能够稳定生成完整 `canonical_schedule_v2.2` 的调用方，可以继续使用 `/api/schedule/snapshots`。Canonical 结构契约以 Pydantic 模型和随代码导出的 JSON Schema 为准：
@@ -68,7 +70,7 @@ Content-Type: application/json
 
 Import 幂等同时检查来源哈希和 Canonical 哈希。同一 `request_id` 的来源 JSON 数据语义发生变化会返回 `409`，即使变化字段没有进入 Canonical；仅改变空白、缩进或对象字段顺序不会改变来源哈希。首次成功为 `201`，相同来源重放为 `200`。
 
-当前实现尚未把 `external_project_id`、`external_snapshot_id` 和 `external_revision` 纳入内容冲突判断。相同 `request_id` 只改变这些信封身份时，服务可能重放旧记录。调用方重试必须保持整个信封一致；任何外部身份或版本变化都必须使用新的 `request_id`。在服务端修复前，不得把成功重放视为信封身份一致性已经验证。
+幂等判断还会独立比较 `external_project_id`、`external_snapshot_id` 和 `external_revision`。同一 `request_id` 改变任一信封身份都会返回 `409`；只有整个信封和内容一致时才会重放旧记录。
 
 ### 2B. 直接提交 Canonical Snapshot
 
@@ -106,20 +108,21 @@ Content-Type: application/json
 
 直接 Canonical 入口的内容哈希只基于通过校验后的 `snapshot`，不包含请求信封字段，也不信任来源 `source.sha256` 作为幂等依据。
 
-Import 入口同样不把信封身份写入来源或 Canonical 内容哈希。`document.source.mpp_sha256` 是外部声明且不会由 Yuxi 复算；`source_document_sha256` 是来源 `document` 的排序紧凑 JSON 哈希；`canonical_snapshot_sha256` 是 Adapter 输出的严格 Canonical 哈希。
+Import 入口不把信封身份写入来源或 Canonical 内容哈希，但会在哈希之外独立比较信封身份。`document.source.mpp_sha256` 是外部声明且不会由 Yuxi 复算；`source_document_sha256` 是来源 `document` 的排序紧凑 JSON 哈希；`canonical_snapshot_sha256` 是 Adapter 输出的严格 Canonical 哈希。
 
 ### 3. 在页面查看结果
 
 登录后从左侧导航进入“排期审查”：
 
-1. 在左侧选择来源快照；
-2. 对 Import 快照先查看“外部接入、来源审查、CPM 重算”三个独立状态；来源审查只审查 Adapter 生成的 Canonical，不证明 MPP 提取过程可信；
-3. 查看来源版本、Adapter 版本和规范化摘要；页面只显示字段数量和 unsupported 原因，不显示未知字段值；
-4. 查看任务、依赖、开放起点/终点和日期检查统计；
-5. 查看 Capability。Capability 阻断和 Issue 严重等级是两个维度；
-6. 按等级或分类过滤 Issue；
-7. 点击“证据”查看对象、确定性证据和直接上下游；
-8. 点击“Agent 解释”进入具备两个 Schedule 工具的智能体。
+1. 需要新增快照时点击“导入排期”，选择 JSON、确认自动识别结果和外部身份后提交；
+2. 在左侧选择来源快照；
+3. 对 Import 快照先查看“外部接入、来源审查、CPM 重算”三个独立状态；来源审查只审查 Adapter 生成的 Canonical，不证明 MPP 提取过程可信；
+4. 查看来源版本、Adapter 版本和规范化摘要；页面只显示字段数量和 unsupported 原因，不显示未知字段值；
+5. 查看任务、依赖、开放起点/终点和日期检查统计；
+6. 查看 Capability。Capability 阻断和 Issue 严重等级是两个维度；
+7. 按等级或分类过滤 Issue；
+8. 点击“证据”查看对象、确定性证据和直接上下游；
+9. 点击“Agent 解释”进入具备两个 Schedule 工具的智能体。
 
 页面不编辑或应用来源计划。符合最小 CPM Profile 的来源可生成只读重算 Candidate；范围外输入只展示结构化阻断原因。
 
@@ -323,7 +326,7 @@ pnpm build
 
 调用方重复使用了同一用户下的幂等键，但来源文档或 Snapshot 内容发生变化，或者在 `/imports` 与 `/snapshots` 之间交叉复用了键。不要覆盖旧请求；为新的业务提交生成新的 `request_id`。
 
-仅改变 `external_project_id`、`external_snapshot_id` 或 `external_revision` 当前不一定返回 `409`，而可能得到旧记录的幂等重放。排障时必须同时核对响应中的 Snapshot ID 和数据库内已保存的外部身份。
+同一 `request_id` 改变 `external_project_id`、`external_snapshot_id` 或 `external_revision` 会返回 `409`。页面重新选择文件会生成新请求；存储失败后的原样重试应保留当前弹窗和请求身份。
 
 ### 页面看不到刚提交的记录
 

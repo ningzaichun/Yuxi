@@ -6,7 +6,13 @@
         <h1>排期审查</h1>
         <p class="subtitle">查看不可变来源快照、Yuxi 确定性审查结论与可追溯证据。</p>
       </div>
-      <a-button :loading="loadingSnapshots" @click="loadSnapshots(false)">刷新</a-button>
+      <a-space>
+        <a-button :loading="loadingSnapshots" @click="loadSnapshots(false)">刷新</a-button>
+        <a-button type="primary" @click="importModalOpen = true">
+          <Upload :size="16" />
+          导入排期
+        </a-button>
+      </a-space>
     </header>
 
     <a-alert
@@ -662,6 +668,8 @@
         </a-radio>
       </a-radio-group>
     </a-modal>
+
+    <ScheduleImportModal v-model:open="importModalOpen" @success="handleImportSuccess" />
   </main>
 </template>
 
@@ -669,8 +677,9 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { Ban, CheckCircle2 } from 'lucide-vue-next'
+import { Ban, CheckCircle2, Upload } from 'lucide-vue-next'
 import { scheduleApi } from '@/apis/schedule_api'
+import ScheduleImportModal from '@/components/schedule/ScheduleImportModal.vue'
 
 const router = useRouter()
 const snapshots = ref([])
@@ -690,6 +699,7 @@ const loadingIssues = ref(false)
 const loadingIssueDetail = ref(false)
 const issueDrawerOpen = ref(false)
 const agentModalOpen = ref(false)
+const importModalOpen = ref(false)
 const workbenchOpen = ref(false)
 const loadingWorkbench = ref(false)
 const savingDecision = ref(false)
@@ -892,6 +902,11 @@ const loadSnapshots = async (append = false) => {
   } finally {
     loadingSnapshots.value = false
   }
+}
+
+const handleImportSuccess = async (result) => {
+  await loadSnapshots(false)
+  if (result.schedule_snapshot_id) await selectSnapshot(result.schedule_snapshot_id)
 }
 
 const selectSnapshot = async (snapshotId) => {

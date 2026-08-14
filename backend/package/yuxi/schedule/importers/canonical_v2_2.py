@@ -21,6 +21,7 @@ def import_canonical_schedule_v2_2(source: CanonicalScheduleV22) -> ScheduleSnap
         status_date=source.project.status_date,
         source_statistics=source.statistics.model_dump(mode="json"),
         source_capabilities=source.capabilities.model_dump(mode="json"),
+        source_fidelity_valid=source.validation.summary.source_fidelity_valid,
         lag_calendar_policy=source.semantics.lag_calendar_policy,
         tasks=tuple(
             ScheduleTask(

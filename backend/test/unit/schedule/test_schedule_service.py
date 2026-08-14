@@ -186,6 +186,29 @@ async def test_same_idempotency_key_with_different_content_conflicts(canonical_s
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("external_project_id", "different-project"),
+        ("external_snapshot_id", "different-external-snapshot"),
+        ("external_revision", "V2.2-revision-2"),
+    ],
+)
+async def test_same_idempotency_key_with_different_external_identity_conflicts(
+    canonical_schedule_payload: dict,
+    field: str,
+    value: str,
+) -> None:
+    repository = FakeScheduleRepository()
+    service = ScheduleAuditService(repository, FakeScheduleStore())
+    submission = _submission(canonical_schedule_payload)
+    await service.submit("owner-1", submission)
+
+    with pytest.raises(ScheduleConflictError):
+        await service.submit("owner-1", submission.model_copy(update={field: value}))
+
+
+@pytest.mark.asyncio
 async def test_import_persists_source_and_canonical_with_dual_hashes() -> None:
     repository = FakeScheduleRepository()
     store = FakeScheduleStore()

@@ -153,6 +153,12 @@ class ScheduleAuditService:
             raise ScheduleConflictError
         if source_document_sha256 is not None and record_source_sha256 != source_document_sha256:
             raise ScheduleConflictError
+        if (
+            record.external_project_id != submission.external_project_id
+            or record.external_snapshot_id != submission.external_snapshot_id
+            or record.external_revision != submission.external_revision
+        ):
+            raise ScheduleConflictError
         if not created:
             replay = await self._resolve_existing(
                 owner_uid,

@@ -41,6 +41,10 @@ microsoft_project_interchange_mock_v1.1
 
 ## 2. 两种提交方式
 
+人工导入时，优先在“排期审查”页面点击“导入排期”，选择不超过 10 MiB 的 JSON 文件。页面会根据根对象的 `schema_version` 自动选择 `/imports` 或 `/snapshots`，生成 `request_id`，并预填外部项目、快照和版本身份；用户确认后再提交。页面不接受 MPP，也不会在浏览器中解析 MPP。
+
+系统间集成仍应直接调用下述 API，并由上游提供稳定的外部身份。
+
 ### 2.1 推荐：提交版本化来源 JSON
 
 调用：
@@ -95,7 +99,7 @@ Microsoft_Project_水泵站排期_MOCK_v1.1/
 - 未定义字段会保存在私有来源对象中，但不会自动参与 Audit 或 CPM；
 - 来源自报 Statistics、Capabilities 和 Validation 不作为 Yuxi 结论。
 
-通过上述契约只代表“JSON 结构可被当前 Adapter 处理”，不代表 MPP 提取过程已经可信，也不代表每个已定义字段都已参与计算。当前 mock Adapter 不会独立验证 MPP 文件、COM 提取过程或 `opened_after_save`、`project_recalculated_after_reopen` 等提取证据；这些事实仍由外部转换服务和案例 manifest 负责。不得把 `source_fidelity_valid` 或“来源审查允许”单独作为 MPP 与 JSON 一致的证明。
+通过上述契约只代表“JSON 结构可被当前 Adapter 处理”，不代表 MPP 提取过程已经可信，也不代表每个已定义字段都已参与计算。当前 mock Adapter 会读取 `opened_after_save` 和 `project_recalculated_after_reopen`；任一字段为 `false` 时，来源审查以 `SOURCE_FIDELITY_INVALID` 阻断，normalization report 同步记录该原因。但 Yuxi 仍不会独立打开 MPP、验证 COM 过程或证明这两个布尔声明为真；这些事实仍由外部转换服务和案例 manifest 负责。
 
 ### 2.2 兼容：直接提交严格 Canonical
 
@@ -138,7 +142,7 @@ POST /api/schedule/snapshots
 
 接入成功不等于全部来源字段都参与了审查，也不等于 CPM 可以运行。页面中的“外部 JSON 接入边界”会独立显示三个状态。
 
-Capability 是“是否允许执行某项 Yuxi 能力”的事实来源；normalization report 只说明字段如何保留、忽略或标记为 unsupported。两者出现矛盾时必须停止验收并记录缺陷，不能任选一个有利结论继续。当前 mock Adapter 的报告仍需补齐条件化一致性验证，因此不能仅凭 `unsupported_semantics` 列表判断 CPM 是否允许。
+Capability 是“是否允许执行某项 Yuxi 能力”的事实来源；normalization report 只说明字段如何保留、忽略或标记为 unsupported。两者出现矛盾时必须停止验收并记录缺陷，不能任选一个有利结论继续。当前 mock Adapter 已对 `SOURCE_FIDELITY_INVALID` 和 `MILESTONE_UNSUPPORTED` 做条件化报告，但仍不能仅凭 `unsupported_semantics` 列表替代 Capability 判定。
 
 ## 4. 幂等、双对象和双哈希
 
@@ -146,10 +150,11 @@ Capability 是“是否允许执行某项 Yuxi 能力”的事实来源；normal
 
 - 同一 `request_id`、相同来源文档：返回原结果；
 - 同一 `request_id`、来源文档变化：返回 `409 SCHEDULE_IDEMPOTENCY_CONFLICT`；
+- 同一 `request_id`、任一外部项目/快照/版本身份变化：返回 `409 SCHEDULE_IDEMPOTENCY_CONFLICT`；
 - 即使两个不同来源文档生成相同 Canonical，只要来源哈希不同，仍视为冲突；
 - `/imports` 和 `/snapshots` 不能交叉复用同一个 `request_id`。
 
-当前实现只用来源哈希和 Canonical 哈希判断内容冲突，`external_project_id`、`external_snapshot_id`、`external_revision` 单独变化时不会触发 `409`，而可能重放旧记录。调用方重试时必须保持整个信封完全一致；任何外部身份或版本变化都必须使用新的 `request_id`。该限制尚待服务端收紧，不能把成功重放解释为信封身份已经校验一致。
+调用方重试必须保持整个信封完全一致。外部身份不会写入来源或 Canonical 内容哈希，但服务端会独立比较已保存的 `external_project_id`、`external_snapshot_id` 和 `external_revision`。
 
 私有对象存储中分别保存：
 
@@ -184,7 +189,7 @@ Capability 是“是否允许执行某项 Yuxi 能力”的事实来源；normal
 | CPM 重算 | 阻断，原因 `MILESTONE_UNSUPPORTED` |
 | 资源能力 | 阻断，来源没有 Assignment |
 
-水泵站案例验证的是该固定样例的导入、规范化、Audit 和阻断行为。它的 manifest 记录了 MPP、JSON 和观测文件哈希，但 Yuxi 导入接口本身不会复算 MPP 哈希。由于包含 4 个零工期里程碑，它不用于验证当前 CPM 成功主路径，也不能覆盖提取证据为 false、无里程碑或外部身份变化等负向边界。
+水泵站案例验证的是该固定样例的导入、规范化、Audit 和阻断行为。它的 manifest 记录了 MPP、JSON 和观测文件哈希，但 Yuxi 导入接口本身不会复算 MPP 哈希。由于包含 4 个零工期里程碑，它不用于验证当前 CPM 成功主路径；提取证据为 false、无里程碑和外部身份变化由独立单元回归覆盖。
 
 ## 6. 推荐测试流程
 
@@ -198,7 +203,7 @@ Capability 是“是否允许执行某项 Yuxi 能力”的事实来源；normal
 
 重点验证缺少必填字段失败、未知字段保留、未知引用和父子环拒绝、适配结果确定性，以及来源声明不参与 Yuxi 结论。
 
-正式扩展来源格式前还必须补充：提取证据为 false、来源类型码与关系类型不一致、日历解析策略不一致、无里程碑时报告条件化、同一请求改变信封身份等回归。当前固定水泵站测试通过不代表这些边界已经验证。
+当前回归已覆盖提取证据为 false、无里程碑时报告条件化和同一请求改变信封身份。正式扩展来源格式前还必须为新版本补充来源类型码与关系类型一致性、日历解析策略及其专属语义边界；固定水泵站测试通过不代表任意新来源版本已经验证。
 
 ### 6.2 真实 API、PostgreSQL 和 MinIO
 
@@ -220,14 +225,15 @@ Import 用例覆盖首次 `201`、重放 `200`、冲突 `409`、双对象、双�
 
 ### 6.4 页面验收
 
-1. 用同一账号导入案例并打开“排期审查”；
-2. 核对来源版本和 Adapter 版本；
-3. 确认“外部接入”为已接入；
-4. 确认“来源审查”为允许；
-5. 确认“CPM 重算”为阻断且原因是 `MILESTONE_UNSUPPORTED`；
-6. 核对 preserved、ignored 和 unsupported 的数量，并确认 Capability 与报告没有矛盾；
-7. 确认页面没有展示来源未知字段值；
-8. 点击“Agent 解释”，确认只生成草稿且不会自动发送。
+1. 打开“排期审查”，点击“导入排期”，选择案例 JSON；
+2. 确认页面识别为“来源 JSON”，核对自动预填的外部身份后提交；
+3. 导入成功后确认页面自动选中新快照，并核对来源版本和 Adapter 版本；
+4. 确认“外部接入”为已接入；
+5. 确认“来源审查”为允许；
+6. 确认“CPM 重算”为阻断且原因是 `MILESTONE_UNSUPPORTED`；
+7. 核对 preserved、ignored 和 unsupported 的数量，并确认 Capability 与报告没有矛盾；
+8. 确认页面没有展示来源未知字段值；
+9. 点击“Agent 解释”，确认只生成草稿且不会自动发送。
 
 ## 7. 常见错误
 

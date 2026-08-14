@@ -250,8 +250,11 @@ def _validation_payload(
     summary_task_dependency_ids: list[str],
     source_schedule_violations: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    milestone_ids = sorted(task.task_id for task in source.tasks if task.task_type == "MILESTONE")
+    milestone_ids = sorted(
+        task.task_id for task in source.tasks if task.task_type != "SUMMARY" and task.duration_minutes == 0
+    )
     all_task_ids = sorted(task.task_id for task in source.tasks)
+    source_fidelity_valid = source.source.opened_after_save and source.source.project_recalculated_after_reopen
     issues = [
         _validation_issue(
             "IMPORT-V1-001",
@@ -278,8 +281,19 @@ def _validation_payload(
             "Source resources and assignments are unavailable.",
         ),
     ]
+    if not source_fidelity_valid:
+        issues.append(
+            _validation_issue(
+                "IMPORT-V1-004",
+                "SOURCE_FIDELITY_INVALID",
+                "blocker",
+                "project",
+                [source.project.project_id],
+                "The source was not reopened and recalculated after save.",
+            )
+        )
     engine_decisions = []
-    for index, code in enumerate(capabilities["cpm_recalculation"]["reasons"], start=4):
+    for index, code in enumerate(capabilities["cpm_recalculation"]["reasons"], start=5):
         object_refs = milestone_ids if code == "MILESTONE_UNSUPPORTED" else []
         issues.append(
             _validation_issue(
@@ -306,12 +320,14 @@ def _validation_payload(
         "source_sha256": source.source.mpp_sha256,
         "summary": {
             "status": (
-                "review_allowed" if capabilities["cpm_recalculation"]["allowed"] else "blocked_for_recalculation"
+                "blocked_for_source_review"
+                if not source_fidelity_valid
+                else ("review_allowed" if capabilities["cpm_recalculation"]["allowed"] else "blocked_for_recalculation")
             ),
             "issue_count": len(issues),
             "blocker_count": sum(issue["severity"] == "blocker" for issue in issues),
             "warning_count": sum(issue["severity"] == "warning" for issue in issues),
-            "source_fidelity_valid": True,
+            "source_fidelity_valid": source_fidelity_valid,
             "recalculation_allowed": capabilities["cpm_recalculation"]["allowed"],
             "display_allowed": True,
         },
@@ -390,6 +406,33 @@ def _build_report(source: MicrosoftProjectInterchangeV11) -> ScheduleNormalizati
     ignored_extensions = [
         FieldDisposition(path=path, reason_code="UNKNOWN_SOURCE_FIELD_NOT_MAPPED") for path in preserved_fields
     ]
+    unsupported_semantics = [
+        UnsupportedSemantic(
+            code="SOURCE_CALCULATION_UNAVAILABLE",
+            object_refs=sorted(task.task_id for task in source.tasks),
+        ),
+        UnsupportedSemantic(
+            code="BASELINE_UNAVAILABLE",
+            object_refs=sorted(task.task_id for task in source.tasks),
+        ),
+        UnsupportedSemantic(
+            code="PROJECT_CURRENT_DATE_UNAVAILABLE",
+            object_refs=[source.project.project_id],
+        ),
+    ]
+    if not (source.source.opened_after_save and source.source.project_recalculated_after_reopen):
+        unsupported_semantics.append(
+            UnsupportedSemantic(
+                code="SOURCE_FIDELITY_INVALID",
+                object_refs=[source.project.project_id],
+            )
+        )
+    milestone_ids = sorted(
+        task.task_id for task in source.tasks if task.task_type != "SUMMARY" and task.duration_minutes == 0
+    )
+    if milestone_ids:
+        unsupported_semantics.append(UnsupportedSemantic(code="MILESTONE_UNSUPPORTED", object_refs=milestone_ids))
+    unsupported_semantics.append(UnsupportedSemantic(code="RESOURCE_ASSIGNMENTS_UNAVAILABLE"))
     return ScheduleNormalizationReport(
         schema_version="schedule_normalization_report_v1",
         source_schema_version=source.schema_version,
@@ -398,25 +441,7 @@ def _build_report(source: MicrosoftProjectInterchangeV11) -> ScheduleNormalizati
         preserved_fields=preserved_fields,
         ignored_for_audit=[*ignored_claims, *ignored_extensions],
         ignored_for_calculation=[*ignored_claims, *ignored_extensions],
-        unsupported_semantics=[
-            UnsupportedSemantic(
-                code="SOURCE_CALCULATION_UNAVAILABLE",
-                object_refs=sorted(task.task_id for task in source.tasks),
-            ),
-            UnsupportedSemantic(
-                code="BASELINE_UNAVAILABLE",
-                object_refs=sorted(task.task_id for task in source.tasks),
-            ),
-            UnsupportedSemantic(
-                code="PROJECT_CURRENT_DATE_UNAVAILABLE",
-                object_refs=[source.project.project_id],
-            ),
-            UnsupportedSemantic(
-                code="MILESTONE_UNSUPPORTED",
-                object_refs=sorted(task.task_id for task in source.tasks if task.task_type == "MILESTONE"),
-            ),
-            UnsupportedSemantic(code="RESOURCE_ASSIGNMENTS_UNAVAILABLE"),
-        ],
+        unsupported_semantics=unsupported_semantics,
     )
 
 

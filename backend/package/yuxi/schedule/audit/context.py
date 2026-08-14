@@ -134,9 +134,13 @@ def _calculate_capabilities(schedule: ScheduleSnapshot, network: DependencyNetwo
 
     resource_unclassified = any(resource.semantic_type == "UNCLASSIFIED" for resource in schedule.resources)
     no_assignments = schedule.assignment_count == 0
+    source_fidelity_invalid = not schedule.source_fidelity_valid
     return {
         "gantt_display": Capability(allowed=True),
-        "source_schedule_review": Capability(allowed=True),
+        "source_schedule_review": Capability(
+            allowed=not source_fidelity_invalid,
+            reasons=["SOURCE_FIDELITY_INVALID"] if source_fidelity_invalid else [],
+        ),
         "cpm_recalculation": Capability(allowed=not cpm_reasons, reasons=cpm_reasons),
         "resource_leveling": Capability(
             allowed=not no_assignments,

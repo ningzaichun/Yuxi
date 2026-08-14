@@ -9,6 +9,7 @@ const queryString = (values) => {
 }
 
 export const scheduleApi = {
+  submitImport: (payload) => apiPost('/api/schedule/imports', payload),
   submitSnapshot: (payload) => apiPost('/api/schedule/snapshots', payload),
   listSnapshots: ({ limit = 50, offset = 0 } = {}) =>
     apiGet(`/api/schedule/snapshots?${queryString({ limit, offset })}`),

@@ -65,6 +65,7 @@ class ScheduleSnapshot:
     status_date: datetime | None
     source_statistics: dict[str, Any]
     source_capabilities: dict[str, dict[str, Any]]
+    source_fidelity_valid: bool
     lag_calendar_policy: str
     tasks: tuple[ScheduleTask, ...]
     dependencies: tuple[ScheduleDependency, ...]
