@@ -26,6 +26,7 @@ def import_canonical_schedule_v2_2(source: CanonicalScheduleV22) -> ScheduleSnap
             ScheduleTask(
                 task_id=task.task_id,
                 parent_task_id=task.parent_task_id,
+                outline_level=task.outline_level,
                 task_type=task.task_type,
                 planned_start=task.planned_start,
                 planned_finish=task.planned_finish,

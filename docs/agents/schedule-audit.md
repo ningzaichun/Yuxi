@@ -9,14 +9,14 @@
 - 幂等提交、查询和隔离排期快照；
 - 任务层级、依赖网络、零 Lag 日期关系和管理完整性审查；
 - Statistics、Capability、Issue、证据和直接上下游查看；
-- 对单一统一项目日历、FS/SS/FF/SF 零/正 Lag、ASAP/SNET/FNET 自动活动任务执行正向重算，并生成只读 Candidate；
+- 对单一统一项目日历、FS/SS/FF/SF 零/正 Lag、ASAP/SNET/FNET、手工/locked 活动任务执行正向重算，自底向上滚动汇总任务日期，并生成只读 Candidate；
 - 通过具备 Schedule 工具的智能体解释已有 Issue。
 
 当前版本不支持：
 
 - 计算负 Lag 日期关系；
-- 负 Lag、多日历、日历例外、约束、手工任务或实际进度的重算；
-- 汇总日期滚动、反向浮时或关键路径计算；
+- 负 Lag、多日历、日历例外、非法约束组合或实际进度的重算；
+- 反向日期、总浮时、自由浮时或关键路径计算；
 - 自动修改任务日期、依赖、日历或约束；
 - 资源均衡、成本优化或 MPP 回写；
 - 把 Candidate 直接应用为生效计划。
@@ -92,22 +92,22 @@ Yuxi 的内容哈希只基于通过校验后的 `snapshot`，不包含请求信�
 ### 4. 生成最小正向重算 Candidate
 
 页面中的“生成重算 Candidate”使用 Profile
-`yuxi-forward-unified-calendar-fs-ss-ff-sf-positive-lag-snet-fnet-manual-v5`。当前只计算单一无继承项目日历下
-FS/SS/FF/SF 零/正 Lag、ASAP/SNET/FNET 自动活动任务的最早开始与完成；正 Lag 按统一项目日历的工作
+`yuxi-forward-unified-calendar-fs-ss-ff-sf-positive-lag-snet-fnet-manual-summary-rollup-v6`。当前计算单一无继承项目日历下
+FS/SS/FF/SF 零/正 Lag、ASAP/SNET/FNET、手工/locked 活动任务的最早开始与完成，并按直接子任务自底向上滚动汇总任务日期；正 Lag 按统一项目日历的工作
 分钟推进，支持多个工作时段、午休、周末
 和非工作时间归位。来源任务日期和 `source_calculation` 不变，Yuxi 日期只保存在 Candidate 的
 `engine_result`，人工接受后可从 Delivery 的 `simulation_result` 查看同一结果。
 
-包含多日历或日历例外、负 Lag、汇总依赖、手工/非活动任务、SNET/FNET 非法组合或实际进度的
-输入返回结构化 `blocked`，不生成近似 Candidate。S3 零 Lag、S4 正 Lag、SS/FF/SF 与 SNET/FNET 的
-Microsoft Project 黄金样例均已人工确认并通过门禁；这只证明当前受限 Profile，不代表生产适用或跨项目通用。
+包含多日历或日历例外、负 Lag、汇总依赖、非活动任务、非法层级、SNET/FNET 非法组合或实际进度的
+输入返回结构化 `blocked`，不生成近似 Candidate。S3 零 Lag、S4 正 Lag、SS/FF/SF、SNET/FNET、手工/locked 与汇总滚动的
+六套 Microsoft Project 黄金样例均已确认并通过门禁；这只证明当前受限 Profile，不代表生产适用或跨项目通用。
 
 仓库提供 `backend/test/data/schedule/microsoft_project_s3_golden_case.json` 作为最小人工对照输入。本机
 Microsoft Project 16.0 已通过独立 COM 会话建立案例并计算日期，结果保存在 `external_observation`；
 `backend/scripts/capture_ms_project_schedule_golden_observation.ps1` 可重复执行同一过程。脚本只向标准输出
 返回观测 JSON，不保存 MPP、不修改夹具 expected，也不会把 Yuxi 输出传给 Microsoft Project。
 
-用户已于 `2026-08-13T14:15:06+08:00` 确认 S3/S4 observation。两个黄金文件均已将独立
+S3/S4 六套黄金文件均已将独立
 Microsoft Project 观测原样回填到 `expected.task_dates`，并记录确认人、确认时间和 Microsoft Project
 版本。禁止把 Yuxi 的计算结果直接填入 expected；如需重新取证，使用以下 Windows PowerShell 命令：
 
@@ -348,7 +348,7 @@ CandidateSnapshot 暂不冻结为长期稳定外部契约。后续首个可运�
 - 历史 Candidate 按原 draft 版本读取；
 - 业务端首版只读取、展示和评价 Delivery Package，不依赖 draft 内部字段的长期稳定性。
 
-S3 零 Lag、S4 正 Lag、SS/FF/SF、SNET/FNET 与手工/locked task 已按 v5 受限 Profile 完成。下一切片为汇总任务日期滚动；开始编码前必须先取得并确认对应 Microsoft Project expected value。之后直接进入反向计算、浮时和关键路径；案例 B 和完整生产治理在 G2 关闭。
+S3 零 Lag、S4 正 Lag、SS/FF/SF、SNET/FNET 与手工/locked task 已按 v5 受限 Profile 完成；两层嵌套汇总任务日期滚动已按 v6 Profile 完成。下一切片为反向计算、总浮时、自由浮时和关键路径，编码前仍必须先取得并确认对应 Microsoft Project expected value；案例 B 和完整生产治理在 G2 关闭。
 
 ### 如何建立 Microsoft Project expected（SS/FF/SF 示例）
 
@@ -484,4 +484,24 @@ Set-Location backend
 完整 v5 门禁当前返回退出码 `0`、`gate_status=PASSED`、`external_observation_status=PASSED`。这里的
 `locked_task_ids` 不是 Microsoft Project 原生字段，而是 Yuxi 重算请求的授权边界：locked 日期不得移动，
 为满足依赖必须移动 locked task 时 Candidate 为 `invalid` 且 Delivery 不允许应用。普通手工任务按 Project
-基线计算，Source 日期仍不原地修改。下一切片为汇总任务日期滚动。
+基线计算，Source 日期仍不原地修改。
+
+### 汇总任务日期滚动已通过 v6 门禁
+
+第六套黄金夹具位于
+`backend/test/data/schedule/microsoft_project_s4_summary_rollup_golden_case.json`，外部 Oracle 包位于
+`MSP-006-SUMMARY-ROLLUP-v2_Yuxi-v6/`。v6 保留 v5 的活动任务正向计算，再按 `outline_level`
+从深到浅处理汇总任务：开始时间取直接子任务最早开始，完成时间取直接子任务最晚完成。汇总任务不参与依赖，
+来源汇总日期和 `source_calculation` 只作为来源事实保留，不作为引擎答案。
+
+在 `backend` 目录运行：
+
+```powershell
+& '.venv\Scripts\python.exe' scripts\verify_schedule_golden_case.py `
+  --case test\data\schedule\microsoft_project_s4_summary_rollup_golden_case.json
+```
+
+当前返回退出码 `0`、`gate_status=PASSED`、`external_observation_status=PASSED`。门禁覆盖 5 个任务、
+2 个嵌套汇总任务、最大层级 3 和两条直接子级滚动断言；生产重算 Candidate 的 `task_dates` 同时包含
+活动任务和汇总任务，Source 保持不变。下一切片为反向日期、浮时和关键路径，在新的 Microsoft Project
+expected 冻结前不得开始编码。

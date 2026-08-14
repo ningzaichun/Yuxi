@@ -17,7 +17,7 @@ from yuxi.schedule.contracts.optimization import (
     DependencyOptimizationRequest,
     ForwardRecalculationRequest,
 )
-from yuxi.schedule.forward_engine import calculate_minimal_forward_schedule
+from yuxi.schedule.forward_engine import SUMMARY_ROLLUP_ENGINE_PROFILE_ID, calculate_minimal_forward_schedule
 from yuxi.schedule.importers.canonical_v2_2 import import_canonical_schedule_v2_2
 from yuxi.schedule.storage import SCHEDULE_BUCKET, ScheduleSnapshotStore
 
@@ -220,7 +220,11 @@ class ScheduleOptimizationService:
         try:
             source = json.loads((await self._store.download(base.minio_object)).decode("utf-8"))
             contract = CanonicalScheduleV22.model_validate(source)
-            engine_result = calculate_minimal_forward_schedule(contract, locked_task_ids=set(request.locked_task_ids))
+            engine_result = calculate_minimal_forward_schedule(
+                contract,
+                locked_task_ids=set(request.locked_task_ids),
+                engine_profile_id=SUMMARY_ROLLUP_ENGINE_PROFILE_ID,
+            )
         except Exception as exc:
             raise ScheduleOptimizationDependencyError from exc
         if engine_result["status"] == "blocked":
@@ -271,7 +275,7 @@ class ScheduleOptimizationService:
                 {
                     "operation_id": uuid.uuid4().hex,
                     "operation": "recalculate_automatic_downstream",
-                    "scope": "all_supported_activities",
+                    "scope": "all_supported_tasks",
                     "source_fields_modified": False,
                 }
             ],

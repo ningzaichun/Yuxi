@@ -82,6 +82,20 @@ def _calculate_capabilities(schedule: ScheduleSnapshot, network: DependencyNetwo
         if not calendar.working_intervals_valid:
             cpm_reasons.append("CALENDAR_INTERVALS_INVALID")
     activity_tasks = [task for task in schedule.tasks if task.task_type != "summary"]
+    tasks_by_id = {task.task_id: task for task in schedule.tasks}
+    summary_child_count = {task_id: 0 for task_id in summary_task_ids}
+    for task in schedule.tasks:
+        if task.parent_task_id is None:
+            continue
+        parent = tasks_by_id[task.parent_task_id]
+        if parent.task_type != "summary":
+            cpm_reasons.append("TASK_PARENT_NOT_SUMMARY")
+        else:
+            summary_child_count[parent.task_id] += 1
+        if task.outline_level <= parent.outline_level:
+            cpm_reasons.append("TASK_OUTLINE_HIERARCHY_INVALID")
+    if any(count == 0 for count in summary_child_count.values()):
+        cpm_reasons.append("SUMMARY_WITHOUT_CHILDREN")
     if not activity_tasks:
         cpm_reasons.append("NO_ACTIVITY_TASKS")
     if any(not task.active for task in activity_tasks):

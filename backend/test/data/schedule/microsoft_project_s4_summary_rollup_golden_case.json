@@ -1,0 +1,155 @@
+{
+  "schema_version": "microsoft_project_schedule_golden_case_v1",
+  "case_id": "MSP-006-SUMMARY-ROLLUP-v2",
+  "purpose": "S4 统一项目日历下两层嵌套汇总任务自底向上日期滚动的 Microsoft Project 外部对照",
+  "engine_profile_id": "yuxi-forward-unified-calendar-fs-ss-ff-sf-positive-lag-snet-fnet-manual-summary-rollup-v6",
+  "expected_value_source": "MICROSOFT_PROJECT_MANUAL_CONFIRMATION",
+  "lag_calendar_policy": "UNIFIED_PROJECT_CALENDAR_WORKING_MINUTES",
+  "project_name": "MSP-006 嵌套汇总任务滚动 v2",
+  "project_start": "2026-09-07T08:00:00+08:00",
+  "project_finish": "2026-09-11T17:00:00+08:00",
+  "project_duration_minutes": 2400,
+  "time_zone": "Asia/Shanghai",
+  "calendar": {
+    "working_weekdays": ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"],
+    "working_intervals": [
+      {"start": "08:00", "finish": "12:00"},
+      {"start": "13:00", "finish": "17:00"}
+    ],
+    "exceptions": []
+  },
+  "tasks": [
+    {
+      "task_id": "task:1",
+      "source_id": 1,
+      "source_unique_id": 1,
+      "parent_task_id": null,
+      "wbs": "1",
+      "outline_level": 1,
+      "name": "总项目",
+      "task_type": "summary",
+      "duration_minutes": 2400,
+      "scheduling_mode": "automatic",
+      "planned_start": "2026-09-07T08:00:00+08:00",
+      "planned_finish": "2026-09-11T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:2",
+      "source_id": 2,
+      "source_unique_id": 2,
+      "parent_task_id": "task:1",
+      "wbs": "1.1",
+      "outline_level": 2,
+      "name": "基础施工阶段",
+      "task_type": "summary",
+      "duration_minutes": 2400,
+      "scheduling_mode": "automatic",
+      "planned_start": "2026-09-07T08:00:00+08:00",
+      "planned_finish": "2026-09-11T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:3",
+      "source_id": 3,
+      "source_unique_id": 3,
+      "parent_task_id": "task:2",
+      "wbs": "1.1.1",
+      "outline_level": 3,
+      "name": "场地准备",
+      "task_type": "activity",
+      "duration_minutes": 960,
+      "scheduling_mode": "automatic",
+      "planned_start": "2026-09-07T08:00:00+08:00",
+      "planned_finish": "2026-09-08T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:4",
+      "source_id": 4,
+      "source_unique_id": 4,
+      "parent_task_id": "task:2",
+      "wbs": "1.1.2",
+      "outline_level": 3,
+      "name": "基坑开挖",
+      "task_type": "activity",
+      "duration_minutes": 1440,
+      "scheduling_mode": "automatic",
+      "planned_start": "2026-09-09T08:00:00+08:00",
+      "planned_finish": "2026-09-11T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:5",
+      "source_id": 5,
+      "source_unique_id": 5,
+      "parent_task_id": "task:1",
+      "wbs": "1.2",
+      "outline_level": 2,
+      "name": "测量复核",
+      "task_type": "activity",
+      "duration_minutes": 480,
+      "scheduling_mode": "automatic",
+      "planned_start": "2026-09-07T08:00:00+08:00",
+      "planned_finish": "2026-09-07T17:00:00+08:00"
+    }
+  ],
+  "dependencies": [
+    {
+      "predecessor_task_id": "task:3",
+      "successor_task_id": "task:5",
+      "type": "SS",
+      "lag_minutes": 0
+    },
+    {
+      "predecessor_task_id": "task:3",
+      "successor_task_id": "task:4",
+      "type": "FS",
+      "lag_minutes": 0
+    }
+  ],
+  "external_observation": {
+    "observation_status": "CAPTURED_BY_MS_PROJECT_COM",
+    "captured_at": "2026-08-13T18:45:56.4851867+08:00",
+    "capture_method": "MICROSOFT_PROJECT_COM_AFTER_SAVE_CLOSE_REOPEN_RECALCULATE",
+    "microsoft_project_version": "16.0.17928.20148",
+    "calendar_name": "标准",
+    "task_relations": [
+      {"task_id": "task:4", "microsoft_project_predecessors": "3"},
+      {"task_id": "task:5", "microsoft_project_predecessors": "3SS"}
+    ],
+    "task_scheduling_modes": [
+      {"task_id": "task:1", "microsoft_project_manual": false},
+      {"task_id": "task:2", "microsoft_project_manual": false},
+      {"task_id": "task:3", "microsoft_project_manual": false},
+      {"task_id": "task:4", "microsoft_project_manual": false},
+      {"task_id": "task:5", "microsoft_project_manual": false}
+    ],
+    "task_dates": [
+      {"task_id": "task:1", "early_start": "2026-09-07T08:00:00+08:00", "early_finish": "2026-09-11T17:00:00+08:00"},
+      {"task_id": "task:2", "early_start": "2026-09-07T08:00:00+08:00", "early_finish": "2026-09-11T17:00:00+08:00"},
+      {"task_id": "task:3", "early_start": "2026-09-07T08:00:00+08:00", "early_finish": "2026-09-08T17:00:00+08:00"},
+      {"task_id": "task:4", "early_start": "2026-09-09T08:00:00+08:00", "early_finish": "2026-09-11T17:00:00+08:00"},
+      {"task_id": "task:5", "early_start": "2026-09-07T08:00:00+08:00", "early_finish": "2026-09-07T17:00:00+08:00"}
+    ]
+  },
+  "expected": {
+    "confirmation_status": "CONFIRMED_BY_MS_PROJECT",
+    "confirmed_by": "MSP-006 v2 冻结 Oracle 独立复采集",
+    "confirmed_at": "2026-08-13T18:45:56.4851867+08:00",
+    "microsoft_project_version": "16.0.17928.20148",
+    "task_dates": [
+      {"task_id": "task:1", "early_start": "2026-09-07T08:00:00+08:00", "early_finish": "2026-09-11T17:00:00+08:00"},
+      {"task_id": "task:2", "early_start": "2026-09-07T08:00:00+08:00", "early_finish": "2026-09-11T17:00:00+08:00"},
+      {"task_id": "task:3", "early_start": "2026-09-07T08:00:00+08:00", "early_finish": "2026-09-08T17:00:00+08:00"},
+      {"task_id": "task:4", "early_start": "2026-09-09T08:00:00+08:00", "early_finish": "2026-09-11T17:00:00+08:00"},
+      {"task_id": "task:5", "early_start": "2026-09-07T08:00:00+08:00", "early_finish": "2026-09-07T17:00:00+08:00"}
+    ]
+  },
+  "rollup_assertions": [
+    {
+      "summary_task_id": "task:2",
+      "direct_child_task_ids": ["task:3", "task:4"]
+    },
+    {
+      "summary_task_id": "task:1",
+      "direct_child_task_ids": ["task:2", "task:5"]
+    }
+  ]
+}

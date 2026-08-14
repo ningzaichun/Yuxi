@@ -11,6 +11,10 @@ from yuxi.schedule.contracts.canonical_v2_2 import CanonicalCalendar, CanonicalS
 
 ENGINE_PROFILE_ID = "yuxi-forward-unified-calendar-fs-ss-ff-sf-positive-lag-snet-fnet-manual-v5"
 ENGINE_VERSION = "5.0.0"
+SUMMARY_ROLLUP_ENGINE_PROFILE_ID = (
+    "yuxi-forward-unified-calendar-fs-ss-ff-sf-positive-lag-snet-fnet-manual-summary-rollup-v6"
+)
+SUMMARY_ROLLUP_ENGINE_VERSION = "6.0.0"
 WEEKDAYS = ("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")
 
 
@@ -112,11 +116,19 @@ def calculate_minimal_forward_schedule(
     source: CanonicalScheduleV22,
     *,
     locked_task_ids: set[str] | None = None,
+    engine_profile_id: str = ENGINE_PROFILE_ID,
 ) -> dict[str, Any]:
     """Calculate early dates or return explicit blockers without approximating input."""
-    blockers = _support_blockers(source)
+    if engine_profile_id == ENGINE_PROFILE_ID:
+        engine_version = ENGINE_VERSION
+    elif engine_profile_id == SUMMARY_ROLLUP_ENGINE_PROFILE_ID:
+        engine_version = SUMMARY_ROLLUP_ENGINE_VERSION
+    else:
+        raise ValueError(f"unsupported schedule engine profile: {engine_profile_id}")
+
+    blockers = _support_blockers(source, include_summary_rollup=engine_profile_id == SUMMARY_ROLLUP_ENGINE_PROFILE_ID)
     if blockers:
-        return _blocked_result(blockers)
+        return _blocked_result(blockers, engine_profile_id, engine_version)
 
     locked_task_ids = locked_task_ids or set()
     calendar = source.calendars[0]
@@ -131,7 +143,9 @@ def calculate_minimal_forward_schedule(
                     tuple(sorted(unknown_locked_task_ids)),
                     "locked_task_ids 必须引用当前来源中的活动任务",
                 )
-            ]
+            ],
+            engine_profile_id,
+            engine_version,
         )
     incoming = {task_id: [] for task_id in activities}
     outgoing = {task_id: [] for task_id in activities}
@@ -154,7 +168,11 @@ def calculate_minimal_forward_schedule(
                 ready.append(successor_id)
                 ready.sort()
     if len(order) != len(activities):
-        return _blocked_result([EngineBlocker("DEPENDENCY_CYCLE", tuple(sorted(activities)), "任务依赖网络存在环路")])
+        return _blocked_result(
+            [EngineBlocker("DEPENDENCY_CYCLE", tuple(sorted(activities)), "任务依赖网络存在环路")],
+            engine_profile_id,
+            engine_version,
+        )
 
     project_start = work_calendar.next_working_instant(source.project.planned_start)
     calculated: dict[str, tuple[datetime, datetime]] = {}
@@ -210,28 +228,56 @@ def calculate_minimal_forward_schedule(
             finish = required_finish
         calculated[task_id] = (start, finish)
 
+    if engine_profile_id == SUMMARY_ROLLUP_ENGINE_PROFILE_ID:
+        children_by_summary = {
+            task.task_id: [child.task_id for child in source.tasks if child.parent_task_id == task.task_id]
+            for task in source.tasks
+            if task.task_type == "summary"
+        }
+        for summary in sorted(
+            (task for task in source.tasks if task.task_type == "summary"),
+            key=lambda task: task.outline_level,
+            reverse=True,
+        ):
+            child_dates = [calculated[child_id] for child_id in children_by_summary[summary.task_id]]
+            calculated[summary.task_id] = (
+                min(start for start, _ in child_dates),
+                max(finish for _, finish in child_dates),
+            )
+
     task_dates = []
-    for task_id in order:
-        task = activities[task_id]
+    output_tasks = (
+        source.tasks if engine_profile_id == SUMMARY_ROLLUP_ENGINE_PROFILE_ID else [activities[id] for id in order]
+    )
+    for task in output_tasks:
+        task_id = task.task_id
         early_start, early_finish = calculated[task_id]
-        task_dates.append(
-            {
-                "task_id": task_id,
-                "source_start": task.planned_start.isoformat(),
-                "source_finish": task.planned_finish.isoformat(),
-                "early_start": early_start.isoformat(),
-                "early_finish": early_finish.isoformat(),
-                "start_changed": early_start != task.planned_start,
-                "finish_changed": early_finish != task.planned_finish,
-            }
-        )
+        task_date = {
+            "task_id": task_id,
+            "source_start": task.planned_start.isoformat(),
+            "source_finish": task.planned_finish.isoformat(),
+            "early_start": early_start.isoformat(),
+            "early_finish": early_finish.isoformat(),
+            "start_changed": early_start != task.planned_start,
+            "finish_changed": early_finish != task.planned_finish,
+        }
+        if engine_profile_id == SUMMARY_ROLLUP_ENGINE_PROFILE_ID:
+            task_date.update(
+                {
+                    "parent_task_id": task.parent_task_id,
+                    "outline_level": task.outline_level,
+                    "task_type": task.task_type,
+                    "summary": task.task_type == "summary",
+                }
+            )
+        task_dates.append(task_date)
 
     source_finish = source.project.planned_finish
     calculated_finish = max(finish for _, finish in calculated.values())
     return {
         "status": "invalid" if conflicts else "calculated",
-        "engine_profile_id": ENGINE_PROFILE_ID,
-        "engine_version": ENGINE_VERSION,
+        "engine_profile_id": engine_profile_id,
+        "engine_version": engine_version,
         "support": {"supported": True, "blockers": []},
         "conflicts": conflicts,
         "project_start": project_start.isoformat(),
@@ -242,7 +288,7 @@ def calculate_minimal_forward_schedule(
     }
 
 
-def _support_blockers(source: CanonicalScheduleV22) -> list[EngineBlocker]:
+def _support_blockers(source: CanonicalScheduleV22, *, include_summary_rollup: bool) -> list[EngineBlocker]:
     blockers: list[EngineBlocker] = []
     try:
         time_zone = ZoneInfo(source.semantics.time_zone)
@@ -336,6 +382,40 @@ def _support_blockers(source: CanonicalScheduleV22) -> list[EngineBlocker]:
                     "当前 Profile 只支持零 Lag 和正 Lag",
                 )
             )
+    if include_summary_rollup:
+        tasks_by_id = {task.task_id: task for task in source.tasks}
+        child_count = {task.task_id: 0 for task in source.tasks if task.task_type == "summary"}
+        for task in source.tasks:
+            if task.parent_task_id is None:
+                continue
+            parent = tasks_by_id[task.parent_task_id]
+            if parent.task_type != "summary":
+                blockers.append(
+                    EngineBlocker(
+                        "TASK_PARENT_NOT_SUMMARY",
+                        (task.task_id, parent.task_id),
+                        "当前 Profile 要求有子任务的父任务必须是汇总任务",
+                    )
+                )
+            else:
+                child_count[parent.task_id] += 1
+            if task.outline_level <= parent.outline_level:
+                blockers.append(
+                    EngineBlocker(
+                        "TASK_OUTLINE_HIERARCHY_INVALID",
+                        (task.task_id, parent.task_id),
+                        "子任务的层级必须深于父任务",
+                    )
+                )
+        for summary_id, count in child_count.items():
+            if count == 0:
+                blockers.append(
+                    EngineBlocker(
+                        "SUMMARY_WITHOUT_CHILDREN",
+                        (summary_id,),
+                        "汇总任务必须至少包含一个直接子任务",
+                    )
+                )
     return blockers
 
 
@@ -353,14 +433,14 @@ def _valid_weekly_pattern(calendar: CanonicalCalendar) -> bool:
     return has_interval
 
 
-def _blocked_result(blockers: list[EngineBlocker]) -> dict[str, Any]:
+def _blocked_result(blockers: list[EngineBlocker], engine_profile_id: str, engine_version: str) -> dict[str, Any]:
     grouped: dict[tuple[str, str], set[str]] = {}
     for blocker in blockers:
         grouped.setdefault((blocker.code, blocker.message), set()).update(blocker.object_refs)
     return {
         "status": "blocked",
-        "engine_profile_id": ENGINE_PROFILE_ID,
-        "engine_version": ENGINE_VERSION,
+        "engine_profile_id": engine_profile_id,
+        "engine_version": engine_version,
         "support": {
             "supported": False,
             "blockers": [

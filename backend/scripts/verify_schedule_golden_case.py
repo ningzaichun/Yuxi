@@ -15,7 +15,11 @@ if str(BACKEND_ROOT / "package") not in sys.path:
     sys.path.insert(0, str(BACKEND_ROOT / "package"))
 
 from yuxi.schedule.contracts.canonical_v2_2 import CanonicalScheduleV22  # noqa: E402
-from yuxi.schedule.forward_engine import ENGINE_PROFILE_ID, calculate_minimal_forward_schedule  # noqa: E402
+from yuxi.schedule.forward_engine import (  # noqa: E402
+    ENGINE_PROFILE_ID,
+    SUMMARY_ROLLUP_ENGINE_PROFILE_ID,
+    calculate_minimal_forward_schedule,
+)
 
 DEFAULT_CASE_PATH = BACKEND_ROOT / "test" / "data" / "schedule" / "microsoft_project_s3_golden_case.json"
 BASE_SOURCE_PATH = BACKEND_ROOT / "test" / "data" / "schedule" / "schedule_v2_2_synthetic_case_s.json"
@@ -38,13 +42,22 @@ def evaluate_golden_gate(case: dict[str, Any]) -> dict[str, Any]:
     if validation_errors:
         return _gate_result(case, "FAILED", validation_errors)
 
-    engine_result = calculate_minimal_forward_schedule(_build_canonical_source(case))
+    engine_result = calculate_minimal_forward_schedule(
+        _build_canonical_source(case),
+        engine_profile_id=case["engine_profile_id"],
+    )
     if engine_result["status"] != "calculated":
         blocker_codes = [item["code"] for item in engine_result["support"]["blockers"]]
         return _gate_result(case, "FAILED", [f"ENGINE_BLOCKED:{code}" for code in blocker_codes])
 
     actual_dates = {item["task_id"]: item for item in engine_result["task_dates"]}
     task_ids = {item["task_id"] for item in case["tasks"]}
+    if set(actual_dates) != task_ids:
+        return _gate_result(case, "FAILED", ["ENGINE_TASK_SET_MISMATCH"])
+    metadata_errors = _compare_task_metadata(case["tasks"], actual_dates)
+    metadata_errors.extend(_validate_rollup_assertions(case, actual_dates))
+    if metadata_errors:
+        return _gate_result(case, "FAILED", metadata_errors)
     observation_errors = _compare_dates(
         task_ids,
         actual_dates,
@@ -106,7 +119,7 @@ def _validate_case(case: dict[str, Any]) -> list[str]:
     errors = []
     if case.get("schema_version") != "microsoft_project_schedule_golden_case_v1":
         errors.append("SCHEMA_VERSION_UNSUPPORTED")
-    if case.get("engine_profile_id") != ENGINE_PROFILE_ID:
+    if case.get("engine_profile_id") not in {ENGINE_PROFILE_ID, SUMMARY_ROLLUP_ENGINE_PROFILE_ID}:
         errors.append("ENGINE_PROFILE_MISMATCH")
     if case.get("expected_value_source") != "MICROSOFT_PROJECT_MANUAL_CONFIRMATION":
         errors.append("EXPECTED_VALUE_SOURCE_INVALID")
@@ -125,10 +138,14 @@ def _validate_case(case: dict[str, Any]) -> list[str]:
         errors.append("TASK_IDS_INVALID")
     known_task_ids = set(task_ids)
     for task in case.get("tasks", []):
+        if task.get("task_type", "activity") not in {"activity", "summary"}:
+            errors.append(f"TASK_TYPE_INVALID:{task.get('task_id')}")
         if task.get("duration_minutes", 0) <= 0:
             errors.append(f"TASK_DURATION_INVALID:{task.get('task_id')}")
         if not set(task.get("predecessor_task_ids", [])) <= known_task_ids:
             errors.append(f"PREDECESSOR_UNKNOWN:{task.get('task_id')}")
+        if task.get("parent_task_id") is not None and task["parent_task_id"] not in known_task_ids:
+            errors.append(f"PARENT_UNKNOWN:{task.get('task_id')}")
     return errors
 
 
@@ -284,11 +301,59 @@ def _compare_dates(
     return errors
 
 
+def _compare_task_metadata(
+    task_specs: list[dict[str, Any]],
+    actual_dates: dict[str, dict[str, Any]],
+) -> list[str]:
+    errors = []
+    for task in task_specs:
+        if task.get("task_type", "activity") == "activity" and "task_type" not in actual_dates[task["task_id"]]:
+            continue
+        actual = actual_dates[task["task_id"]]
+        expected = {
+            "parent_task_id": task.get("parent_task_id"),
+            "outline_level": task.get("outline_level", 1),
+            "task_type": task.get("task_type", "activity"),
+            "summary": task.get("task_type", "activity") == "summary",
+        }
+        for field, expected_value in expected.items():
+            if actual.get(field) != expected_value:
+                errors.append(f"ENGINE_TASK_METADATA_MISMATCH:{task['task_id']}:{field}")
+    return errors
+
+
+def _validate_rollup_assertions(
+    case: dict[str, Any],
+    actual_dates: dict[str, dict[str, Any]],
+) -> list[str]:
+    errors = []
+    for assertion in case.get("rollup_assertions", []):
+        summary_id = assertion["summary_task_id"]
+        children = [actual_dates[child_id] for child_id in assertion["direct_child_task_ids"]]
+        expected_start = min(child["early_start"] for child in children)
+        expected_finish = max(child["early_finish"] for child in children)
+        if actual_dates[summary_id]["early_start"] != expected_start:
+            errors.append(f"SUMMARY_ROLLUP_START_MISMATCH:{summary_id}")
+        if actual_dates[summary_id]["early_finish"] != expected_finish:
+            errors.append(f"SUMMARY_ROLLUP_FINISH_MISMATCH:{summary_id}")
+    return errors
+
+
 def _build_canonical_source(case: dict[str, Any]) -> CanonicalScheduleV22:
     source = json.loads(BASE_SOURCE_PATH.read_text(encoding="utf-8"))
+    source["snapshot_id"] = f"golden:{case['case_id']}"
+    source["source"]["file_name"] = f"{case['case_id']}.json"
+    source["project"]["project_id"] = f"project:{case['case_id']}"
+    source["project"]["name"] = case.get("project_name", case["case_id"])
     source["semantics"]["time_zone"] = case["time_zone"]
     source["project"]["planned_start"] = case["project_start"]
+    if "project_finish" in case:
+        source["project"]["planned_finish"] = case["project_finish"]
     source["project"]["source_project_summary"]["start"] = case["project_start"]
+    if "project_finish" in case:
+        source["project"]["source_project_summary"]["finish"] = case["project_finish"]
+    if "project_duration_minutes" in case:
+        source["project"]["source_project_summary"]["duration_minutes"] = case["project_duration_minutes"]
 
     working_weekdays = set(case["calendar"]["working_weekdays"])
     intervals = case["calendar"]["working_intervals"]
@@ -297,24 +362,41 @@ def _build_canonical_source(case: dict[str, Any]) -> CanonicalScheduleV22:
         day["intervals"] = copy.deepcopy(intervals) if weekday in working_weekdays else []
     source["calendars"][0]["exceptions"] = copy.deepcopy(case["calendar"]["exceptions"])
 
-    activity_templates = [task for task in source["tasks"] if task["task_type"] == "activity"]
-    if not activity_templates:
-        raise ValueError("canonical fixture shell has no activity template")
-    activities = []
+    templates = {
+        task_type: next(task for task in source["tasks"] if task["task_type"] == task_type)
+        for task_type in ("activity", "summary")
+    }
+    tasks = []
     for index, task_spec in enumerate(case["tasks"]):
-        template = activity_templates[index % len(activity_templates)]
-        task = copy.deepcopy(template)
+        task_type = task_spec.get("task_type", "activity")
+        task = copy.deepcopy(templates[task_type])
         task["task_id"] = task_spec["task_id"]
+        task["source_id"] = task_spec.get("source_id", index + 1)
+        task["source_unique_id"] = task_spec.get("source_unique_id", index + 1)
+        task["source_guid"] = f"golden:{task_spec['task_id']}"
+        task["parent_task_id"] = task_spec.get("parent_task_id")
+        task["wbs"] = task_spec.get("wbs", str(index + 1))
+        task["outline_level"] = task_spec.get("outline_level", 1)
         task["name"] = task_spec["name"]
+        task["task_type"] = task_type
         task["duration_minutes"] = task_spec["duration_minutes"]
+        task["source_work_minutes"] = 0 if task_type == "summary" else task_spec["duration_minutes"]
         task["scheduling_mode"] = task_spec.get("scheduling_mode", "automatic")
+        task["calendar_id"] = None
+        task["effective_calendar_id"] = source["project"]["default_calendar_id"]
         if "planned_start" in task_spec:
             task["planned_start"] = task_spec["planned_start"]
             task["planned_finish"] = task_spec["planned_finish"]
+            for field in ("early_start", "late_start"):
+                task["source_calculation"][field] = task_spec["planned_start"]
+            for field in ("early_finish", "late_finish"):
+                task["source_calculation"][field] = task_spec["planned_finish"]
         if "constraint" in task_spec:
             task["constraint"] = copy.deepcopy(task_spec["constraint"])
-        activities.append(task)
-    source["tasks"] = [task for task in source["tasks"] if task["task_type"] == "summary"] + activities
+        else:
+            task["constraint"] = {"type": "AS_SOON_AS_POSSIBLE", "date": None}
+        tasks.append(task)
+    source["tasks"] = tasks
 
     dependencies = []
     dependency_specs = case.get("dependencies")
@@ -342,6 +424,35 @@ def _build_canonical_source(case: dict[str, Any]) -> CanonicalScheduleV22:
             }
         )
     source["dependencies"] = dependencies
+    summary_ids = {task["task_id"] for task in tasks if task["task_type"] == "summary"}
+    activity_ids = {task["task_id"] for task in tasks if task["task_type"] == "activity"}
+    incoming = {task_id: 0 for task_id in activity_ids}
+    outgoing = {task_id: 0 for task_id in activity_ids}
+    dependency_types = {kind: 0 for kind in ("FS", "SS", "FF", "SF")}
+    for dependency in dependencies:
+        dependency_types[dependency["type"]] += 1
+        if dependency["successor_task_id"] in incoming:
+            incoming[dependency["successor_task_id"]] += 1
+        if dependency["predecessor_task_id"] in outgoing:
+            outgoing[dependency["predecessor_task_id"]] += 1
+    source["statistics"].update(
+        {
+            "tasks": len(tasks),
+            "summary_tasks": len(summary_ids),
+            "leaf_tasks": len(activity_ids),
+            "milestones": sum(task["duration_minutes"] == 0 for task in tasks if task["task_type"] == "activity"),
+            "dependencies": len(dependencies),
+            "dependency_types": dependency_types,
+            "positive_lag_dependencies": sum(item["lag_minutes"] > 0 for item in dependencies),
+            "negative_lag_dependencies": sum(item["lag_minutes"] < 0 for item in dependencies),
+            "open_start_tasks": sum(count == 0 for count in incoming.values()),
+            "open_finish_tasks": sum(count == 0 for count in outgoing.values()),
+            "summary_task_dependencies": sum(
+                item["predecessor_task_id"] in summary_ids or item["successor_task_id"] in summary_ids
+                for item in dependencies
+            ),
+        }
+    )
     return CanonicalScheduleV22.model_validate(source)
 
 

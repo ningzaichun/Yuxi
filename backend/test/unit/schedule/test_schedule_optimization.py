@@ -15,6 +15,7 @@ from yuxi.schedule.contracts.optimization import (
     ForwardRecalculationRequest,
 )
 from yuxi.schedule.delivery_adapter import apply_delivery_to_source_copy
+from yuxi.schedule.forward_engine import SUMMARY_ROLLUP_ENGINE_PROFILE_ID
 from yuxi.schedule.importers.canonical_v2_2 import import_canonical_schedule_v2_2
 from yuxi.services.schedule_optimization_service import (
     ScheduleOptimizationConflictError,
@@ -255,6 +256,7 @@ async def test_forward_candidate_keeps_source_immutable_and_delivers_engine_resu
     assert created is True
     assert candidate["candidate_kind"] == "automatic_forward_recalculation"
     assert candidate["candidate_snapshot"]["engine_result"]["status"] == "calculated"
+    assert candidate["candidate_snapshot"]["engine_profile_id"] == SUMMARY_ROLLUP_ENGINE_PROFILE_ID
     dates = {item["task_id"]: item for item in candidate["candidate_snapshot"]["engine_result"]["task_dates"]}
     assert dates["synthetic-task:build-a"]["early_start"] == "2026-09-02T10:00:00+08:00"
     assert candidate["candidate_snapshot"]["candidate_schedule"] == before

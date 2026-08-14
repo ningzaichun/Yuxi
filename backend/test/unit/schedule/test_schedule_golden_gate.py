@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 from scripts.verify_schedule_golden_case import evaluate_external_observation, evaluate_golden_gate, load_golden_case
-from yuxi.schedule.forward_engine import ENGINE_PROFILE_ID
+from yuxi.schedule.forward_engine import ENGINE_PROFILE_ID, SUMMARY_ROLLUP_ENGINE_PROFILE_ID
 
 POSITIVE_LAG_CASE_PATH = (
     Path(__file__).resolve().parents[2] / "data" / "schedule" / "microsoft_project_s4_positive_lag_golden_case.json"
@@ -18,6 +18,9 @@ CONSTRAINTS_CASE_PATH = (
 )
 MANUAL_LOCKED_CASE_PATH = (
     Path(__file__).resolve().parents[2] / "data" / "schedule" / "microsoft_project_s4_manual_locked_golden_case.json"
+)
+SUMMARY_ROLLUP_CASE_PATH = (
+    Path(__file__).resolve().parents[2] / "data" / "schedule" / "microsoft_project_s4_summary_rollup_golden_case.json"
 )
 
 
@@ -173,3 +176,16 @@ def test_external_observation_gate_rejects_manual_mode_evidence_drift() -> None:
 
     assert result["gate_status"] == "FAILED"
     assert result["errors"] == ["EXTERNAL_OBSERVATION_SCHEDULING_MODE_MISMATCH:manual-task:fixed-later"]
+
+
+def test_summary_rollup_slice_is_confirmed_for_v6_profile() -> None:
+    case = json.loads(SUMMARY_ROLLUP_CASE_PATH.read_text(encoding="utf-8"))
+
+    result = evaluate_golden_gate(case)
+
+    assert case["engine_profile_id"] == SUMMARY_ROLLUP_ENGINE_PROFILE_ID
+    assert len(case["tasks"]) == 5
+    assert len(case["rollup_assertions"]) == 2
+    assert result["gate_status"] == "PASSED"
+    assert result["external_observation_status"] == "PASSED"
+    assert result["errors"] == []

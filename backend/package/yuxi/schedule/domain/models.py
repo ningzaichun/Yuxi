@@ -13,6 +13,7 @@ from yuxi.schedule.contracts.audit import AuditResult
 class ScheduleTask:
     task_id: str
     parent_task_id: str | None
+    outline_level: int
     task_type: str
     planned_start: datetime
     planned_finish: datetime

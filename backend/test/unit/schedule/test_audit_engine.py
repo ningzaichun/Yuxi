@@ -81,6 +81,21 @@ def test_network_defects_remain_auditable(canonical_schedule_payload: dict) -> N
     assert "SELF_DEPENDENCY" in execution.result.capabilities["cpm_recalculation"].reasons
 
 
+def test_cpm_capability_blocks_summary_without_direct_children(canonical_schedule_payload: dict) -> None:
+    payload = copy.deepcopy(canonical_schedule_payload)
+    summary_ids = {task["task_id"] for task in payload["tasks"] if task["task_type"] == "summary"}
+    summary_id = next(
+        task_id for task_id in summary_ids if any(task["parent_task_id"] == task_id for task in payload["tasks"])
+    )
+    for task in payload["tasks"]:
+        if task["parent_task_id"] == summary_id:
+            task["parent_task_id"] = None
+
+    execution = _audit(payload)
+
+    assert "SUMMARY_WITHOUT_CHILDREN" in execution.result.capabilities["cpm_recalculation"].reasons
+
+
 def test_dependency_cycle_detection_supports_the_5000_task_boundary() -> None:
     task_ids = {f"task-{index}" for index in range(5000)}
     dependencies = tuple(

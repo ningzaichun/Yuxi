@@ -9,7 +9,12 @@ from zoneinfo import ZoneInfo
 from scripts.generate_synthetic_schedule_case import build_synthetic_schedule_case
 from yuxi.schedule.contracts.canonical_v2_2 import CanonicalScheduleV22
 from scripts.verify_schedule_golden_case import _build_canonical_source, evaluate_golden_gate
-from yuxi.schedule.forward_engine import ENGINE_PROFILE_ID, UnifiedWorkCalendar, calculate_minimal_forward_schedule
+from yuxi.schedule.forward_engine import (
+    ENGINE_PROFILE_ID,
+    SUMMARY_ROLLUP_ENGINE_PROFILE_ID,
+    UnifiedWorkCalendar,
+    calculate_minimal_forward_schedule,
+)
 
 POSITIVE_LAG_CASE_PATH = (
     Path(__file__).resolve().parents[2] / "data" / "schedule" / "microsoft_project_s4_positive_lag_golden_case.json"
@@ -22,6 +27,9 @@ CONSTRAINTS_CASE_PATH = (
 )
 MANUAL_LOCKED_CASE_PATH = (
     Path(__file__).resolve().parents[2] / "data" / "schedule" / "microsoft_project_s4_manual_locked_golden_case.json"
+)
+SUMMARY_ROLLUP_CASE_PATH = (
+    Path(__file__).resolve().parents[2] / "data" / "schedule" / "microsoft_project_s4_summary_rollup_golden_case.json"
 )
 
 
@@ -161,6 +169,46 @@ def test_forward_engine_matches_confirmed_microsoft_project_manual_dates() -> No
     assert result["gate_status"] == "PASSED"
     assert result["external_observation_status"] == "PASSED"
     assert result["engine_profile_id"] == ENGINE_PROFILE_ID
+
+
+def test_forward_engine_rolls_up_nested_summaries_without_using_source_summary_dates() -> None:
+    case = json.loads(SUMMARY_ROLLUP_CASE_PATH.read_text(encoding="utf-8"))
+    payload = _build_canonical_source(case).model_dump(mode="json")
+    for task in payload["tasks"]:
+        if task["task_type"] == "summary":
+            task["planned_start"] = "2026-09-30T08:00:00+08:00"
+            task["planned_finish"] = "2026-09-30T17:00:00+08:00"
+    source = CanonicalScheduleV22.model_validate(payload)
+    before = source.model_dump(mode="json")
+
+    result = calculate_minimal_forward_schedule(source, engine_profile_id=SUMMARY_ROLLUP_ENGINE_PROFILE_ID)
+
+    dates = {item["task_id"]: item for item in result["task_dates"]}
+    assert result["status"] == "calculated"
+    assert result["engine_profile_id"] == SUMMARY_ROLLUP_ENGINE_PROFILE_ID
+    assert set(dates) == {"task:1", "task:2", "task:3", "task:4", "task:5"}
+    assert dates["task:2"]["early_start"] == dates["task:3"]["early_start"]
+    assert dates["task:2"]["early_finish"] == dates["task:4"]["early_finish"]
+    assert dates["task:1"]["early_start"] == dates["task:5"]["early_start"]
+    assert dates["task:1"]["early_finish"] == dates["task:2"]["early_finish"]
+    assert dates["task:1"]["summary"] is True
+    assert source.model_dump(mode="json") == before
+
+
+def test_summary_rollup_profile_blocks_summary_without_direct_children() -> None:
+    case = json.loads(SUMMARY_ROLLUP_CASE_PATH.read_text(encoding="utf-8"))
+    payload = _build_canonical_source(case).model_dump(mode="json")
+    for task in payload["tasks"]:
+        if task["parent_task_id"] == "task:2":
+            task["parent_task_id"] = "task:1"
+
+    result = calculate_minimal_forward_schedule(
+        CanonicalScheduleV22.model_validate(payload),
+        engine_profile_id=SUMMARY_ROLLUP_ENGINE_PROFILE_ID,
+    )
+
+    assert result["status"] == "blocked"
+    assert "SUMMARY_WITHOUT_CHILDREN" in {item["code"] for item in result["support"]["blockers"]}
 
 
 def test_forward_engine_keeps_locked_task_fixed_and_reports_dependency_conflict() -> None:
