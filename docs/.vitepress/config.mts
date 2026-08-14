@@ -53,6 +53,7 @@ export default defineConfig({
           { text: 'Skills 管理', link: '/agents/skills-management' },
           { text: '子智能体', link: '/agents/subagents-management' },
           { text: '子智能体调用链', link: '/agents/subagent-invocation-lifecycle' },
+          { text: '排期审查用户与测试手册', link: '/agents/schedule-cpm-user-guide' },
           { text: '排期审查模块', link: '/agents/schedule-audit' }
         ]
       },
