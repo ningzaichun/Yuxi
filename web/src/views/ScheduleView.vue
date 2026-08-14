@@ -97,18 +97,18 @@
             <section class="content-card">
               <div class="section-title issue-title">
                 <div>
-                  <h3>S4 正向重算</h3>
-                  <span>统一项目日历、FS/SS/FF/SF 零/正 Lag、ASAP/SNET/FNET、手工任务和 locked 冲突；负 Lag 和范围外输入明确阻断</span>
+                  <h3>排期重算</h3>
+                  <span>计算最早/最晚日期、浮时与关键任务；负 Lag、多日历和其他范围外输入会明确阻断</span>
                 </div>
                 <a-button type="primary" :loading="recalculatingForward" @click="recalculateForward">
-                  生成重算 Candidate
+                  生成重算方案
                 </a-button>
               </div>
               <a-alert
                 v-if="forwardBlockedResult"
                 type="warning"
                 show-icon
-                message="当前来源超出最小 CPM Profile，未生成近似结果。"
+                message="当前来源超出受支持的排期范围，系统未生成近似结果。"
                 class="workbench-alert"
               />
               <div v-if="forwardBlockedResult" class="blocker-list">
@@ -392,7 +392,7 @@
       </a-spin>
     </a-drawer>
 
-    <a-drawer v-model:open="candidateOpen" :title="candidateDrawerTitle" width="820">
+    <a-drawer v-model:open="candidateOpen" :title="candidateDrawerTitle" width="min(1120px, 96vw)">
       <a-spin :spinning="loadingCandidate">
         <template v-if="candidateDetail">
           <a-alert
@@ -402,30 +402,33 @@
             class="workbench-alert"
           />
           <a-descriptions :column="2" bordered size="small">
-            <a-descriptions-item label="技术状态">
+            <a-descriptions-item label="候选结果">
               <a-tag :color="candidateDetail.candidate_status === 'valid' ? 'green' : 'red'">
-                {{ candidateDetail.candidate_status }}
+                {{ candidateStatusLabel }}
               </a-tag>
             </a-descriptions-item>
-            <a-descriptions-item label="基础版本">
+            <a-descriptions-item label="来源版本">
               <a-tag :color="candidateDetail.base_snapshot_status === 'current' ? 'green' : 'orange'">
-                {{ candidateDetail.base_snapshot_status }}
+                {{ baseSnapshotStatusLabel }}
               </a-tag>
             </a-descriptions-item>
-            <a-descriptions-item label="用户态度">{{ candidateDetail.user_attitude }}</a-descriptions-item>
-            <a-descriptions-item label="Candidate Kind">{{ candidateDetail.candidate_kind }}</a-descriptions-item>
+            <a-descriptions-item label="审阅状态">{{ userAttitudeLabel }}</a-descriptions-item>
+            <a-descriptions-item label="变更类型">{{ candidateKindLabel }}</a-descriptions-item>
           </a-descriptions>
 
           <h4>请求变更</h4>
-          <div class="patch-list">
+          <div v-if="isForwardCandidate" class="patch-list">
+            <div>
+              <a-tag color="blue">重新计算支持范围内任务</a-tag>
+              <span>仅生成候选结果，不修改来源字段</span>
+            </div>
+          </div>
+          <div v-else class="patch-list">
             <div v-for="operation in candidateDetail.requested_patch.operations" :key="operation.operation_id">
               <a-tag :color="operation.operation === 'remove_dependency' ? 'orange' : 'blue'">
                 {{ operation.operation }}
               </a-tag>
-              <code v-if="operation.operation === 'recalculate_automatic_downstream'">
-                {{ operation.scope }} · Source fields modified: {{ operation.source_fields_modified }}
-              </code>
-              <code v-else-if="operation.dependency_id">{{ operation.dependency_id }}</code>
+              <code v-if="operation.dependency_id">{{ operation.dependency_id }}</code>
               <code v-else-if="operation.dependency">
                 {{ operation.dependency.predecessor_task_id }} → {{ operation.dependency.successor_task_id }}
                 · {{ operation.dependency.type }} · Lag {{ operation.dependency.lag_minutes }}
@@ -433,15 +436,70 @@
             </div>
           </div>
 
-          <h4>{{ isForwardCandidate ? '日期差异' : '审查差异' }}</h4>
-          <a-descriptions v-if="isForwardCandidate" :column="1" bordered size="small">
-            <a-descriptions-item label="受影响任务">{{ candidateDetail.comparison.affected_task_count }}</a-descriptions-item>
-            <a-descriptions-item label="来源完成">{{ candidateDetail.comparison.finish_before }}</a-descriptions-item>
-            <a-descriptions-item label="重算完成">{{ candidateDetail.comparison.finish_after }}</a-descriptions-item>
-            <a-descriptions-item label="任务日期变化">
+          <h4>{{ isForwardCandidate ? '排期结果' : '审查差异' }}</h4>
+          <template v-if="isForwardCandidate">
+            <a-descriptions :column="2" bordered size="small">
+              <a-descriptions-item label="受影响任务">{{ candidateDetail.comparison.affected_task_count }}</a-descriptions-item>
+              <a-descriptions-item label="关键活动任务">{{ forwardCriticalCount }}</a-descriptions-item>
+              <a-descriptions-item label="来源完成">{{ formatScheduleDate(candidateDetail.comparison.finish_before) }}</a-descriptions-item>
+              <a-descriptions-item label="重算完成">{{ formatScheduleDate(candidateDetail.comparison.finish_after) }}</a-descriptions-item>
+            </a-descriptions>
+            <a-table
+              :columns="forwardResultColumns"
+              :data-source="forwardTaskResults"
+              :pagination="false"
+              :scroll="{ x: 1080 }"
+              row-key="task_id"
+              size="small"
+              class="schedule-result-table"
+            >
+              <template #bodyCell="{ column, record }">
+                <template v-if="column.key === 'task'">
+                  <div class="result-task">
+                    <strong>{{ record.name }}</strong>
+                    <span>{{ record.wbs || record.task_id }}</span>
+                    <div>
+                      <a-tag v-if="record.summary">汇总</a-tag>
+                      <a-tag v-if="record.changed" color="blue">日期有变化</a-tag>
+                    </div>
+                  </div>
+                </template>
+                <template v-else-if="column.key === 'source_period'">
+                  <div class="result-period">
+                    <span>始 {{ formatScheduleDate(record.source_start) }}</span>
+                    <span>终 {{ formatScheduleDate(record.source_finish) }}</span>
+                  </div>
+                </template>
+                <template v-else-if="column.key === 'early_period'">
+                  <div class="result-period">
+                    <span>始 {{ formatScheduleDate(record.early_start) }}</span>
+                    <span>终 {{ formatScheduleDate(record.early_finish) }}</span>
+                  </div>
+                </template>
+                <template v-else-if="column.key === 'late_period'">
+                  <div class="result-period">
+                    <span>始 {{ formatScheduleDate(record.late_start) }}</span>
+                    <span>终 {{ formatScheduleDate(record.late_finish) }}</span>
+                  </div>
+                </template>
+                <template v-else-if="column.key === 'total_slack'">
+                  {{ formatSlack(record.total_slack_minutes) }}
+                </template>
+                <template v-else-if="column.key === 'free_slack'">
+                  {{ formatSlack(record.free_slack_minutes) }}
+                </template>
+                <template v-else-if="column.key === 'critical'">
+                  <a-tag :color="record.critical ? 'red' : 'default'">
+                    {{ record.critical ? '关键' : '非关键' }}
+                  </a-tag>
+                </template>
+              </template>
+            </a-table>
+            <details class="technical-details">
+              <summary>查看技术明细（日期变化 Patch）</summary>
               <pre>{{ pretty(candidateDetail.effective_patch.task_date_changes) }}</pre>
-            </a-descriptions-item>
-          </a-descriptions>
+            </details>
+          </template>
           <a-descriptions v-else :column="1" bordered size="small">
             <a-descriptions-item label="目标问题已解决">
               {{ candidateDetail.comparison.target_issue_resolved ? '是' : '否' }}
@@ -601,6 +659,15 @@ const issueColumns = [
   { title: '对象', key: 'objects', width: 220 },
   { title: '操作', key: 'actions', width: 150 }
 ]
+const forwardResultColumns = [
+  { title: '任务', key: 'task', width: 220, fixed: 'left' },
+  { title: '来源计划', key: 'source_period', width: 180 },
+  { title: '最早日期', key: 'early_period', width: 180 },
+  { title: '最晚日期', key: 'late_period', width: 180 },
+  { title: '总浮时', key: 'total_slack', width: 120 },
+  { title: '自由浮时', key: 'free_slack', width: 120 },
+  { title: '关键任务', key: 'critical', width: 100 }
+]
 const categoryOptions = [
   { label: '契约', value: 'contract' },
   { label: '网络', value: 'network' },
@@ -645,12 +712,43 @@ const isForwardCandidate = computed(
   () => candidateDetail.value?.candidate_kind === 'automatic_forward_recalculation'
 )
 const candidateDrawerTitle = computed(() =>
-  isForwardCandidate.value ? '正向重算 Candidate 审阅' : '依赖 Candidate 审阅'
+  isForwardCandidate.value ? '排期重算方案审阅' : '依赖 Candidate 审阅'
+)
+const candidateStatusLabel = computed(
+  () => ({ valid: '可审阅', invalid: '不可应用' })[candidateDetail.value?.candidate_status] || candidateDetail.value?.candidate_status
+)
+const baseSnapshotStatusLabel = computed(
+  () => ({ current: '当前版本', outdated: '已过期' })[candidateDetail.value?.base_snapshot_status] || candidateDetail.value?.base_snapshot_status
+)
+const userAttitudeLabel = computed(
+  () => ({ unreviewed: '待审阅', accepted: '已接受', rejected: '已拒绝' })[candidateDetail.value?.user_attitude] || candidateDetail.value?.user_attitude
+)
+const candidateKindLabel = computed(() =>
+  isForwardCandidate.value ? '自动排期重算' : '依赖关系调整'
 )
 const candidateNotice = computed(() =>
   isForwardCandidate.value
-    ? '日期仅保存在 engine_result，来源任务及 source_calculation 均未修改。'
+    ? '重算结果包含最早/最晚日期、浮时和关键任务；来源任务及原始计算字段均未修改。'
     : '该 Candidate 只规范化依赖，不修改 Source，也不运行 CPM。'
+)
+const forwardTaskResults = computed(() => {
+  const document = candidateDetail.value?.candidate_snapshot
+  const tasks = new Map(
+    (document?.candidate_schedule?.tasks || []).map((task) => [task.task_id, task])
+  )
+  return (document?.engine_result?.task_dates || []).map((result) => {
+    const task = tasks.get(result.task_id) || {}
+    return {
+      ...result,
+      name: task.name || result.task_id,
+      wbs: task.wbs || '',
+      summary: result.summary ?? task.task_type === 'summary',
+      changed: result.start_changed || result.finish_changed
+    }
+  })
+})
+const forwardCriticalCount = computed(
+  () => forwardTaskResults.value.filter((task) => task.critical && !task.summary).length
 )
 const deliveryMessage = computed(() => {
   if (!deliveryDetail.value?.application_allowed) return '当前不可交付'
@@ -864,7 +962,7 @@ const recalculateForward = async () => {
     }
     candidateDetail.value = result
     candidateOpen.value = true
-    message.success('正向重算 Candidate 已生成，Source 未修改')
+    message.success('排期重算方案已生成，来源快照未修改')
   } catch (error) {
     message.error(error.message || '正向重算失败')
   } finally {
@@ -956,6 +1054,14 @@ const capabilityLabel = (name) =>
 const severityColor = (severity) => ({ blocker: 'red', warning: 'orange', info: 'blue' })[severity]
 const shortId = (value) => `${value.slice(0, 8)}…`
 const formatDate = (value) => (value ? new Date(value).toLocaleString() : '处理中')
+const formatScheduleDate = (value) => (value ? new Date(value).toLocaleString() : '—')
+const formatSlack = (minutes) => {
+  if (!Number.isFinite(minutes)) return '—'
+  if (minutes === 0) return '0 分钟'
+  const hours = Math.abs(minutes) / 60
+  const hourText = Number.isInteger(hours) ? `${hours} 小时` : `${hours.toFixed(1)} 小时`
+  return `${minutes} 分钟（${hourText}）`
+}
 const pretty = (value) => JSON.stringify(value, null, 2)
 
 onMounted(loadSnapshots)
@@ -1166,6 +1272,32 @@ h4 {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.schedule-result-table {
+  margin-top: 16px;
+}
+
+.result-task,
+.result-period {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.result-task > span,
+.result-period {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.technical-details {
+  margin-top: 16px;
+  color: var(--color-text-secondary);
+}
+
+.technical-details summary {
+  cursor: pointer;
 }
 
 .task-tree,
