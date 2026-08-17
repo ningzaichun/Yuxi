@@ -16,16 +16,20 @@ from yuxi.schedule.contracts.optimization import (
     CandidateDecisionRequest,
     DependencyOptimizationRequest,
     ForwardRecalculationRequest,
+    GoalOptimizationRequest,
 )
 from yuxi.schedule.forward_engine import REVERSE_FLOAT_ENGINE_PROFILE_ID, calculate_minimal_forward_schedule
+from yuxi.schedule.goal_optimizer import optimize_project_finish
 from yuxi.schedule.importers.canonical_v2_2 import import_canonical_schedule_v2_2
 from yuxi.schedule.storage import SCHEDULE_BUCKET, ScheduleSnapshotStore
 
 CANDIDATE_SCHEMA_VERSION = "schedule_candidate_draft_v0"
 CANDIDATE_KIND = "dependency_normalization"
 FORWARD_CANDIDATE_KIND = "automatic_forward_recalculation"
+GOAL_CANDIDATE_KIND = "goal_duration_optimization"
 STRATEGY_ID = "replace-summary-dependency-v1"
 FORWARD_STRATEGY_ID = "recalculate-automatic-downstream-v1"
+GOAL_STRATEGY_ID = "authorized-duration-goal-v1"
 SOURCE_TYPE_CODES = {"FF": 0, "FS": 1, "SF": 2, "SS": 3}
 
 
@@ -346,6 +350,199 @@ class ScheduleOptimizationService:
             raise ScheduleOptimizationDependencyError from exc
         return await self._candidate_response(owner_uid, candidate), True
 
+    async def create_goal_candidate(
+        self,
+        owner_uid: str,
+        snapshot_id: str,
+        request: GoalOptimizationRequest,
+    ) -> tuple[dict[str, Any], bool]:
+        base = await self._repository.get_ready(owner_uid, snapshot_id)
+        if base is None:
+            raise ScheduleOptimizationNotFoundError
+        if base.snapshot_content_sha256 != request.base_snapshot_content_sha256:
+            raise ScheduleOptimizationConflictError
+        latest = await self._repository.get_latest_ready_for_project(owner_uid, base.external_project_id)
+        if latest is None or latest.schedule_snapshot_id != snapshot_id:
+            raise ScheduleOptimizationConflictError
+
+        try:
+            source = json.loads((await self._store.download(base.minio_object)).decode("utf-8"))
+            contract = CanonicalScheduleV22.model_validate(source)
+            engine_result = optimize_project_finish(contract, request)
+        except Exception as exc:
+            raise ScheduleOptimizationDependencyError from exc
+        if engine_result["status"] != "calculated":
+            return {
+                "candidate_status": engine_result["status"],
+                "candidate_kind": GOAL_CANDIDATE_KIND,
+                "base_schedule_snapshot_id": snapshot_id,
+                "base_snapshot_content_sha256": base.snapshot_content_sha256,
+                "engine_result": engine_result,
+            }, False
+        base_issues = await self._repository.list_all_issues(owner_uid, snapshot_id)
+        if base_issues is None:
+            raise ScheduleOptimizationNotFoundError
+
+        optimization_id = uuid.uuid4().hex
+        candidate_snapshot_id = uuid.uuid4().hex
+        try:
+            selected = engine_result["selected_strategy"]
+            duration_changes = selected["duration_changes"]
+            requested_patch = {
+                "strategy_id": GOAL_STRATEGY_ID,
+                "objective": request.objective,
+                "target_finish": request.target_finish.isoformat() if request.target_finish else None,
+                "authorization": {
+                    "confirmed": request.authorization_confirmed,
+                    "authorized_task_ids": [item.task_id for item in request.authorized_duration_options],
+                    "authorized_duration_options": [
+                        item.model_dump(mode="json") for item in request.authorized_duration_options
+                    ],
+                    "locked_task_ids": request.locked_task_ids,
+                },
+                "hard_constraints": {
+                    "preserve_dependencies": True,
+                    "preserve_lag": True,
+                    "preserve_calendars": True,
+                    "preserve_milestones": True,
+                    "preserve_task_modes": True,
+                },
+                "operations": [
+                    {
+                        "operation_id": uuid.uuid4().hex,
+                        "operation": "set_task_duration",
+                        **change,
+                        "change_origin": "explicit_authorization",
+                    }
+                    for change in duration_changes
+                ],
+            }
+            effective_patch = {
+                "duration_changes": duration_changes,
+                "change_origin": "explicit_authorization",
+            }
+            candidate_schedule = copy.deepcopy(source)
+            candidate_tasks = {task["task_id"]: task for task in candidate_schedule["tasks"]}
+            for change in duration_changes:
+                candidate_tasks[change["task_id"]]["duration_minutes"] = change["after_duration_minutes"]
+            candidate_contract = CanonicalScheduleV22.model_validate(candidate_schedule)
+            audit = audit_schedule(
+                import_canonical_schedule_v2_2(candidate_contract),
+                schedule_snapshot_id=candidate_snapshot_id,
+                audit_run_id=uuid.uuid4().hex,
+            )
+            base_blockers = {_blocker_signature(item) for item in base_issues if item.severity == "blocker"}
+            new_blockers = sorted(
+                _blocker_signature(item)
+                for item in audit.findings
+                if item.severity == "blocker" and _blocker_signature(item) not in base_blockers
+            )
+            candidate_status = "invalid" if new_blockers else "valid"
+            comparison = {
+                "objective": request.objective,
+                "target_finish": engine_result["target_finish"],
+                "target_met": engine_result["target_met"],
+                "finish_before": engine_result["finish_before"],
+                "finish_after": engine_result["finish_after"],
+                "evaluated_strategy_count": engine_result["evaluated_strategy_count"],
+                "affected_task_count": len(duration_changes),
+                "total_reduction_minutes": selected["total_reduction_minutes"],
+                "new_blockers": new_blockers,
+            }
+            candidate_document = {
+                "candidate_schema_version": CANDIDATE_SCHEMA_VERSION,
+                "candidate_snapshot_id": candidate_snapshot_id,
+                "base_schedule_snapshot_id": snapshot_id,
+                "base_snapshot_content_sha256": base.snapshot_content_sha256,
+                "candidate_schedule": candidate_schedule,
+                "engine_result": engine_result,
+                "requested_patch": requested_patch,
+                "effective_patch": effective_patch,
+                "engine_profile_id": engine_result["optimizer_profile_id"],
+                "engine_version": engine_result["optimizer_version"],
+                "candidate_kind": GOAL_CANDIDATE_KIND,
+                "candidate_status": candidate_status,
+                "comparison": comparison,
+                "candidate_audit": _candidate_audit(audit),
+            }
+        except Exception as exc:
+            raise ScheduleOptimizationDependencyError from exc
+
+        object_name = f"{owner_uid}/candidates/{candidate_snapshot_id}/snapshot.json"
+        optimization, created = await self._repository.reserve_optimization(
+            {
+                "optimization_id": optimization_id,
+                "candidate_snapshot_id": candidate_snapshot_id,
+                "owner_uid": owner_uid,
+                "request_id": request.request_id,
+                "dependency_decision_id": None,
+                "base_schedule_snapshot_id": snapshot_id,
+                "base_snapshot_content_sha256": base.snapshot_content_sha256,
+                "strategy_id": GOAL_STRATEGY_ID,
+                "status": "creating",
+            }
+        )
+        if not created:
+            if (
+                optimization.strategy_id != GOAL_STRATEGY_ID
+                or optimization.base_schedule_snapshot_id != snapshot_id
+                or optimization.base_snapshot_content_sha256 != request.base_snapshot_content_sha256
+            ):
+                raise ScheduleOptimizationConflictError
+            if optimization.status == "creating":
+                raise ScheduleOptimizationInProgressError
+            if optimization.status == "failed":
+                raise ScheduleOptimizationDependencyError
+            candidate = await self._repository.get_candidate_by_optimization(owner_uid, optimization.optimization_id)
+            if candidate is None:
+                raise ScheduleOptimizationDependencyError
+            response = await self._candidate_response(owner_uid, candidate)
+            requested_patch = response["requested_patch"]
+            expected_options = [item.model_dump(mode="json") for item in request.authorized_duration_options]
+            if (
+                requested_patch.get("objective") != request.objective
+                or requested_patch.get("target_finish")
+                != (request.target_finish.isoformat() if request.target_finish else None)
+                or requested_patch.get("authorization", {}).get("authorized_duration_options") != expected_options
+                or requested_patch.get("authorization", {}).get("locked_task_ids") != request.locked_task_ids
+            ):
+                raise ScheduleOptimizationConflictError
+            return response, False
+
+        try:
+            await self._store.upload(
+                object_name,
+                json.dumps(
+                    candidate_document,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ).encode("utf-8"),
+            )
+            candidate = await self._repository.finalize_optimization(
+                optimization_id,
+                requested_patch,
+                {
+                    "candidate_snapshot_id": candidate_snapshot_id,
+                    "owner_uid": owner_uid,
+                    "optimization_id": optimization_id,
+                    "dependency_decision_id": None,
+                    "base_schedule_snapshot_id": snapshot_id,
+                    "candidate_schema_version": CANDIDATE_SCHEMA_VERSION,
+                    "candidate_kind": GOAL_CANDIDATE_KIND,
+                    "candidate_status": candidate_status,
+                    "minio_bucket": SCHEDULE_BUCKET,
+                    "minio_object": object_name,
+                    "effective_patch": effective_patch,
+                    "comparison": comparison,
+                    "candidate_audit": candidate_document["candidate_audit"],
+                },
+            )
+        except Exception as exc:
+            await self._repository.mark_optimization_failed(optimization_id, "SCHEDULE_GOAL_OPTIMIZATION_FAILURE")
+            raise ScheduleOptimizationDependencyError from exc
+        return await self._candidate_response(owner_uid, candidate), True
+
     async def get_optimization(self, owner_uid: str, optimization_id: str) -> dict[str, Any]:
         record = await self._repository.get_optimization(owner_uid, optimization_id)
         if record is None:
@@ -389,8 +586,6 @@ class ScheduleOptimizationService:
     async def get_delivery(self, owner_uid: str, candidate_snapshot_id: str) -> dict[str, Any]:
         candidate = await self.get_candidate(owner_uid, candidate_snapshot_id)
         attitude = candidate["user_attitude"]
-        if attitude != "accepted":
-            raise ScheduleOptimizationInvalidError
         reasons = []
         if candidate["candidate_status"] != "valid":
             reasons.append("CANDIDATE_NOT_VALID")
@@ -499,7 +694,7 @@ class ScheduleOptimizationService:
             "effective_patch": candidate.effective_patch,
             "comparison": candidate.comparison,
             "candidate_audit": candidate.candidate_audit,
-            "user_attitude": decision.attitude if decision else "unreviewed",
+            "user_attitude": decision.attitude if decision else "not_reviewed",
             "latest_decision": _candidate_decision_record(decision) if decision else None,
             "candidate_snapshot": document,
             "created_at": candidate.created_at,

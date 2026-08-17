@@ -6,9 +6,42 @@
         <AgentChatComponent
           ref="chatComponentRef"
           :single-mode="false"
+          :thread-metadata="scheduleReviewThreadMetadata"
           @thread-change="handleThreadChange"
           @draft-consumed="clearScheduleEntryQuery"
         >
+          <template #header-left>
+            <div
+              v-if="scheduleReviewContext"
+              class="schedule-review-context"
+              :title="`${scheduleReviewContext.externalProjectId} · ${scheduleReviewContext.externalRevision} · ${scheduleReviewContext.scheduleSnapshotId}`"
+            >
+              <MessageSquareText :size="15" />
+              <strong>{{ isScheduleGoalContext ? '工期优化规划' : '排期审查' }}</strong>
+              <span>{{ scheduleReviewContext.externalProjectId }}</span>
+              <span>{{ scheduleReviewContext.externalRevision }}</span>
+              <code>{{ shortId(scheduleReviewContext.scheduleSnapshotId) }}</code>
+            </div>
+          </template>
+          <template #header-right>
+            <a-dropdown
+              v-if="scheduleReviewContext && !isScheduleGoalContext"
+              :trigger="['click']"
+              placement="bottomRight"
+            >
+              <a-button type="text" size="small" class="schedule-suggestion-trigger">
+                建议问题
+                <ChevronDown :size="14" />
+              </a-button>
+              <template #overlay>
+                <a-menu @click="setScheduleReviewQuestion">
+                  <a-menu-item v-for="item in scheduleReviewSuggestions" :key="item.key">
+                    {{ item.label }}
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+          </template>
           <template #input-actions-left="{ hasActiveThread }">
             <a-dropdown
               v-if="selectedAgentId"
@@ -93,15 +126,24 @@
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'
 import { message } from 'ant-design-vue'
-import { Settings2, ChevronDown, Check } from 'lucide-vue-next'
+import { Settings2, ChevronDown, Check, MessageSquareText } from 'lucide-vue-next'
 import { useRoute, useRouter } from 'vue-router'
 import { agentApi } from '@/apis/agent_api'
 import AgentChatComponent from '@/components/AgentChatComponent.vue'
 import AgentEditModal from '@/components/model-management/AgentEditModal.vue'
 import { isBuiltinAgent, useAgentStore } from '@/stores/agent'
+import { useChatThreadsStore } from '@/stores/chatThreads'
 import { handleChatError } from '@/utils/errorHandler'
 import { generatePixelAvatar } from '@/utils/pixelAvatar'
 import FallbackAvatar from '@/components/common/FallbackAvatar.vue'
+import {
+  buildScheduleGoalDraft,
+  buildScheduleReviewDraft,
+  buildScheduleReviewThreadMetadata,
+  scheduleReviewContextFromQuery,
+  scheduleReviewContextFromMetadata,
+  scheduleReviewSuggestions
+} from '@/utils/scheduleAgentEntry'
 
 import { storeToRefs } from 'pinia'
 
@@ -111,14 +153,17 @@ const agentEditModalRef = ref(null)
 
 // Stores
 const agentStore = useAgentStore()
+const chatThreadsStore = useChatThreadsStore()
 const route = useRoute()
 const router = useRouter()
 
 // 从 agentStore 中获取响应式状态
 const { agents, selectedAgentId, isLoadingConfig } = storeToRefs(agentStore)
+const { currentThread } = storeToRefs(chatThreadsStore)
 
 const syncingRouteThread = ref(false)
 const consumingScheduleEntry = ref(false)
+const preparedScheduleSnapshotId = ref('')
 
 const getRouteThreadId = () => {
   const value = route.params.thread_id
@@ -134,6 +179,23 @@ const getRouteScheduleIssueId = () => {
   const value = route.query.schedule_issue_id
   return typeof value === 'string' ? value : ''
 }
+
+const scheduleReviewContext = computed(
+  () =>
+    scheduleReviewContextFromQuery(route.query) ||
+    scheduleReviewContextFromMetadata(currentThread.value?.metadata)
+)
+const scheduleReviewThreadMetadata = computed(() =>
+  scheduleReviewContext.value
+    ? buildScheduleReviewThreadMetadata(scheduleReviewContext.value)
+    : {}
+)
+const isScheduleGoalContext = computed(
+  () => scheduleReviewContext.value?.mode === 'goal_optimization'
+)
+const scheduleReviewThreadId = ref(
+  scheduleReviewContext.value ? getRouteThreadId() : ''
+)
 
 const syncSelectedThreadFromRoute = async () => {
   const chatComponent = chatComponentRef.value
@@ -160,9 +222,10 @@ const syncSelectedThreadFromRoute = async () => {
 const consumeRouteAgentSelection = async () => {
   const targetAgentId = getRouteAgentId()
   const scheduleIssueId = getRouteScheduleIssueId()
+  const reviewContext = scheduleReviewContext.value
   const chatComponent = chatComponentRef.value
   if (
-    (!targetAgentId && !scheduleIssueId) ||
+    (!targetAgentId && !scheduleIssueId && !reviewContext) ||
     getRouteThreadId() ||
     !chatComponent ||
     consumingScheduleEntry.value
@@ -182,13 +245,23 @@ const consumeRouteAgentSelection = async () => {
       chatComponent.setDraftMessage?.(
         `请解释排期审查问题 issue_id=${scheduleIssueId}，并说明证据、影响和需要工程人员确认的事项。只能依据 Schedule 工具返回的 YUXI_AUDIT 事实；不得把来源 Validation，或 normalization report 中 ignored/unsupported 的字段描述成已参与审查或计算。`
       )
+    } else if (
+      reviewContext &&
+      preparedScheduleSnapshotId.value !== reviewContext.scheduleSnapshotId
+    ) {
+      chatComponent.setDraftMessage?.(
+        isScheduleGoalContext.value
+          ? buildScheduleGoalDraft(reviewContext)
+          : buildScheduleReviewDraft(reviewContext)
+      )
+      preparedScheduleSnapshotId.value = reviewContext.scheduleSnapshotId
     }
   } catch (error) {
     handleChatError(error, 'load')
   } finally {
     consumingScheduleEntry.value = false
   }
-  if (!scheduleIssueId) {
+  if (!scheduleIssueId && !reviewContext) {
     const nextQuery = { ...route.query }
     delete nextQuery.agent_id
     await router.replace({ name: 'AgentComp', query: nextQuery })
@@ -199,7 +272,12 @@ const clearScheduleEntryQuery = async () => {
   const nextQuery = { ...route.query }
   delete nextQuery.agent_id
   delete nextQuery.schedule_issue_id
-  await router.replace({ name: 'AgentComp', query: nextQuery })
+  const threadId = getRouteThreadId()
+  await router.replace(
+    threadId
+      ? { name: 'AgentCompWithThreadId', params: { thread_id: threadId }, query: nextQuery }
+      : { name: 'AgentComp', query: nextQuery }
+  )
 }
 
 watch(
@@ -211,8 +289,20 @@ watch(
 )
 
 watch(
-  () => [route.query.agent_id, route.query.schedule_issue_id],
-  () => {
+  () => [
+    route.query.agent_id,
+    route.query.schedule_issue_id,
+    route.query.schedule_snapshot_id,
+    route.query.schedule_snapshot_sha256,
+    route.query.schedule_external_project_id,
+    route.query.schedule_external_revision,
+    route.query.schedule_goal_optimization
+  ],
+  (current, previous) => {
+    if (current[2] !== previous?.[2]) {
+      preparedScheduleSnapshotId.value = ''
+      scheduleReviewThreadId.value = getRouteThreadId()
+    }
     consumeRouteAgentSelection()
   },
   { immediate: true }
@@ -233,11 +323,45 @@ const handleThreadChange = (threadId) => {
   if (currentRouteThreadId === nextThreadId) return
 
   if (nextThreadId) {
-    router.replace({ name: 'AgentCompWithThreadId', params: { thread_id: nextThreadId } })
+    let query = {}
+    if (scheduleReviewContext.value) {
+      if (!scheduleReviewThreadId.value) scheduleReviewThreadId.value = nextThreadId
+      if (scheduleReviewThreadId.value === nextThreadId) {
+        query = {
+          schedule_snapshot_id: scheduleReviewContext.value.scheduleSnapshotId,
+          schedule_snapshot_sha256: scheduleReviewContext.value.snapshotContentSha256,
+          schedule_external_project_id: scheduleReviewContext.value.externalProjectId,
+          schedule_external_revision: scheduleReviewContext.value.externalRevision,
+          ...(scheduleReviewContext.value.mode === 'goal_optimization'
+            ? { schedule_goal_optimization: '1' }
+            : {})
+        }
+      } else {
+        preparedScheduleSnapshotId.value = ''
+        scheduleReviewThreadId.value = ''
+      }
+    }
+    router.replace({
+      name: 'AgentCompWithThreadId',
+      params: { thread_id: nextThreadId },
+      query
+    })
   } else {
+    preparedScheduleSnapshotId.value = ''
+    scheduleReviewThreadId.value = ''
     router.replace({ name: 'AgentComp' })
   }
 }
+
+const setScheduleReviewQuestion = ({ key }) => {
+  const suggestion = scheduleReviewSuggestions.find((item) => item.key === key)
+  if (!suggestion || !scheduleReviewContext.value) return
+  chatComponentRef.value?.setDraftMessage?.(
+    buildScheduleReviewDraft(scheduleReviewContext.value, suggestion.question)
+  )
+}
+
+const shortId = (value) => (value ? `${value.slice(0, 8)}…${value.slice(-6)}` : '-')
 
 const agentQuickSwitchOptions = computed(() =>
   (agents.value || [])
@@ -342,6 +466,37 @@ const openAgentManagement = async () => {
   overflow: hidden;
 }
 
+.schedule-review-context {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  max-width: min(620px, calc(100vw - 440px));
+  gap: 6px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.schedule-review-context strong {
+  color: var(--color-text);
+}
+
+.schedule-review-context span {
+  overflow: hidden;
+  max-width: 160px;
+  text-overflow: ellipsis;
+}
+
+.schedule-review-context code {
+  color: var(--main-700);
+}
+
+.schedule-suggestion-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .config-dropdown-trigger {
   display: inline-flex;
   align-items: center;
@@ -370,6 +525,14 @@ const openAgentManagement = async () => {
 
 // 响应式优化
 @media (max-width: 520px) {
+  .schedule-review-context span {
+    display: none;
+  }
+
+  .schedule-review-context {
+    max-width: calc(100vw - 250px);
+  }
+
   .config-dropdown-trigger {
     max-width: calc(100vw - 112px);
   }

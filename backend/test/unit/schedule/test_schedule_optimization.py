@@ -13,12 +13,14 @@ from yuxi.schedule.contracts.optimization import (
     CandidateDecisionRequest,
     DependencyOptimizationRequest,
     ForwardRecalculationRequest,
+    GoalOptimizationRequest,
 )
 from yuxi.schedule.delivery_adapter import apply_delivery_to_source_copy
 from yuxi.schedule.forward_engine import REVERSE_FLOAT_ENGINE_PROFILE_ID
 from yuxi.schedule.importers.canonical_v2_2 import import_canonical_schedule_v2_2
 from yuxi.services.schedule_optimization_service import (
     ScheduleOptimizationConflictError,
+    ScheduleOptimizationDependencyError,
     ScheduleOptimizationInvalidError,
     ScheduleOptimizationService,
     _apply_decision,
@@ -294,6 +296,84 @@ async def test_forward_candidate_supports_relation_types_in_main_flow() -> None:
 
 
 @pytest.mark.asyncio
+async def test_goal_candidate_persists_selected_duration_strategy_and_delivers_before_review() -> None:
+    source = _supported_forward_source()
+    service, repository = _service(source)
+    repository.snapshot.snapshot_content_sha256 = _canonical_content_sha256(source)
+    before = json.loads(json.dumps(source))
+    request = GoalOptimizationRequest(
+        request_id="goal-request-1",
+        base_snapshot_content_sha256=repository.snapshot.snapshot_content_sha256,
+        objective="MINIMIZE_PROJECT_FINISH",
+        authorized_duration_options=[{"task_id": "synthetic-task:build-a", "duration_minutes": 240}],
+        authorization_confirmed=True,
+    )
+
+    candidate, created = await service.create_goal_candidate("owner-1", "snapshot-1", request)
+    replay, replay_created = await service.create_goal_candidate("owner-1", "snapshot-1", request)
+    delivery = await service.get_delivery("owner-1", candidate["candidate_snapshot_id"])
+
+    assert created is True
+    assert replay_created is False
+    assert replay["candidate_snapshot_id"] == candidate["candidate_snapshot_id"]
+    assert candidate["candidate_kind"] == "goal_duration_optimization"
+    assert candidate["candidate_status"] == "valid"
+    assert candidate["comparison"]["finish_after"] < candidate["comparison"]["finish_before"]
+    assert candidate["effective_patch"]["duration_changes"] == [
+        {
+            "task_id": "synthetic-task:build-a",
+            "before_duration_minutes": 480,
+            "after_duration_minutes": 240,
+        }
+    ]
+    candidate_tasks = {task["task_id"]: task for task in candidate["candidate_snapshot"]["candidate_schedule"]["tasks"]}
+    assert candidate_tasks["synthetic-task:build-a"]["duration_minutes"] == 240
+    assert source == before
+    assert delivery["user_attitude"] == "not_reviewed"
+    assert delivery["application_allowed"] is True
+
+    with pytest.raises(ScheduleOptimizationConflictError):
+        await service.create_goal_candidate(
+            "owner-1",
+            "snapshot-1",
+            GoalOptimizationRequest(
+                request_id="goal-request-1",
+                base_snapshot_content_sha256=repository.snapshot.snapshot_content_sha256,
+                objective="MINIMIZE_PROJECT_FINISH",
+                authorized_duration_options=[{"task_id": "synthetic-task:build-a", "duration_minutes": 120}],
+                authorization_confirmed=True,
+            ),
+        )
+
+
+@pytest.mark.asyncio
+async def test_goal_candidate_does_not_leave_creating_record_when_candidate_audit_fails(monkeypatch) -> None:
+    source = _supported_forward_source()
+    service, repository = _service(source)
+    repository.snapshot.snapshot_content_sha256 = _canonical_content_sha256(source)
+
+    def fail_audit(*args, **kwargs):
+        raise RuntimeError("candidate audit failed")
+
+    monkeypatch.setattr("yuxi.services.schedule_optimization_service.audit_schedule", fail_audit)
+
+    with pytest.raises(ScheduleOptimizationDependencyError):
+        await service.create_goal_candidate(
+            "owner-1",
+            "snapshot-1",
+            GoalOptimizationRequest(
+                request_id="goal-audit-failure-1",
+                base_snapshot_content_sha256=repository.snapshot.snapshot_content_sha256,
+                objective="MINIMIZE_PROJECT_FINISH",
+                authorized_duration_options=[{"task_id": "synthetic-task:build-a", "duration_minutes": 240}],
+                authorization_confirmed=True,
+            ),
+        )
+
+    assert repository.optimization is None
+
+
+@pytest.mark.asyncio
 async def test_forward_candidate_persists_invalid_locked_conflict_without_allowing_delivery() -> None:
     source = _supported_forward_source()
     target = next(task for task in source["tasks"] if task["task_id"] == "synthetic-task:build-a")
@@ -393,15 +473,16 @@ async def test_optimization_request_is_idempotent_and_rejects_hash_conflict(
 
 
 @pytest.mark.asyncio
-async def test_acceptance_enables_delivery_and_rejection_does_not_change_technical_status(
+async def test_delivery_is_available_for_every_attitude_without_changing_technical_status(
     canonical_schedule_payload: dict,
 ) -> None:
     service, repository = _service(canonical_schedule_payload)
     candidate, _ = await service.create_candidate("owner-1", "snapshot-1", _request(repository))
     candidate_id = candidate["candidate_snapshot_id"]
 
-    with pytest.raises(ScheduleOptimizationInvalidError):
-        await service.get_delivery("owner-1", candidate_id)
+    initial_delivery = await service.get_delivery("owner-1", candidate_id)
+    assert initial_delivery["user_attitude"] == "not_reviewed"
+    assert initial_delivery["application_allowed"] is True
 
     rejected, _ = await service.record_decision(
         "owner-1",
@@ -409,8 +490,11 @@ async def test_acceptance_enables_delivery_and_rejection_does_not_change_technic
         CandidateDecisionRequest(request_id="reject-1", attitude="rejected", comment="需要复核"),
     )
     after_rejection = await service.get_candidate("owner-1", candidate_id)
+    rejected_delivery = await service.get_delivery("owner-1", candidate_id)
     assert rejected["attitude"] == "rejected"
     assert after_rejection["candidate_status"] == "valid"
+    assert rejected_delivery["user_attitude"] == "rejected"
+    assert rejected_delivery["application_allowed"] is True
 
     await service.record_decision(
         "owner-1",

@@ -109,6 +109,23 @@ class FakeOptimizationService:
             not self.replay,
         )
 
+    async def create_goal_candidate(self, owner_uid, snapshot_id, request):
+        if self.conflict:
+            raise ScheduleOptimizationConflictError
+        return (
+            {
+                "candidate_snapshot_id": "candidate-goal-1",
+                "base_schedule_snapshot_id": snapshot_id,
+                "candidate_status": "valid",
+                "candidate_kind": "goal_duration_optimization",
+                "comparison": {
+                    "objective": request.objective,
+                    "target_met": True,
+                },
+            },
+            not self.replay,
+        )
+
     async def get_candidate(self, owner_uid, candidate_snapshot_id):
         return {"candidate_snapshot_id": candidate_snapshot_id, "candidate_status": "valid"}
 
@@ -309,3 +326,25 @@ def test_forward_recalculation_candidate_contract(monkeypatch) -> None:
     assert response.status_code == 201
     assert response.json()["candidate_status"] == "valid"
     assert response.json()["candidate_kind"] == "automatic_forward_recalculation"
+
+
+def test_goal_optimization_candidate_contract(monkeypatch) -> None:
+    client = _client(monkeypatch, FakeService())
+
+    response = client.post(
+        "/api/schedule/snapshots/snapshot-1/goal-optimizations",
+        json={
+            "request_id": "goal-request-1",
+            "base_snapshot_content_sha256": "sha256:" + "a" * 64,
+            "objective": "MEET_TARGET_FINISH",
+            "target_finish": "2026-09-03T17:00:00+08:00",
+            "authorized_duration_options": [{"task_id": "synthetic-task:long-work", "duration_minutes": 480}],
+            "locked_task_ids": ["synthetic-task:kickoff"],
+            "authorization_confirmed": True,
+        },
+    )
+
+    assert response.status_code == 201
+    assert response.json()["candidate_status"] == "valid"
+    assert response.json()["candidate_kind"] == "goal_duration_optimization"
+    assert response.json()["comparison"]["target_met"] is True

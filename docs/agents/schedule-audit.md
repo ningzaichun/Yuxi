@@ -135,7 +135,7 @@ Capability 决定某项 Yuxi 能力是否允许，normalization report 只描述
 FS/SS/FF/SF 零/正 Lag、ASAP/SNET/FNET、手工/locked 活动任务的最早和最晚开始/完成、总浮时、自由浮时与关键标识，并按直接子任务自底向上滚动汇总任务结果；正 Lag 与浮时按统一项目日历的工作
 分钟推进，支持多个工作时段、午休、周末
 和非工作时间归位。来源任务日期和 `source_calculation` 不变，Yuxi 日期只保存在 Candidate 的
-`engine_result`，人工接受后可从 Delivery 的 `simulation_result` 查看同一结果。
+`engine_result`，Candidate 生成后即可从 Delivery 的 `simulation_result` 查看同一结果；用户接受、拒绝或未表态只作为态度元数据。
 
 包含多日历或日历例外、负 Lag、汇总依赖、非活动任务、非法层级、SNET/FNET 非法组合或实际进度的
 输入返回结构化 `blocked`，不生成近似 Candidate。S3 零 Lag、S4 正 Lag、SS/FF/SF、SNET/FNET、手工/locked、汇总滚动与反向浮时的
@@ -173,14 +173,39 @@ FS 正 Lag 和 ASAP 自动任务，Lag 按项目日历的工作分钟推进；Mi
 `--case test/data/schedule/microsoft_project_s4_positive_lag_golden_case.json` 参数复核，当前同样应返回
 `PASSED`；负 Lag 继续明确 blocked。
 
-### 5. 使用 Agent 解释 Issue
+### 5. 使用 Agent 审查排期
+
+#### 5.1 整份计划 AI 审查
+
+目标智能体的工具配置必须同时包含：
+
+- `get_schedule_review_context`
+- `get_schedule_audit`
+- `get_schedule_issue_context`
+
+选择快照后，在“审查问题”标题栏点击“AI 审查计划”。只有规范化运行配置包含三个工具且当前用户可访问的智能体，才会出现在整份计划入口的选择列表中。进入对话后，页面持续显示外部项目、外部版本和 Snapshot 简写，并提供“概括主要问题”“解释能力阻断”“建议处理顺序”三个建议问题；建议只会写入输入框，不会自动发送。
+
+`get_schedule_review_context(schedule_snapshot_id)` 使用运行时 `uid` 校验 Snapshot 归属，只返回以下安全投影：
+
+- Snapshot 身份、内容哈希、外部项目和版本；
+- Audit Run、规则集、Statistics 和日期检查统计；
+- Capability 和 Issue Summary；
+- 最多 50 个按既有排序输出的问题摘要、对象引用预览和 `evidence_locator`。
+
+投影不包含完整 Canonical、外部来源 JSON、Notes、未知扩展字段、normalization report 或 Issue 原始 evidence。问题超过 50 个时返回 `truncated=true`，Agent 必须说明摘要被截断，不能把已返回明细描述成全部问题。引用具体问题时使用 `evidence_locator.url` 返回排期页面，或调用 `get_schedule_issue_context` 读取该 Issue 的受控证据。
+
+整份审查先解释阻断用户目标的 Capability，再按 `blocker`、`warning`、`info` 组织问题。同级没有量化影响证据时只能给出明确标记为“建议”的处理顺序。没有版本化规则和证据时，不判断施工顺序、养护时间、设备到货等工程业务合理性。
+
+对话入口同时绑定 `schedule_snapshot_id` 和 `snapshot_content_sha256`。绑定线程保留这组身份；切换到其他线程或新建普通对话时清除排期上下文，避免把上一快照用于当前回答。
+
+#### 5.2 单个 Issue 解释
 
 目标智能体的工具配置必须同时包含：
 
 - `get_schedule_audit`
 - `get_schedule_issue_context`
 
-只有规范化运行配置包含两个工具且当前用户可访问的智能体，才会出现在排期页面的选择列表中。
+只有规范化运行配置包含两个工具且当前用户可访问的智能体，才会出现在单 Issue 入口的选择列表中。整份计划入口仍要求上述三个工具。
 
 页面进入 Agent 后只预填以下消息，不会自动发送：
 
@@ -191,6 +216,21 @@ FS 正 Lag 和 ASAP 自动任务，Lag 按项目日历的工作分钟推进；Mi
 用户发送或清空预填内容后，页面会移除 URL 中的 `agent_id` 与 `schedule_issue_id`，避免刷新后重复消费。
 
 Agent 只能读取已持久化的 Yuxi Audit 和 Issue。它不能自行计算日期、关键路径或 Patch，也不能把来源 Validation 或 ignored/unsupported 字段描述成已参与 Yuxi 审查或计算。
+
+#### 5.3 工期目标优化
+
+当前工期目标优化只支持两个确定性目标：
+
+- `MINIMIZE_PROJECT_FINISH`：在明确授权范围内尽早完工；
+- `MEET_TARGET_FINISH`：在明确授权范围内满足指定完成时间。
+
+页面只允许用户授权自动活动任务的工期缩短。后端请求可包含 1–10 个 `authorized_duration_options`，每项必须给出任务 ID 和短于来源工期的正整数工作分钟；`locked_task_ids` 用于冻结任务日期。依赖、Lag、日历、里程碑和任务模式均为固定硬约束，不能通过本接口授权修改。请求必须同时绑定基础 Snapshot 内容哈希并提交 `authorization_confirmed=true`。
+
+优化器复用 v7 正向/反向 CPM，比较基线和全部有限授权组合，不使用模型计算日期。`MINIMIZE_PROJECT_FINISH` 依次按最早完工、最少压缩分钟、最少变更任务和稳定策略 ID 选择；`MEET_TARGET_FINISH` 只在满足目标的组合中依次按最少压缩分钟、最少变更任务和最接近目标选择。候选会再次执行 Audit；出现新增 blocker 时不能标记为 `valid`。
+
+若所有授权组合都无法满足目标，接口返回 `status=blocked`、`TARGET_FINISH_UNACHIEVABLE` 和 `best_achievable_strategy`，不持久化 Candidate。成功 Candidate 记录授权、Requested/Effective Patch、比较方案数量、来源/优化完成时间、任务日期、浮时和关键标识；来源 Snapshot 不变。Candidate 生成后即可读取 Delivery，用户的 `not_reviewed`、`accepted` 或 `rejected` 只作为态度元数据。
+
+“让 AI 帮我梳理目标与授权”要求智能体同时启用 `get_schedule_review_context`、`get_schedule_goal_optimization_context`、`get_schedule_audit` 和 `get_schedule_issue_context`。Goal 工具只返回 Snapshot 身份、CPM Capability、固定硬约束和可授权活动任务的安全投影。Agent 不得推断可压缩工期、伪造授权或创建 Candidate；最终必须回到排期页面，由用户明确授权并提交。
 
 ## 审查规则
 
@@ -379,7 +419,7 @@ cd backend
 
 ### Agent 列表为空
 
-确认用户可访问目标 Agent，并在该 Agent 的工具配置中同时启用两个 Schedule 工具。只启用其中一个不会进入候选列表。
+确认用户可访问目标 Agent。单 Issue“Agent 解释”需要同时启用 `get_schedule_audit` 和 `get_schedule_issue_context`；整份计划“AI 审查计划”还必须启用 `get_schedule_review_context`。未满足对应入口的完整工具集合时，Agent 不会进入该入口的候选列表。
 
 ### 为什么 blocker 仍可查看 Snapshot
 

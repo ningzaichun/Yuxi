@@ -26,9 +26,7 @@ def _content_sha256(source: dict) -> str:
 
 
 def _delivery(source: dict) -> dict:
-    removed = copy.deepcopy(
-        next(item for item in source["dependencies"] if item["dependency_id"] == "dependency:81")
-    )
+    removed = copy.deepcopy(next(item for item in source["dependencies"] if item["dependency_id"] == "dependency:81"))
     added = {
         "dependency_id": "candidate:test:1",
         "predecessor_task_id": "task:179",
@@ -94,15 +92,12 @@ def test_adapter_applies_delivery_to_independent_consistent_source_copy(
     )
     assert result["statistics"]["summary_task_dependencies"] == 3
     assert result["statistics"]["open_finish_tasks"] == 14
-    assert "dependency:81" not in result["validation"]["network_quality"][
-        "summary_task_dependency_ids"
-    ]
+    assert "dependency:81" not in result["validation"]["network_quality"]["summary_task_dependency_ids"]
 
 
 @pytest.mark.parametrize(
     ("field", "value"),
     [
-        ("user_attitude", "unreviewed"),
         ("candidate_status", "invalid"),
         ("application_allowed", False),
         ("base_snapshot_content_sha256", "sha256:" + "0" * 64),
@@ -147,8 +142,7 @@ def test_adapter_removes_stale_validation_when_last_summary_dependency_is_resolv
     source["dependencies"] = [
         item
         for item in source["dependencies"]
-        if item["dependency_id"] == target["dependency_id"]
-        or item["dependency_id"] not in summary_dependency_ids
+        if item["dependency_id"] == target["dependency_id"] or item["dependency_id"] not in summary_dependency_ids
     ]
     delivery = _delivery(source)
 
@@ -165,8 +159,5 @@ def test_adapter_removes_stale_validation_when_last_summary_dependency_is_resolv
         item["code"] == "SUMMARY_TASK_DEPENDENCIES"
         for item in result["validation"]["source_vs_conversion_assessment"]["source_mpp_findings"]
     )
-    assert not any(
-        item["code"] == "SUMMARY_TASK_DEPENDENCIES"
-        for item in result["validation"]["issues"]
-    )
+    assert not any(item["code"] == "SUMMARY_TASK_DEPENDENCIES" for item in result["validation"]["issues"])
     assert result["validation"]["summary"]["issue_count"] == len(result["validation"]["issues"])

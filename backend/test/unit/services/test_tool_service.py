@@ -64,6 +64,8 @@ def test_schedule_tool_metadata_excludes_injected_runtime():
 
     result = {item["slug"]: item for item in tool_service.get_tool_metadata(category="buildin")}
 
+    assert [arg["name"] for arg in result["get_schedule_goal_optimization_context"]["args"]] == ["schedule_snapshot_id"]
+    assert [arg["name"] for arg in result["get_schedule_review_context"]["args"]] == ["schedule_snapshot_id"]
     assert [arg["name"] for arg in result["get_schedule_audit"]["args"]] == ["schedule_snapshot_id"]
     assert [arg["name"] for arg in result["get_schedule_issue_context"]["args"]] == ["issue_id"]
 

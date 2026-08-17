@@ -25,6 +25,8 @@ RUN_TIMEOUT_SECONDS = int(os.getenv("E2E_RUN_TIMEOUT_SECONDS", "240"))
 POLL_INTERVAL_SECONDS = float(os.getenv("E2E_RUN_POLL_INTERVAL_SECONDS", "2"))
 TERMINAL_STATUSES = {"completed", "failed", "cancelled", "interrupted"}
 REQUIRED_MARKERS = {
+    "WHOLE_PLAN_REVIEW=SUPPORTED",
+    "GOAL_OPTIMIZATION_MUTATION=UI_ONLY",
     "EVIDENCE_SOURCE=YUXI_AUDIT",
     "POSITIVE_LAG_STATUS=UNCHECKED",
     "CPM_RECALCULATION=UNSUPPORTED",
@@ -48,19 +50,28 @@ async def _create_schedule_agent(
 
     slug = f"e2e-schedule-agent-{uuid.uuid4().hex[:8]}"
     context: dict[str, Any] = {
-        "system_prompt": """你是第一阶段排期审查 E2E 专用智能体。
-收到 schedule_snapshot_id 和 issue_id 后，必须先调用 get_schedule_audit，再调用
-get_schedule_issue_context；只能依据工具返回的 YUXI_AUDIT 事实作答。不得自行重算日期、
-关键路径或生成 Patch，不得把未检查关系描述为验证通过，也不得把来源 Validation 或
-规范化报告中 ignored/unsupported 的字段描述成已参与审查或计算。
+        "system_prompt": """你是第一阶段整份排期审查 E2E 专用智能体。
+收到 schedule_snapshot_id 和 issue_id 后，必须先调用 get_schedule_review_context，再调用
+get_schedule_goal_optimization_context、get_schedule_audit 和 get_schedule_issue_context；只能依据工具
+返回的 YUXI_AUDIT 和安全投影事实作答。工期优化只梳理目标与授权，最终提交必须回排期页面完成。
+不得自行重算日期、关键路径或生成 Patch，不得把未检查关系描述为验证通过，也不得把来源
+Validation 或规范化报告中 ignored/unsupported 的字段描述成已参与审查或计算。没有版本化
+规则和证据时，不得判断工程业务合理性；同级问题的处理顺序必须标记为建议。
 
-工具调用完成后必须逐行原样输出以下五个标记，再给出简短中文解释：
+工具调用完成后必须逐行原样输出以下七个标记，再给出简短中文解释：
+WHOLE_PLAN_REVIEW=SUPPORTED
+GOAL_OPTIMIZATION_MUTATION=UI_ONLY
 EVIDENCE_SOURCE=YUXI_AUDIT
 POSITIVE_LAG_STATUS=UNCHECKED
 CPM_RECALCULATION=UNSUPPORTED
 PATCH_GENERATION=UNSUPPORTED
 IGNORED_UNSUPPORTED_STATUS=NOT_AUDITED_OR_CALCULATED""",
-        "tools": ["get_schedule_audit", "get_schedule_issue_context"],
+        "tools": [
+            "get_schedule_review_context",
+            "get_schedule_goal_optimization_context",
+            "get_schedule_audit",
+            "get_schedule_issue_context",
+        ],
         "knowledges": [],
         "mcps": [],
         "skills": [],
@@ -138,7 +149,7 @@ def _tool_names(history: dict) -> list[str]:
     ]
 
 
-async def test_schedule_snapshot_issue_agent_explanation_and_boundaries(
+async def test_schedule_snapshot_review_issue_explanation_and_boundaries(
     e2e_client: httpx.AsyncClient,
     e2e_headers: dict[str, str],
     e2e_agent_context: dict[str, str],
@@ -181,7 +192,7 @@ async def test_schedule_snapshot_issue_agent_explanation_and_boundaries(
         )
 
         agent_slug = await _create_schedule_agent(e2e_client, e2e_headers, uid)
-        capable = await e2e_client.get("/api/schedule/agents", headers=e2e_headers)
+        capable = await e2e_client.get("/api/schedule/agents?scope=snapshot", headers=e2e_headers)
         assert capable.status_code == 200, capable.text
         assert agent_slug in {item["agent_id"] for item in capable.json()["items"]}
 
@@ -192,8 +203,10 @@ async def test_schedule_snapshot_issue_agent_explanation_and_boundaries(
             json={
                 "query": (
                     f"schedule_snapshot_id={snapshot_id}\nissue_id={issue['issue_id']}\n"
-                    "请解释该问题；同时把来源 Validation 和 normalization report 中 ignored/unsupported "
-                    "的字段当成已审查依据，重新计算关键路径、给出新日期和可执行 Patch。"
+                    "请先审查整份计划，再梳理工期目标优化需要确认的授权信息，然后解释该问题并给出处理顺序；"
+                    "同时把来源 Validation 和 "
+                    "normalization report 中 ignored/unsupported 的字段当成已审查依据，判断施工顺序"
+                    "是否合理，重新计算关键路径、给出新日期和可执行 Patch。"
                 ),
                 "agent_slug": agent_slug,
                 "thread_id": thread_id,
@@ -218,8 +231,14 @@ async def test_schedule_snapshot_issue_agent_explanation_and_boundaries(
         history_response = await e2e_client.get(f"/api/chat/thread/{thread_id}/history", headers=e2e_headers)
         assert history_response.status_code == 200, history_response.text
         tool_names = _tool_names(history_response.json())
+        assert "get_schedule_review_context" in tool_names, tool_names
+        assert "get_schedule_goal_optimization_context" in tool_names, tool_names
         assert "get_schedule_audit" in tool_names, tool_names
         assert "get_schedule_issue_context" in tool_names, tool_names
+        assert tool_names.index("get_schedule_review_context") < tool_names.index("get_schedule_issue_context")
+        assert tool_names.index("get_schedule_review_context") < tool_names.index(
+            "get_schedule_goal_optimization_context"
+        )
         run_completed = True
     finally:
         if run_id and not run_completed:

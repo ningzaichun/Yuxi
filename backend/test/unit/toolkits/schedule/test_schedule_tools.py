@@ -15,6 +15,22 @@ from yuxi.services.schedule_audit_service import ScheduleNotFoundError
 
 
 class FakeService:
+    async def get_goal_optimization_context(self, uid, snapshot_id):
+        return {
+            "owner": uid,
+            "snapshot": {"schedule_snapshot_id": snapshot_id},
+            "supported_objectives": ["MINIMIZE_PROJECT_FINISH", "MEET_TARGET_FINISH"],
+        }
+
+    async def get_review_context(self, uid, snapshot_id):
+        if snapshot_id == "hidden":
+            raise ScheduleNotFoundError
+        return {
+            "owner": uid,
+            "evidence_source": "YUXI_AUDIT",
+            "snapshot": {"schedule_snapshot_id": snapshot_id},
+        }
+
     async def get_audit(self, uid, snapshot_id):
         return {
             "owner": uid,
@@ -52,6 +68,33 @@ async def test_schedule_tools_use_runtime_uid_and_preserve_skip_scope(monkeypatc
 
 
 @pytest.mark.asyncio
+async def test_schedule_review_tool_uses_runtime_uid(monkeypatch) -> None:
+    monkeypatch.setattr(schedule_tools, "_service", FakeService)
+
+    result = await schedule_tools.get_schedule_review_context.ainvoke(
+        {"schedule_snapshot_id": "snapshot-1", "runtime": _runtime("owner-1")}
+    )
+
+    assert result == {
+        "owner": "owner-1",
+        "evidence_source": "YUXI_AUDIT",
+        "snapshot": {"schedule_snapshot_id": "snapshot-1"},
+    }
+
+
+@pytest.mark.asyncio
+async def test_schedule_goal_context_tool_uses_runtime_uid(monkeypatch) -> None:
+    monkeypatch.setattr(schedule_tools, "_service", FakeService)
+
+    result = await schedule_tools.get_schedule_goal_optimization_context.ainvoke(
+        {"schedule_snapshot_id": "snapshot-1", "runtime": _runtime("owner-1")}
+    )
+
+    assert result["owner"] == "owner-1"
+    assert result["snapshot"]["schedule_snapshot_id"] == "snapshot-1"
+
+
+@pytest.mark.asyncio
 async def test_schedule_issue_tool_hides_unauthorized_resource(monkeypatch) -> None:
     monkeypatch.setattr(schedule_tools, "_service", FakeService)
 
@@ -74,24 +117,41 @@ async def test_schedule_tools_reject_missing_runtime_uid(monkeypatch) -> None:
 
 
 def test_schedule_tools_are_registered_as_buildin() -> None:
+    goal_metadata = get_extra_metadata("get_schedule_goal_optimization_context")
+    review_metadata = get_extra_metadata("get_schedule_review_context")
     audit_metadata = get_extra_metadata("get_schedule_audit")
     issue_metadata = get_extra_metadata("get_schedule_issue_context")
 
+    assert goal_metadata is not None and goal_metadata.category == "buildin"
+    assert review_metadata is not None and review_metadata.category == "buildin"
     assert audit_metadata is not None and audit_metadata.category == "buildin"
     assert issue_metadata is not None and issue_metadata.category == "buildin"
 
 
 def test_schedule_tools_inject_runtime_without_exposing_it_to_model() -> None:
+    assert schedule_tools.get_schedule_goal_optimization_context._injected_args_keys == frozenset({"runtime"})
+    assert schedule_tools.get_schedule_review_context._injected_args_keys == frozenset({"runtime"})
     assert schedule_tools.get_schedule_audit._injected_args_keys == frozenset({"runtime"})
     assert schedule_tools.get_schedule_issue_context._injected_args_keys == frozenset({"runtime"})
+    assert set(schedule_tools.get_schedule_goal_optimization_context.args) == {"schedule_snapshot_id"}
+    assert set(schedule_tools.get_schedule_review_context.args) == {"schedule_snapshot_id"}
     assert set(schedule_tools.get_schedule_audit.args) == {"schedule_snapshot_id"}
     assert set(schedule_tools.get_schedule_issue_context.args) == {"issue_id"}
 
 
 def test_schedule_tool_descriptions_preserve_agent_behavior_boundaries() -> None:
+    goal_description = schedule_tools.get_schedule_goal_optimization_context.description
+    review_description = schedule_tools.get_schedule_review_context.description
     audit_description = schedule_tools.get_schedule_audit.description
     issue_description = schedule_tools.get_schedule_issue_context.description
 
+    assert "不创建 Candidate" in goal_description
+    assert "不得替用户推断" in goal_description
+    assert "必须先调用" in review_description
+    assert "工程业务合理性" in review_description
+    assert "建议" in review_description
+    assert "不得自行计算" in review_description
+    assert "evidence_locator" in review_description
     assert "不会重新计算日期、关键路径或补丁" in audit_description
     assert "未检查" in audit_description
     assert "ignored/unsupported" in audit_description

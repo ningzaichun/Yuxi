@@ -622,7 +622,8 @@ import { makeChildThreadId } from '@/utils/subagentThread'
 const props = defineProps({
   agentId: { type: String, default: '' },
   singleMode: { type: Boolean, default: true },
-  sendDisabled: { type: Boolean, default: false }
+  sendDisabled: { type: Boolean, default: false },
+  threadMetadata: { type: Object, default: () => ({}) }
 })
 const emit = defineEmits(['thread-change', 'draft-consumed'])
 
@@ -2109,7 +2110,7 @@ const createThread = async (agentId, title = '新的对话') => {
   if (!agentId) return null
 
   try {
-    const thread = await chatThreadsStore.createThread(agentId, title)
+    const thread = await chatThreadsStore.createThread(agentId, title, props.threadMetadata)
     if (thread) {
       threadMessages.value[thread.id] = []
       threadFilesMap.value[thread.id] = []

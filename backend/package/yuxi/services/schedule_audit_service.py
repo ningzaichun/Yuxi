@@ -8,6 +8,7 @@ import json
 import uuid
 from datetime import timedelta
 from typing import Any
+from urllib.parse import urlencode
 
 from yuxi.repositories.schedule_repository import ScheduleRepository
 from yuxi.schedule.audit.engine import audit_schedule
@@ -21,6 +22,8 @@ from yuxi.utils.datetime_utils import utc_now_naive
 
 SUBMISSION_LEASE_SECONDS = 60
 SUBMISSION_POLL_INTERVAL_SECONDS = 0.05
+REVIEW_CONTEXT_ISSUE_LIMIT = 50
+REVIEW_CONTEXT_OBJECT_REF_LIMIT = 10
 
 
 class ScheduleConflictError(Exception):
@@ -286,6 +289,124 @@ class ScheduleAuditService:
         if audit is None:
             raise ScheduleNotFoundError
         return _audit_record(audit)
+
+    async def get_review_context(self, owner_uid: str, snapshot_id: str) -> dict[str, Any]:
+        record = await self._repository.get_ready(owner_uid, snapshot_id)
+        if record is None:
+            raise ScheduleNotFoundError
+        audit = await self._repository.get_audit(owner_uid, snapshot_id)
+        if audit is None:
+            raise ScheduleDependencyError
+        issues = await self._repository.list_issues(
+            owner_uid,
+            snapshot_id,
+            category=None,
+            severity=None,
+            limit=REVIEW_CONTEXT_ISSUE_LIMIT + 1,
+            offset=0,
+        )
+        if issues is None:
+            raise ScheduleNotFoundError
+
+        visible_issues = issues[:REVIEW_CONTEXT_ISSUE_LIMIT]
+        issue_total = int((audit.issue_summary or {}).get("total", 0))
+        return {
+            "evidence_source": "YUXI_AUDIT",
+            "review_scope": {
+                "basis": ["persisted_audit", "persisted_issues", "persisted_capabilities"],
+                "excluded": [
+                    "raw_source_reinterpretation",
+                    "unsupported_field_inference",
+                    "unversioned_domain_judgment",
+                    "date_cost_or_patch_calculation",
+                ],
+            },
+            "priority_policy": {
+                "first": "capability_reasons_blocking_the_user_goal",
+                "then": ["blocker", "warning", "info"],
+                "same_severity": "advisory_only_without_quantified_evidence",
+            },
+            "snapshot": {
+                "schedule_snapshot_id": record.schedule_snapshot_id,
+                "snapshot_content_sha256": record.snapshot_content_sha256,
+                "external_project_id": record.external_project_id,
+                "external_snapshot_id": record.external_snapshot_id,
+                "external_revision": record.external_revision,
+                "source_snapshot_id": record.source_snapshot_id,
+                "schema_version": record.schema_version,
+                "source_schema_version": getattr(record, "source_schema_version", None),
+                "adapter_id": getattr(record, "adapter_id", None),
+                "adapter_version": getattr(record, "adapter_version", None),
+            },
+            "audit": {
+                "audit_run_id": audit.audit_run_id,
+                "rule_set_version": audit.rule_set_version,
+                "statistics": audit.statistics,
+                "dependency_date_checks": audit.dependency_date_checks,
+                "created_at": audit.created_at,
+            },
+            "capabilities": audit.capabilities,
+            "issue_summary": audit.issue_summary,
+            "issue_projection": {
+                "limit": REVIEW_CONTEXT_ISSUE_LIMIT,
+                "returned": len(visible_issues),
+                "truncated": issue_total > len(visible_issues) or len(issues) > REVIEW_CONTEXT_ISSUE_LIMIT,
+                "items": [_review_issue_record(issue) for issue in visible_issues],
+            },
+        }
+
+    async def get_goal_optimization_context(self, owner_uid: str, snapshot_id: str) -> dict[str, Any]:
+        record = await self._repository.get_ready(owner_uid, snapshot_id)
+        if record is None:
+            raise ScheduleNotFoundError
+        audit = await self._repository.get_audit(owner_uid, snapshot_id)
+        if audit is None:
+            raise ScheduleDependencyError
+        try:
+            source = json.loads((await self._store.download(record.minio_object)).decode("utf-8"))
+        except Exception as exc:
+            raise ScheduleDependencyError from exc
+
+        return {
+            "evidence_source": "YUXI_SCHEDULE_SNAPSHOT",
+            "snapshot": {
+                "schedule_snapshot_id": record.schedule_snapshot_id,
+                "snapshot_content_sha256": record.snapshot_content_sha256,
+                "external_project_id": record.external_project_id,
+                "external_revision": record.external_revision,
+            },
+            "cpm_capability": (audit.capabilities or {}).get("cpm_recalculation"),
+            "supported_objectives": ["MINIMIZE_PROJECT_FINISH", "MEET_TARGET_FINISH"],
+            "authorization_policy": {
+                "allowed_change": "explicitly_authorized_automatic_activity_duration_only",
+                "authorization_confirmation_required": True,
+                "max_authorized_duration_options": 10,
+                "hard_constraints": {
+                    "preserve_dependencies": True,
+                    "preserve_lag": True,
+                    "preserve_calendars": True,
+                    "preserve_milestones": True,
+                    "preserve_task_modes": True,
+                },
+            },
+            "eligible_tasks": [
+                {
+                    "task_id": task["task_id"],
+                    "wbs": task["wbs"],
+                    "name": task["name"],
+                    "duration_minutes": task["duration_minutes"],
+                }
+                for task in source["tasks"]
+                if task["task_type"] == "activity"
+                and task["scheduling_mode"] == "automatic"
+                and task["duration_minutes"] > 0
+            ],
+            "submission": {
+                "method": "POST",
+                "url": f"/schedule?schedule_snapshot_id={record.schedule_snapshot_id}",
+                "final_confirmation_surface": "schedule_goal_optimization_dialog",
+            },
+        }
 
     async def list_issues(
         self,
@@ -577,6 +698,31 @@ def _issue_record(record: Any) -> dict[str, Any]:
     }
 
 
+def _review_issue_record(record: Any) -> dict[str, Any]:
+    object_refs = list(record.object_refs or [])
+    query = urlencode(
+        {
+            "schedule_snapshot_id": record.schedule_snapshot_id,
+            "schedule_issue_id": record.issue_id,
+        }
+    )
+    return {
+        "issue_id": record.issue_id,
+        "rule_id": record.rule_id,
+        "category": record.category,
+        "severity": record.severity,
+        "message": record.message,
+        "recommendation": record.recommendation,
+        "object_ref_count": len(object_refs),
+        "object_refs_preview": object_refs[:REVIEW_CONTEXT_OBJECT_REF_LIMIT],
+        "evidence_locator": {
+            "tool": "get_schedule_issue_context",
+            "issue_id": record.issue_id,
+            "url": f"/schedule?{query}",
+        },
+    }
+
+
 def _task_context(task: dict[str, Any]) -> dict[str, Any]:
     return {
         "task_id": task["task_id"],
@@ -688,13 +834,17 @@ def _dependency_candidate_summary(record: Any) -> dict[str, Any]:
     }
 
 
-async def list_schedule_capable_agents(user: Any) -> list[dict[str, Any]]:
-    """Project visible agents whose normalized runtime includes both Schedule tools."""
+async def list_schedule_capable_agents(user: Any, *, review_scope: str = "issue") -> list[dict[str, Any]]:
+    """Project visible agents with the Schedule tools required by the requested entry."""
     from yuxi.agents.context import normalize_agent_context_config
     from yuxi.repositories.agent_repository import AgentRepository
     from yuxi.storage.postgres.manager import pg_manager
 
     required_tools = {"get_schedule_audit", "get_schedule_issue_context"}
+    if review_scope == "snapshot":
+        required_tools.add("get_schedule_review_context")
+    elif review_scope == "goal":
+        required_tools.update({"get_schedule_review_context", "get_schedule_goal_optimization_context"})
     async with pg_manager.get_async_session_context() as db:
         repository = AgentRepository(db)
         agents = await repository.list_visible(user=user)

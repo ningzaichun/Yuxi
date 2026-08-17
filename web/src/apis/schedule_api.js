@@ -42,6 +42,11 @@ export const scheduleApi = {
       `/api/schedule/snapshots/${encodeURIComponent(snapshotId)}/recalculate-automatic-downstream`,
       payload
     ),
+  createGoalOptimization: (snapshotId, payload) =>
+    apiPost(
+      `/api/schedule/snapshots/${encodeURIComponent(snapshotId)}/goal-optimizations`,
+      payload
+    ),
   getCandidate: (candidateId) =>
     apiGet(`/api/schedule/candidates/${encodeURIComponent(candidateId)}`),
   recordCandidateDecision: (candidateId, payload) =>
@@ -50,5 +55,6 @@ export const scheduleApi = {
     apiGet(`/api/schedule/candidates/${encodeURIComponent(candidateId)}/delivery`),
   getCandidateAcceptanceEvidence: (candidateId) =>
     apiGet(`/api/schedule/candidates/${encodeURIComponent(candidateId)}/acceptance-evidence`),
-  listCapableAgents: () => apiGet('/api/schedule/agents')
+  listCapableAgents: ({ scope = 'issue' } = {}) =>
+    apiGet(`/api/schedule/agents?${queryString({ scope })}`)
 }

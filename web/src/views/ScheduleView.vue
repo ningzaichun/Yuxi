@@ -184,9 +184,15 @@
                   <h3>排期重算</h3>
                   <span>计算最早/最晚日期、浮时与关键任务；负 Lag、多日历和其他范围外输入会明确阻断</span>
                 </div>
-                <a-button type="primary" :loading="recalculatingForward" @click="recalculateForward">
-                  生成重算方案
-                </a-button>
+                <a-space>
+                  <a-button :loading="recalculatingForward" @click="recalculateForward">
+                    生成重算方案
+                  </a-button>
+                  <a-button type="primary" :disabled="!selectedSnapshotId" @click="openGoalOptimization">
+                    <Target :size="16" />
+                    工期目标优化
+                  </a-button>
+                </a-space>
               </div>
               <a-alert
                 v-if="forwardBlockedResult"
@@ -214,6 +220,14 @@
                   <span>结论均来自 YUXI_AUDIT，不复制来源 Validation</span>
                 </div>
                 <div class="filters">
+                  <a-button
+                    type="primary"
+                    :disabled="!selectedSnapshotId || loadingDetail"
+                    @click="reviewSchedule"
+                  >
+                    <MessageSquareText :size="16" />
+                    AI 审查计划
+                  </a-button>
                   <a-select
                     v-model:value="severityFilter"
                     allow-clear
@@ -476,6 +490,82 @@
       </a-spin>
     </a-drawer>
 
+    <a-modal
+      v-model:open="goalModalOpen"
+      title="工期目标优化"
+      ok-text="确认授权并生成候选"
+      cancel-text="取消"
+      :confirm-loading="goalSubmitting"
+      @ok="submitGoalOptimization"
+    >
+      <a-form layout="vertical">
+        <a-form-item label="主要目标" required>
+          <a-select v-model:value="goalForm.objective" :options="goalObjectiveOptions" />
+        </a-form-item>
+        <a-form-item v-if="goalForm.objective === 'MEET_TARGET_FINISH'" label="目标完成时间" required>
+          <a-date-picker
+            v-model:value="goalTargetFinish"
+            show-time
+            format="YYYY-MM-DD HH:mm"
+            style="width: 100%"
+          />
+        </a-form-item>
+        <a-form-item label="允许压缩的活动任务" required>
+          <a-select
+            v-model:value="goalForm.taskId"
+            show-search
+            option-filter-prop="label"
+            :options="goalTaskOptions"
+            placeholder="选择一个已确认可压缩的自动任务"
+            @change="handleGoalTaskChange"
+          />
+        </a-form-item>
+        <a-form-item label="授权后的工期（工作分钟）" required>
+          <a-input-number
+            v-model:value="goalForm.durationMinutes"
+            :min="1"
+            :max="selectedGoalTaskDuration ? selectedGoalTaskDuration - 1 : undefined"
+            style="width: 100%"
+          />
+          <div v-if="selectedGoalTaskDuration" class="field-hint">
+            来源工期 {{ selectedGoalTaskDuration }} 分钟；这里只填写业务已确认可实现的工期。
+          </div>
+        </a-form-item>
+        <a-form-item label="锁定任务日期">
+          <a-select
+            v-model:value="goalForm.lockedTaskIds"
+            mode="multiple"
+            show-search
+            option-filter-prop="label"
+            :options="goalTaskOptions"
+            placeholder="可选；锁定任务不得因依赖要求移动"
+          />
+        </a-form-item>
+        <a-alert
+          type="info"
+          show-icon
+          message="依赖、Lag、日历、里程碑和任务模式全部保持不变；系统只比较基线与明确授权的工期方案。"
+          class="workbench-alert"
+        />
+        <a-button class="goal-agent-button" @click="planGoalWithAgent">
+          <MessageSquareText :size="16" />
+          让 AI 帮我梳理目标与授权
+        </a-button>
+        <a-checkbox v-model:checked="goalForm.authorizationConfirmed">
+          我确认上述任务工期调整已获得明确业务授权
+        </a-checkbox>
+        <div v-if="goalBlockedResult" class="blocker-list goal-blocker-list">
+          <div
+            v-for="blocker in goalBlockedResult.support.blockers"
+            :key="`${blocker.code}-${blocker.object_refs.join('-')}`"
+          >
+            <a-tag color="orange">{{ blocker.code }}</a-tag>
+            <span>{{ blocker.message }}</span>
+          </div>
+        </div>
+      </a-form>
+    </a-modal>
+
     <a-drawer v-model:open="candidateOpen" :title="candidateDrawerTitle" width="min(1120px, 96vw)">
       <a-spin :spinning="loadingCandidate">
         <template v-if="candidateDetail">
@@ -501,7 +591,16 @@
           </a-descriptions>
 
           <h4>请求变更</h4>
-          <div v-if="isForwardCandidate" class="patch-list">
+          <div v-if="isGoalCandidate" class="patch-list">
+            <div v-for="operation in candidateDetail.requested_patch.operations" :key="operation.operation_id">
+              <a-tag color="blue">授权压缩工期</a-tag>
+              <code>
+                {{ operation.task_id }} · {{ operation.before_duration_minutes }} →
+                {{ operation.after_duration_minutes }} 分钟
+              </code>
+            </div>
+          </div>
+          <div v-else-if="isForwardCandidate" class="patch-list">
             <div>
               <a-tag color="blue">重新计算支持范围内任务</a-tag>
               <span>仅生成候选结果，不修改来源字段</span>
@@ -520,13 +619,27 @@
             </div>
           </div>
 
-          <h4>{{ isForwardCandidate ? '排期结果' : '审查差异' }}</h4>
-          <template v-if="isForwardCandidate">
+          <h4>{{ isEngineCandidate ? '排期结果' : '审查差异' }}</h4>
+          <template v-if="isEngineCandidate">
             <a-descriptions :column="2" bordered size="small">
               <a-descriptions-item label="受影响任务">{{ candidateDetail.comparison.affected_task_count }}</a-descriptions-item>
               <a-descriptions-item label="关键活动任务">{{ forwardCriticalCount }}</a-descriptions-item>
               <a-descriptions-item label="来源完成">{{ formatScheduleDate(candidateDetail.comparison.finish_before) }}</a-descriptions-item>
-              <a-descriptions-item label="重算完成">{{ formatScheduleDate(candidateDetail.comparison.finish_after) }}</a-descriptions-item>
+              <a-descriptions-item :label="isGoalCandidate ? '优化完成' : '重算完成'">
+                {{ formatScheduleDate(candidateDetail.comparison.finish_after) }}
+              </a-descriptions-item>
+              <template v-if="isGoalCandidate">
+                <a-descriptions-item label="优化目标">{{ goalObjectiveLabel }}</a-descriptions-item>
+                <a-descriptions-item label="比较方案数">
+                  {{ candidateDetail.comparison.evaluated_strategy_count }}
+                </a-descriptions-item>
+                <a-descriptions-item label="目标完成时间">
+                  {{ formatScheduleDate(candidateDetail.comparison.target_finish) }}
+                </a-descriptions-item>
+                <a-descriptions-item label="目标是否满足">
+                  {{ candidateDetail.comparison.target_finish ? (candidateDetail.comparison.target_met ? '是' : '否') : '不适用' }}
+                </a-descriptions-item>
+              </template>
             </a-descriptions>
             <a-table
               :columns="forwardResultColumns"
@@ -580,8 +693,8 @@
               </template>
             </a-table>
             <details class="technical-details">
-              <summary>查看技术明细（日期变化 Patch）</summary>
-              <pre>{{ pretty(candidateDetail.effective_patch.task_date_changes) }}</pre>
+              <summary>查看技术明细（{{ isGoalCandidate ? '工期授权 Patch' : '日期变化 Patch' }}）</summary>
+              <pre>{{ pretty(isGoalCandidate ? candidateDetail.effective_patch.duration_changes : candidateDetail.effective_patch.task_date_changes) }}</pre>
             </details>
           </template>
           <a-descriptions v-else :column="1" bordered size="small">
@@ -614,14 +727,13 @@
                 接受
               </a-button>
               <a-button
-                v-if="candidateDetail.user_attitude === 'accepted'"
                 :loading="loadingDelivery"
                 @click="loadDelivery"
               >
                 查看 Delivery
               </a-button>
               <a-button
-                v-if="candidateDetail.user_attitude === 'accepted' && !isForwardCandidate"
+                v-if="candidateDetail.user_attitude === 'accepted' && !isEngineCandidate"
                 :loading="loadingAcceptanceEvidence"
                 @click="loadAcceptanceEvidence"
               >
@@ -675,12 +787,14 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { Ban, CheckCircle2, Upload } from 'lucide-vue-next'
+import { Ban, CheckCircle2, MessageSquareText, Target, Upload } from 'lucide-vue-next'
 import { scheduleApi } from '@/apis/schedule_api'
 import ScheduleImportModal from '@/components/schedule/ScheduleImportModal.vue'
+import { buildScheduleReviewRouteQuery } from '@/utils/scheduleAgentEntry'
 
+const route = useRoute()
 const router = useRouter()
 const snapshots = ref([])
 const selectedSnapshotId = ref('')
@@ -690,7 +804,7 @@ const issues = ref([])
 const issueDetail = ref(null)
 const capableAgents = ref([])
 const selectedAgentId = ref('')
-const pendingIssueId = ref('')
+const pendingAgentEntry = ref(null)
 const severityFilter = ref()
 const categoryFilter = ref()
 const loadingSnapshots = ref(false)
@@ -715,6 +829,11 @@ const candidateDetail = ref(null)
 const deliveryDetail = ref(null)
 const acceptanceEvidence = ref(null)
 const forwardBlockedResult = ref(null)
+const goalModalOpen = ref(false)
+const goalSubmitting = ref(false)
+const goalTargetFinish = ref(null)
+const goalBlockedResult = ref(null)
+const goalRequestId = ref('')
 const candidateComment = ref('')
 const dependencyWorkbench = ref(null)
 const activeWorkbenchIssueId = ref('')
@@ -730,6 +849,13 @@ const decisionForm = reactive({
   dependency_type: 'FS',
   lag_minutes: 0,
   reason: ''
+})
+const goalForm = reactive({
+  objective: 'MEET_TARGET_FINISH',
+  taskId: '',
+  durationMinutes: null,
+  lockedTaskIds: [],
+  authorizationConfirmed: false
 })
 
 const SNAPSHOT_PAGE_SIZE = 50
@@ -765,6 +891,10 @@ const categoryOptions = [
   { label: '引擎边界', value: 'engine_contract' }
 ]
 const dependencyTypeOptions = ['FS', 'SS', 'FF', 'SF'].map((value) => ({ label: value, value }))
+const goalObjectiveOptions = [
+  { label: '满足目标完成时间', value: 'MEET_TARGET_FINISH' },
+  { label: '在授权范围内尽早完工', value: 'MINIMIZE_PROJECT_FINISH' }
+]
 const acceptanceCheckLabels = {
   CANDIDATE_VALID: 'Candidate 技术状态有效',
   CANDIDATE_ACCEPTED: '业务人员已明确接受',
@@ -818,8 +948,16 @@ const candidateEligible = computed(
 const isForwardCandidate = computed(
   () => candidateDetail.value?.candidate_kind === 'automatic_forward_recalculation'
 )
+const isGoalCandidate = computed(
+  () => candidateDetail.value?.candidate_kind === 'goal_duration_optimization'
+)
+const isEngineCandidate = computed(() => isForwardCandidate.value || isGoalCandidate.value)
 const candidateDrawerTitle = computed(() =>
-  isForwardCandidate.value ? '排期重算方案审阅' : '依赖 Candidate 审阅'
+  isGoalCandidate.value
+    ? '工期目标优化方案审阅'
+    : isForwardCandidate.value
+      ? '排期重算方案审阅'
+      : '依赖 Candidate 审阅'
 )
 const candidateStatusLabel = computed(
   () => ({ valid: '可审阅', invalid: '不可应用' })[candidateDetail.value?.candidate_status] || candidateDetail.value?.candidate_status
@@ -828,22 +966,54 @@ const baseSnapshotStatusLabel = computed(
   () => ({ current: '当前版本', outdated: '已过期' })[candidateDetail.value?.base_snapshot_status] || candidateDetail.value?.base_snapshot_status
 )
 const userAttitudeLabel = computed(
-  () => ({ unreviewed: '待审阅', accepted: '已接受', rejected: '已拒绝' })[candidateDetail.value?.user_attitude] || candidateDetail.value?.user_attitude
+  () => ({ not_reviewed: '待审阅', accepted: '已接受', rejected: '已拒绝' })[candidateDetail.value?.user_attitude] || candidateDetail.value?.user_attitude
 )
 const candidateKindLabel = computed(() =>
-  isForwardCandidate.value ? '自动排期重算' : '依赖关系调整'
+  isGoalCandidate.value
+    ? '授权工期目标优化'
+    : isForwardCandidate.value
+      ? '自动排期重算'
+      : '依赖关系调整'
 )
 const candidateNotice = computed(() =>
-  isForwardCandidate.value
-    ? '重算结果包含最早/最晚日期、浮时和关键任务；来源任务及原始计算字段均未修改。'
-    : '该 Candidate 只规范化依赖，不修改 Source，也不运行 CPM。'
+  isGoalCandidate.value
+    ? '系统只比较基线与明确授权的任务工期组合；依赖、Lag、日历、里程碑和任务模式保持不变。'
+    : isForwardCandidate.value
+      ? '重算结果包含最早/最晚日期、浮时和关键任务；来源任务及原始计算字段均未修改。'
+      : '该 Candidate 只规范化依赖，不修改 Source，也不运行 CPM。'
 )
+const goalObjectiveLabel = computed(
+  () =>
+    goalObjectiveOptions.find((item) => item.value === candidateDetail.value?.comparison?.objective)
+      ?.label || candidateDetail.value?.comparison?.objective
+)
+const goalTaskOptions = computed(() =>
+  (snapshotDetail.value?.snapshot?.tasks || [])
+    .filter(
+      (task) =>
+        task.task_type === 'activity' &&
+        task.scheduling_mode === 'automatic' &&
+        task.duration_minutes > 1
+    )
+    .map((task) => ({
+      value: task.task_id,
+      label: `${task.wbs || task.task_id} ${task.name} · ${task.duration_minutes} 分钟`,
+      durationMinutes: task.duration_minutes
+    }))
+)
+const selectedGoalTaskDuration = computed(
+  () => goalTaskOptions.value.find((item) => item.value === goalForm.taskId)?.durationMinutes || 0
+)
+const candidateEngineResult = computed(() => {
+  const result = candidateDetail.value?.candidate_snapshot?.engine_result
+  return isGoalCandidate.value ? result?.selected_strategy?.engine_result : result
+})
 const forwardTaskResults = computed(() => {
   const document = candidateDetail.value?.candidate_snapshot
   const tasks = new Map(
     (document?.candidate_schedule?.tasks || []).map((task) => [task.task_id, task])
   )
-  return (document?.engine_result?.task_dates || []).map((result) => {
+  return (candidateEngineResult.value?.task_dates || []).map((result) => {
     const task = tasks.get(result.task_id) || {}
     return {
       ...result,
@@ -858,9 +1028,9 @@ const forwardCriticalCount = computed(
   () => forwardTaskResults.value.filter((task) => task.critical && !task.summary).length
 )
 const deliveryMessage = computed(() => {
-  if (!deliveryDetail.value?.application_allowed) return '当前不可交付'
-  return isForwardCandidate.value
-    ? '可交付 engine_result 供业务审阅；不会改写 Source'
+  if (!deliveryDetail.value?.application_allowed) return 'Delivery 可读取，但当前技术状态或来源版本不允许应用'
+  return isEngineCandidate.value
+    ? '可交付确定性引擎结果和 Patch 供外部业务流程审批；不会改写 Source'
     : '可交给业务适配器应用到新的 Source 副本'
 })
 const candidateOptions = (side) => {
@@ -895,7 +1065,11 @@ const loadSnapshots = async (append = false) => {
     snapshotOffset.value = offset + items.length
     hasMoreSnapshots.value = items.length === SNAPSHOT_PAGE_SIZE
     if (!selectedSnapshotId.value && snapshots.value.length) {
-      await selectSnapshot(snapshots.value[0].schedule_snapshot_id)
+      const requestedSnapshotId =
+        typeof route.query.schedule_snapshot_id === 'string'
+          ? route.query.schedule_snapshot_id
+          : ''
+      await selectSnapshot(requestedSnapshotId || snapshots.value[0].schedule_snapshot_id)
     }
   } catch (error) {
     pageError.value = error.message || '排期快照加载失败或当前用户无权访问'
@@ -1057,6 +1231,77 @@ const generateCandidate = async () => {
   }
 }
 
+const openGoalOptimization = () => {
+  goalForm.objective = 'MEET_TARGET_FINISH'
+  goalForm.taskId = ''
+  goalForm.durationMinutes = null
+  goalForm.lockedTaskIds = []
+  goalForm.authorizationConfirmed = false
+  goalTargetFinish.value = null
+  goalBlockedResult.value = null
+  goalRequestId.value = requestId('goal-optimization')
+  goalModalOpen.value = true
+}
+
+const handleGoalTaskChange = () => {
+  goalForm.durationMinutes = null
+  goalForm.lockedTaskIds = goalForm.lockedTaskIds.filter((taskId) => taskId !== goalForm.taskId)
+}
+
+const submitGoalOptimization = async () => {
+  if (!selectedSnapshotId.value || !snapshotDetail.value) return
+  if (!goalForm.taskId || !goalForm.durationMinutes) {
+    message.warning('请选择已授权任务并填写压缩后的工期')
+    return
+  }
+  if (goalForm.durationMinutes >= selectedGoalTaskDuration.value) {
+    message.warning('授权后的工期必须短于来源工期')
+    return
+  }
+  if (goalForm.objective === 'MEET_TARGET_FINISH' && !goalTargetFinish.value) {
+    message.warning('请填写目标完成时间')
+    return
+  }
+  if (!goalForm.authorizationConfirmed) {
+    message.warning('必须明确确认业务授权后才能生成候选')
+    return
+  }
+
+  goalSubmitting.value = true
+  goalBlockedResult.value = null
+  deliveryDetail.value = null
+  acceptanceEvidence.value = null
+  try {
+    const result = await scheduleApi.createGoalOptimization(selectedSnapshotId.value, {
+      request_id: goalRequestId.value,
+      base_snapshot_content_sha256: snapshotDetail.value.snapshot_content_sha256,
+      objective: goalForm.objective,
+      target_finish:
+        goalForm.objective === 'MEET_TARGET_FINISH'
+          ? goalTargetFinish.value.toISOString()
+          : null,
+      authorized_duration_options: [
+        { task_id: goalForm.taskId, duration_minutes: goalForm.durationMinutes }
+      ],
+      locked_task_ids: goalForm.lockedTaskIds,
+      authorization_confirmed: true
+    })
+    if (result.candidate_status !== 'valid' && !result.candidate_snapshot_id) {
+      goalBlockedResult.value = result.engine_result
+      message.warning('已授权方案无法满足目标，系统未生成伪成功候选')
+      return
+    }
+    candidateDetail.value = result
+    candidateOpen.value = true
+    goalModalOpen.value = false
+    message.success('工期目标优化候选已生成，来源快照未修改')
+  } catch (error) {
+    message.error(error.message || '工期目标优化失败')
+  } finally {
+    goalSubmitting.value = false
+  }
+}
+
 const recalculateForward = async () => {
   if (!selectedSnapshotId.value || !snapshotDetail.value) return
   recalculatingForward.value = true
@@ -1126,12 +1371,49 @@ const loadAcceptanceEvidence = async () => {
 }
 
 const explainIssue = async (issue) => {
-  pendingIssueId.value = issue.issue_id
+  pendingAgentEntry.value = { scope: 'issue', issueId: issue.issue_id }
+  await selectCapableAgent('issue')
+}
+
+const reviewSchedule = async () => {
+  if (
+    !snapshotDetail.value ||
+    snapshotDetail.value.schedule_snapshot_id !== selectedSnapshotId.value
+  )
+    return
+  pendingAgentEntry.value = {
+    scope: 'snapshot',
+    snapshot: {
+      schedule_snapshot_id: snapshotDetail.value.schedule_snapshot_id,
+      snapshot_content_sha256: snapshotDetail.value.snapshot_content_sha256,
+      external_project_id: snapshotDetail.value.external_project_id,
+      external_revision: snapshotDetail.value.external_revision
+    }
+  }
+  await selectCapableAgent('snapshot')
+}
+
+const planGoalWithAgent = async () => {
+  if (!snapshotDetail.value) return
+  pendingAgentEntry.value = {
+    scope: 'goal',
+    snapshot: {
+      schedule_snapshot_id: snapshotDetail.value.schedule_snapshot_id,
+      snapshot_content_sha256: snapshotDetail.value.snapshot_content_sha256,
+      external_project_id: snapshotDetail.value.external_project_id,
+      external_revision: snapshotDetail.value.external_revision
+    }
+  }
+  await selectCapableAgent('goal')
+}
+
+const selectCapableAgent = async (scope) => {
   try {
-    const response = await scheduleApi.listCapableAgents()
+    const response = await scheduleApi.listCapableAgents({ scope })
     capableAgents.value = response.items || []
     if (!capableAgents.value.length) {
-      message.warning('没有可用智能体，请先为智能体启用两个 Schedule 工具')
+      const requiredTools = scope === 'goal' ? '四个' : scope === 'snapshot' ? '三个' : '两个'
+      message.warning(`没有可用智能体，请先为智能体启用${requiredTools} Schedule 工具`)
       return
     }
     if (capableAgents.value.length === 1) {
@@ -1147,11 +1429,25 @@ const explainIssue = async (issue) => {
 }
 
 const openAgent = async () => {
-  if (!selectedAgentId.value || !pendingIssueId.value) return
+  if (!selectedAgentId.value || !pendingAgentEntry.value) return
   agentModalOpen.value = false
+  let query
+  if (pendingAgentEntry.value.scope === 'goal') {
+    query = {
+      ...buildScheduleReviewRouteQuery(selectedAgentId.value, pendingAgentEntry.value.snapshot),
+      schedule_goal_optimization: '1'
+    }
+  } else if (pendingAgentEntry.value.scope === 'snapshot') {
+    query = buildScheduleReviewRouteQuery(selectedAgentId.value, pendingAgentEntry.value.snapshot)
+  } else {
+    query = {
+      agent_id: selectedAgentId.value,
+      schedule_issue_id: pendingAgentEntry.value.issueId
+    }
+  }
   await router.push({
     path: '/agent',
-    query: { agent_id: selectedAgentId.value, schedule_issue_id: pendingIssueId.value }
+    query
   })
 }
 
@@ -1184,7 +1480,12 @@ const formatSlack = (minutes) => {
 }
 const pretty = (value) => JSON.stringify(value, null, 2)
 
-onMounted(loadSnapshots)
+onMounted(async () => {
+  await loadSnapshots()
+  const requestedIssueId =
+    typeof route.query.schedule_issue_id === 'string' ? route.query.schedule_issue_id : ''
+  if (requestedIssueId) await openIssue(requestedIssueId)
+})
 </script>
 
 <style lang="less" scoped>
@@ -1413,6 +1714,7 @@ onMounted(loadSnapshots)
 
 .filters {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -1462,6 +1764,23 @@ h4 {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.field-hint {
+  margin-top: 6px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.goal-blocker-list {
+  margin-bottom: 12px;
+}
+
+.goal-agent-button {
+  display: flex;
+  margin: 12px 0;
+  align-items: center;
+  gap: 6px;
 }
 
 .schedule-result-table {

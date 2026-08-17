@@ -602,3 +602,52 @@ async def test_schedule_forward_recalculation_candidate_decision_delivery_and_bl
     assert blocked.status_code == 200, blocked.text
     assert blocked.json()["candidate_status"] == "blocked"
     assert blocked.json()["engine_result"]["task_dates"] == []
+
+
+async def test_schedule_goal_optimization_is_idempotent_deliverable_and_source_immutable(
+    test_client,
+    standard_user,
+):
+    headers = standard_user["headers"]
+    submission = _forward_submission(f"pytest-goal-{uuid.uuid4().hex}")
+    created = await test_client.post("/api/schedule/snapshots", json=submission, headers=headers)
+    assert created.status_code == 201, created.text
+    snapshot_id = created.json()["schedule_snapshot_id"]
+    source_before = await test_client.get(f"/api/schedule/snapshots/{snapshot_id}", headers=headers)
+    payload = {
+        "request_id": f"pytest-goal-{uuid.uuid4().hex}",
+        "base_snapshot_content_sha256": source_before.json()["snapshot_content_sha256"],
+        "objective": "MINIMIZE_PROJECT_FINISH",
+        "target_finish": None,
+        "authorized_duration_options": [{"task_id": "synthetic-task:build-a", "duration_minutes": 240}],
+        "locked_task_ids": [],
+        "authorization_confirmed": True,
+    }
+
+    candidate = await test_client.post(
+        f"/api/schedule/snapshots/{snapshot_id}/goal-optimizations",
+        json=payload,
+        headers=headers,
+    )
+    replay = await test_client.post(
+        f"/api/schedule/snapshots/{snapshot_id}/goal-optimizations",
+        json=payload,
+        headers=headers,
+    )
+    assert candidate.status_code == 201, candidate.text
+    assert replay.status_code == 200, replay.text
+    candidate_payload = candidate.json()
+    candidate_id = candidate_payload["candidate_snapshot_id"]
+    delivery = await test_client.get(f"/api/schedule/candidates/{candidate_id}/delivery", headers=headers)
+    source_after = await test_client.get(f"/api/schedule/snapshots/{snapshot_id}", headers=headers)
+
+    assert replay.json()["candidate_snapshot_id"] == candidate_id
+    assert candidate_payload["candidate_kind"] == "goal_duration_optimization"
+    assert candidate_payload["candidate_status"] == "valid"
+    assert candidate_payload["comparison"]["finish_after"] < candidate_payload["comparison"]["finish_before"]
+    assert candidate_payload["comparison"]["evaluated_strategy_count"] == 2
+    assert delivery.status_code == 200, delivery.text
+    assert delivery.json()["user_attitude"] == "not_reviewed"
+    assert delivery.json()["application_allowed"] is True
+    assert source_after.json()["snapshot_content_sha256"] == source_before.json()["snapshot_content_sha256"]
+    assert source_after.json()["snapshot"] == source_before.json()["snapshot"]

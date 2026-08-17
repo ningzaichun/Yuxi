@@ -19,6 +19,7 @@ from yuxi.schedule.contracts.optimization import (
     CandidateDecisionRequest,
     DependencyOptimizationRequest,
     ForwardRecalculationRequest,
+    GoalOptimizationRequest,
 )
 from yuxi.services.schedule_audit_service import (
     ScheduleAuditService,
@@ -240,6 +241,29 @@ async def get_optimization(optimization_id: str, current_user: User = Depends(ge
         raise _error(404, "SCHEDULE_NOT_FOUND", "排期资源不存在") from exc
 
 
+@schedule_router.post("/snapshots/{snapshot_id}/goal-optimizations")
+async def create_goal_optimization(
+    snapshot_id: str,
+    request: GoalOptimizationRequest,
+    response: Response,
+    current_user: User = Depends(get_required_user),
+):
+    try:
+        candidate, created = await optimization_service.create_goal_candidate(
+            str(current_user.uid), snapshot_id, request
+        )
+    except ScheduleOptimizationNotFoundError as exc:
+        raise _error(404, "SCHEDULE_NOT_FOUND", "排期资源不存在") from exc
+    except ScheduleOptimizationConflictError as exc:
+        raise _error(409, "SCHEDULE_OPTIMIZATION_CONFLICT", "基础版本或幂等请求发生冲突") from exc
+    except ScheduleOptimizationInProgressError as exc:
+        raise _error(409, "SCHEDULE_OPTIMIZATION_IN_PROGRESS", "相同请求仍在处理中") from exc
+    except ScheduleOptimizationDependencyError as exc:
+        raise _error(500, "SCHEDULE_OPTIMIZATION_FAILURE", "工期目标优化执行失败") from exc
+    response.status_code = 201 if created else 200
+    return candidate
+
+
 @schedule_router.get("/candidates/{candidate_snapshot_id}")
 async def get_candidate(candidate_snapshot_id: str, current_user: User = Depends(get_required_user)):
     try:
@@ -278,8 +302,6 @@ async def get_candidate_delivery(
         return await optimization_service.get_delivery(str(current_user.uid), candidate_snapshot_id)
     except ScheduleOptimizationNotFoundError as exc:
         raise _error(404, "SCHEDULE_NOT_FOUND", "排期资源不存在") from exc
-    except ScheduleOptimizationInvalidError as exc:
-        raise _error(409, "SCHEDULE_DELIVERY_NOT_READY", "候选尚未接受或不满足交付条件") from exc
     except ScheduleOptimizationDependencyError as exc:
         raise _error(500, "SCHEDULE_OPTIMIZATION_FAILURE", "交付包读取失败") from exc
 
@@ -300,8 +322,11 @@ async def get_candidate_acceptance_evidence(
 
 
 @schedule_router.get("/agents")
-async def list_capable_agents(current_user: User = Depends(get_required_user)):
-    return {"items": await list_schedule_capable_agents(current_user)}
+async def list_capable_agents(
+    scope: str = Query("issue", pattern="^(issue|snapshot|goal)$"),
+    current_user: User = Depends(get_required_user),
+):
+    return {"items": await list_schedule_capable_agents(current_user, review_scope=scope)}
 
 
 async def _read(awaitable):
