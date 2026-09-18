@@ -1,0 +1,482 @@
+{
+  "schema_version": "schedule_engine_test_input_v1",
+  "case_id": "C03_NESTED_SUMMARY_BRANCHES",
+  "title": "三级 WBS、多分支与汇总滚算",
+  "data_classification": "SYNTHETIC_TEST_DATA",
+  "oracle": {
+    "type": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+    "is_microsoft_project_observation": false,
+    "date_precision": "minute",
+    "tolerance_minutes": 0
+  },
+  "semantics": {
+    "timezone": "Asia/Shanghai",
+    "duration_unit": "working_minute",
+    "lag_unit": "working_minute",
+    "default_lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR",
+    "summary_rollup": "BOTTOM_UP_DIRECT_CHILD_MIN_START_MAX_FINISH",
+    "date_boundary": "START_INCLUSIVE_FINISH_EXCLUSIVE_WORK_INTERVALS"
+  },
+  "project": {
+    "project_id": "project:c03_nested_summary_branches",
+    "name": "三级 WBS、多分支与汇总滚算",
+    "planned_start": "2026-09-07T08:00:00+08:00",
+    "required_finish": null,
+    "status_date": null,
+    "default_calendar_id": "calendar:standard"
+  },
+  "calendars": [
+    {
+      "calendar_id": "calendar:standard",
+      "name": "标准工作日历",
+      "weekly_pattern": {
+        "MONDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "TUESDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "WEDNESDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "THURSDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "FRIDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "SATURDAY": {
+          "day_type": "NON_WORKING",
+          "intervals": []
+        },
+        "SUNDAY": {
+          "day_type": "NON_WORKING",
+          "intervals": []
+        }
+      },
+      "exceptions": []
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "task:root",
+      "parent_task_id": null,
+      "name": "总项目",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:design",
+      "parent_task_id": "task:root",
+      "name": "设计阶段",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:d1",
+      "parent_task_id": "task:design",
+      "name": "方案设计",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": "PROJECT_START",
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:d2",
+      "parent_task_id": "task:design",
+      "name": "施工图",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:build",
+      "parent_task_id": "task:root",
+      "name": "施工阶段",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:civil",
+      "parent_task_id": "task:build",
+      "name": "土建",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:c1",
+      "parent_task_id": "task:civil",
+      "name": "基础",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:c2",
+      "parent_task_id": "task:civil",
+      "name": "结构",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:mep",
+      "parent_task_id": "task:build",
+      "name": "机电",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:m1",
+      "parent_task_id": "task:mep",
+      "name": "设备安装",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:m2",
+      "parent_task_id": "task:mep",
+      "name": "电气安装",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:test",
+      "parent_task_id": "task:build",
+      "name": "联合调试",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:finish",
+      "parent_task_id": "task:root",
+      "name": "竣工",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 0,
+      "calendar_id": null,
+      "boundary_role": "PROJECT_FINISH",
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    }
+  ],
+  "dependencies": [
+    {
+      "dependency_id": "dep:d1:d2:FS:0",
+      "predecessor_task_id": "task:d1",
+      "successor_task_id": "task:d2",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:d2:c1:FS:0",
+      "predecessor_task_id": "task:d2",
+      "successor_task_id": "task:c1",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:c1:c2:FS:0",
+      "predecessor_task_id": "task:c1",
+      "successor_task_id": "task:c2",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:d2:m1:FS:0",
+      "predecessor_task_id": "task:d2",
+      "successor_task_id": "task:m1",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:d2:m2:SS:960",
+      "predecessor_task_id": "task:d2",
+      "successor_task_id": "task:m2",
+      "type": "SS",
+      "lag_minutes": 960,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:c2:test:FS:0",
+      "predecessor_task_id": "task:c2",
+      "successor_task_id": "task:test",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:m1:test:FS:0",
+      "predecessor_task_id": "task:m1",
+      "successor_task_id": "task:test",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:m2:test:FS:0",
+      "predecessor_task_id": "task:m2",
+      "successor_task_id": "task:test",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:test:finish:FS:0",
+      "predecessor_task_id": "task:test",
+      "successor_task_id": "task:finish",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    }
+  ],
+  "resources": [],
+  "assignments": [],
+  "boundary_whitelist": {
+    "open_start_task_ids": [
+      "task:d1"
+    ],
+    "open_finish_task_ids": [
+      "task:finish"
+    ]
+  }
+}

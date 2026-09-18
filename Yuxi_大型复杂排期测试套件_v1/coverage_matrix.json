@@ -1,0 +1,228 @@
+{
+  "suite_id": "YUXI_LARGE_COMPLEX_SCHEDULE_SUITE_V1",
+  "cases": [
+    {
+      "case_id": "L01_EPC_FULL_LIFECYCLE",
+      "title": "大型水处理厂 EPC 全生命周期计划",
+      "coverage": [
+        "4级WBS",
+        "FS/SS/FF/SF",
+        "正负Lag",
+        "Baseline 0",
+        "300条Assignment",
+        "资源超配",
+        "成本"
+      ],
+      "metrics": {
+        "tasks": 195,
+        "summary_tasks": 37,
+        "leaf_tasks": 158,
+        "milestones": 8,
+        "dependencies": 181,
+        "dependency_types": {
+          "FS": 121,
+          "SS": 30,
+          "FF": 24,
+          "SF": 6
+        },
+        "nonzero_lags": 90,
+        "calendars": 1,
+        "resources": 12,
+        "assignments": 300,
+        "baseline_tasks": 158,
+        "completed_tasks": 0,
+        "in_progress_tasks": 0,
+        "expected_status": "SUCCEEDED_WITH_ISSUES",
+        "expected_issues": 68,
+        "expected_resource_conflicts": 68,
+        "expected_baseline_variances": 158
+      }
+    },
+    {
+      "case_id": "L02_MULTI_SITE_PARALLEL",
+      "title": "八标段多作业面并行施工计划",
+      "coverage": [
+        "8标段",
+        "24作业面",
+        "并行DAG",
+        "跨标段FF",
+        "共享资源",
+        "资源冲突",
+        "双日历"
+      ],
+      "metrics": {
+        "tasks": 235,
+        "summary_tasks": 33,
+        "leaf_tasks": 202,
+        "milestones": 10,
+        "dependencies": 231,
+        "dependency_types": {
+          "FS": 176,
+          "SS": 48,
+          "FF": 7,
+          "SF": 0
+        },
+        "nonzero_lags": 103,
+        "calendars": 2,
+        "resources": 10,
+        "assignments": 192,
+        "baseline_tasks": 0,
+        "completed_tasks": 0,
+        "in_progress_tasks": 0,
+        "expected_status": "SUCCEEDED_WITH_ISSUES",
+        "expected_issues": 325,
+        "expected_resource_conflicts": 325,
+        "expected_baseline_variances": 0
+      }
+    },
+    {
+      "case_id": "L03_CALENDAR_SHIFT_STRESS",
+      "title": "多日历与跨班次排程压力计划",
+      "coverage": [
+        "5种日历",
+        "跨午夜",
+        "24x7",
+        "节假日",
+        "补班",
+        "正负Lag",
+        "跨日历多前置"
+      ],
+      "metrics": {
+        "tasks": 133,
+        "summary_tasks": 6,
+        "leaf_tasks": 127,
+        "milestones": 7,
+        "dependencies": 134,
+        "dependency_types": {
+          "FS": 109,
+          "SS": 15,
+          "FF": 10,
+          "SF": 0
+        },
+        "nonzero_lags": 34,
+        "calendars": 5,
+        "resources": 0,
+        "assignments": 0,
+        "baseline_tasks": 0,
+        "completed_tasks": 0,
+        "in_progress_tasks": 0,
+        "expected_status": "SUCCEEDED",
+        "expected_issues": 0,
+        "expected_resource_conflicts": 0,
+        "expected_baseline_variances": 0
+      }
+    },
+    {
+      "case_id": "L04_BASELINE_PROGRESS_FORECAST",
+      "title": "大型基线与进度更新预测计划",
+      "coverage": [
+        "Baseline 0",
+        "状态日期",
+        "36项已完成",
+        "6项进行中",
+        "实际网络冲突",
+        "Deadline",
+        "负浮时",
+        "资源"
+      ],
+      "metrics": {
+        "tasks": 165,
+        "summary_tasks": 7,
+        "leaf_tasks": 158,
+        "milestones": 8,
+        "dependencies": 162,
+        "dependency_types": {
+          "FS": 162,
+          "SS": 0,
+          "FF": 0,
+          "SF": 0
+        },
+        "nonzero_lags": 18,
+        "calendars": 1,
+        "resources": 8,
+        "assignments": 150,
+        "baseline_tasks": 158,
+        "completed_tasks": 37,
+        "in_progress_tasks": 6,
+        "expected_status": "SUCCEEDED_WITH_ISSUES",
+        "expected_issues": 40,
+        "expected_resource_conflicts": 32,
+        "expected_baseline_variances": 158
+      }
+    },
+    {
+      "case_id": "L05_BULK_INVALID_GUARDRAILS",
+      "title": "大规模错误输入与防御性校验",
+      "coverage": [
+        "6组循环",
+        "12个错误里程碑",
+        "12个无效日历",
+        "12个孤儿父级",
+        "6条悬空依赖",
+        "12条无效Assignment"
+      ],
+      "metrics": {
+        "tasks": 127,
+        "summary_tasks": 7,
+        "leaf_tasks": 120,
+        "milestones": 12,
+        "dependencies": 126,
+        "dependency_types": {
+          "FS": 126,
+          "SS": 0,
+          "FF": 0,
+          "SF": 0
+        },
+        "nonzero_lags": 0,
+        "calendars": 1,
+        "resources": 0,
+        "assignments": 12,
+        "baseline_tasks": 0,
+        "completed_tasks": 0,
+        "in_progress_tasks": 0,
+        "expected_status": "VALIDATION_FAILED",
+        "expected_issues": 55,
+        "expected_resource_conflicts": 0,
+        "expected_baseline_variances": 0
+      }
+    },
+    {
+      "case_id": "L06_SCALE_500_DAG",
+      "title": "500 活动大型 DAG 性能计划",
+      "coverage": [
+        "500活动",
+        "四级WBS",
+        "约550条依赖",
+        "500条Assignment",
+        "20资源",
+        "资源超配",
+        "性能",
+        "确定性排序"
+      ],
+      "metrics": {
+        "tasks": 573,
+        "summary_tasks": 61,
+        "leaf_tasks": 512,
+        "milestones": 12,
+        "dependencies": 551,
+        "dependency_types": {
+          "FS": 451,
+          "SS": 100,
+          "FF": 0,
+          "SF": 0
+        },
+        "nonzero_lags": 150,
+        "calendars": 1,
+        "resources": 20,
+        "assignments": 500,
+        "baseline_tasks": 0,
+        "completed_tasks": 0,
+        "in_progress_tasks": 0,
+        "expected_status": "SUCCEEDED_WITH_ISSUES",
+        "expected_issues": 100,
+        "expected_resource_conflicts": 100,
+        "expected_baseline_variances": 0
+      }
+    }
+  ]
+}

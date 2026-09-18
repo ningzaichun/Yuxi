@@ -1,0 +1,420 @@
+{
+  "case_id": "L05_BULK_INVALID_GUARDRAILS",
+  "status": "VALIDATION_FAILED",
+  "project_dates": null,
+  "task_dates": [],
+  "summary_dates": [],
+  "issues": [
+    {
+      "severity": "BLOCKER",
+      "code": "ASSIGNMENT_RESOURCE_NOT_FOUND",
+      "object_ref": "assign:bad:1"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "ASSIGNMENT_RESOURCE_NOT_FOUND",
+      "object_ref": "assign:bad:10"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "ASSIGNMENT_RESOURCE_NOT_FOUND",
+      "object_ref": "assign:bad:11"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "ASSIGNMENT_RESOURCE_NOT_FOUND",
+      "object_ref": "assign:bad:12"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "ASSIGNMENT_RESOURCE_NOT_FOUND",
+      "object_ref": "assign:bad:2"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "ASSIGNMENT_RESOURCE_NOT_FOUND",
+      "object_ref": "assign:bad:3"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "ASSIGNMENT_RESOURCE_NOT_FOUND",
+      "object_ref": "assign:bad:4"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "ASSIGNMENT_RESOURCE_NOT_FOUND",
+      "object_ref": "assign:bad:5"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "ASSIGNMENT_RESOURCE_NOT_FOUND",
+      "object_ref": "assign:bad:6"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "ASSIGNMENT_RESOURCE_NOT_FOUND",
+      "object_ref": "assign:bad:7"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "ASSIGNMENT_RESOURCE_NOT_FOUND",
+      "object_ref": "assign:bad:8"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "ASSIGNMENT_RESOURCE_NOT_FOUND",
+      "object_ref": "assign:bad:9"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "DEPENDENCY_CYCLE",
+      "object_refs": [
+        "task:g01-a03",
+        "task:g01-a04",
+        "task:g01-a05",
+        "task:g01-a06",
+        "task:g01-a07",
+        "task:g01-a08",
+        "task:g01-a09",
+        "task:g01-a10",
+        "task:g01-a11",
+        "task:g01-a12",
+        "task:g01-a13",
+        "task:g01-a14",
+        "task:g01-a15",
+        "task:g01-a16",
+        "task:g01-a17",
+        "task:g01-a18",
+        "task:g01-a19",
+        "task:g01-a20",
+        "task:g02-a03",
+        "task:g02-a04",
+        "task:g02-a05",
+        "task:g02-a06",
+        "task:g02-a07",
+        "task:g02-a08",
+        "task:g02-a09",
+        "task:g02-a10",
+        "task:g02-a11",
+        "task:g02-a12",
+        "task:g02-a13",
+        "task:g02-a14",
+        "task:g02-a15",
+        "task:g02-a16",
+        "task:g02-a17",
+        "task:g02-a18",
+        "task:g02-a19",
+        "task:g02-a20",
+        "task:g03-a03",
+        "task:g03-a04",
+        "task:g03-a05",
+        "task:g03-a06",
+        "task:g03-a07",
+        "task:g03-a08",
+        "task:g03-a09",
+        "task:g03-a10",
+        "task:g03-a11",
+        "task:g03-a12",
+        "task:g03-a13",
+        "task:g03-a14",
+        "task:g03-a15",
+        "task:g03-a16",
+        "task:g03-a17",
+        "task:g03-a18",
+        "task:g03-a19",
+        "task:g03-a20",
+        "task:g04-a03",
+        "task:g04-a04",
+        "task:g04-a05",
+        "task:g04-a06",
+        "task:g04-a07",
+        "task:g04-a08",
+        "task:g04-a09",
+        "task:g04-a10",
+        "task:g04-a11",
+        "task:g04-a12",
+        "task:g04-a13",
+        "task:g04-a14",
+        "task:g04-a15",
+        "task:g04-a16",
+        "task:g04-a17",
+        "task:g04-a18",
+        "task:g04-a19",
+        "task:g04-a20",
+        "task:g05-a03",
+        "task:g05-a04",
+        "task:g05-a05",
+        "task:g05-a06",
+        "task:g05-a07",
+        "task:g05-a08",
+        "task:g05-a09",
+        "task:g05-a10",
+        "task:g05-a11",
+        "task:g05-a12",
+        "task:g05-a13",
+        "task:g05-a14",
+        "task:g05-a15",
+        "task:g05-a16",
+        "task:g05-a17",
+        "task:g05-a18",
+        "task:g05-a19",
+        "task:g05-a20",
+        "task:g06-a03",
+        "task:g06-a04",
+        "task:g06-a05",
+        "task:g06-a06",
+        "task:g06-a07",
+        "task:g06-a08",
+        "task:g06-a09",
+        "task:g06-a10",
+        "task:g06-a11",
+        "task:g06-a12",
+        "task:g06-a13",
+        "task:g06-a14",
+        "task:g06-a15",
+        "task:g06-a16",
+        "task:g06-a17",
+        "task:g06-a18",
+        "task:g06-a19",
+        "task:g06-a20"
+      ]
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "DEPENDENCY_TASK_NOT_FOUND",
+      "object_ref": "dep:g01-a10:not-found-1:FS:0"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "DEPENDENCY_TASK_NOT_FOUND",
+      "object_ref": "dep:g02-a10:not-found-2:FS:0"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "DEPENDENCY_TASK_NOT_FOUND",
+      "object_ref": "dep:g03-a10:not-found-3:FS:0"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "DEPENDENCY_TASK_NOT_FOUND",
+      "object_ref": "dep:g04-a10:not-found-4:FS:0"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "DEPENDENCY_TASK_NOT_FOUND",
+      "object_ref": "dep:g05-a10:not-found-5:FS:0"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "DEPENDENCY_TASK_NOT_FOUND",
+      "object_ref": "dep:g06-a10:not-found-6:FS:0"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "MILESTONE_DURATION_NONZERO",
+      "object_ref": "task:g01-a04"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "MILESTONE_DURATION_NONZERO",
+      "object_ref": "task:g01-a08"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "MILESTONE_DURATION_NONZERO",
+      "object_ref": "task:g02-a04"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "MILESTONE_DURATION_NONZERO",
+      "object_ref": "task:g02-a08"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "MILESTONE_DURATION_NONZERO",
+      "object_ref": "task:g03-a04"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "MILESTONE_DURATION_NONZERO",
+      "object_ref": "task:g03-a08"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "MILESTONE_DURATION_NONZERO",
+      "object_ref": "task:g04-a04"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "MILESTONE_DURATION_NONZERO",
+      "object_ref": "task:g04-a08"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "MILESTONE_DURATION_NONZERO",
+      "object_ref": "task:g05-a04"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "MILESTONE_DURATION_NONZERO",
+      "object_ref": "task:g05-a08"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "MILESTONE_DURATION_NONZERO",
+      "object_ref": "task:g06-a04"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "MILESTONE_DURATION_NONZERO",
+      "object_ref": "task:g06-a08"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "PARENT_TASK_NOT_FOUND",
+      "object_ref": "task:g01-a06",
+      "parent_task_id": "task:missing-parent"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "PARENT_TASK_NOT_FOUND",
+      "object_ref": "task:g01-a12",
+      "parent_task_id": "task:missing-parent"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "PARENT_TASK_NOT_FOUND",
+      "object_ref": "task:g02-a06",
+      "parent_task_id": "task:missing-parent"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "PARENT_TASK_NOT_FOUND",
+      "object_ref": "task:g02-a12",
+      "parent_task_id": "task:missing-parent"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "PARENT_TASK_NOT_FOUND",
+      "object_ref": "task:g03-a06",
+      "parent_task_id": "task:missing-parent"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "PARENT_TASK_NOT_FOUND",
+      "object_ref": "task:g03-a12",
+      "parent_task_id": "task:missing-parent"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "PARENT_TASK_NOT_FOUND",
+      "object_ref": "task:g04-a06",
+      "parent_task_id": "task:missing-parent"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "PARENT_TASK_NOT_FOUND",
+      "object_ref": "task:g04-a12",
+      "parent_task_id": "task:missing-parent"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "PARENT_TASK_NOT_FOUND",
+      "object_ref": "task:g05-a06",
+      "parent_task_id": "task:missing-parent"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "PARENT_TASK_NOT_FOUND",
+      "object_ref": "task:g05-a12",
+      "parent_task_id": "task:missing-parent"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "PARENT_TASK_NOT_FOUND",
+      "object_ref": "task:g06-a06",
+      "parent_task_id": "task:missing-parent"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "PARENT_TASK_NOT_FOUND",
+      "object_ref": "task:g06-a12",
+      "parent_task_id": "task:missing-parent"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "TASK_CALENDAR_NOT_FOUND",
+      "object_ref": "task:g01-a05",
+      "calendar_id": "calendar:missing"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "TASK_CALENDAR_NOT_FOUND",
+      "object_ref": "task:g01-a15",
+      "calendar_id": "calendar:missing"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "TASK_CALENDAR_NOT_FOUND",
+      "object_ref": "task:g02-a05",
+      "calendar_id": "calendar:missing"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "TASK_CALENDAR_NOT_FOUND",
+      "object_ref": "task:g02-a15",
+      "calendar_id": "calendar:missing"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "TASK_CALENDAR_NOT_FOUND",
+      "object_ref": "task:g03-a05",
+      "calendar_id": "calendar:missing"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "TASK_CALENDAR_NOT_FOUND",
+      "object_ref": "task:g03-a15",
+      "calendar_id": "calendar:missing"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "TASK_CALENDAR_NOT_FOUND",
+      "object_ref": "task:g04-a05",
+      "calendar_id": "calendar:missing"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "TASK_CALENDAR_NOT_FOUND",
+      "object_ref": "task:g04-a15",
+      "calendar_id": "calendar:missing"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "TASK_CALENDAR_NOT_FOUND",
+      "object_ref": "task:g05-a05",
+      "calendar_id": "calendar:missing"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "TASK_CALENDAR_NOT_FOUND",
+      "object_ref": "task:g05-a15",
+      "calendar_id": "calendar:missing"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "TASK_CALENDAR_NOT_FOUND",
+      "object_ref": "task:g06-a05",
+      "calendar_id": "calendar:missing"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "TASK_CALENDAR_NOT_FOUND",
+      "object_ref": "task:g06-a15",
+      "calendar_id": "calendar:missing"
+    }
+  ],
+  "resource_conflicts": [],
+  "assignment_costs": [],
+  "baseline_variances": []
+}

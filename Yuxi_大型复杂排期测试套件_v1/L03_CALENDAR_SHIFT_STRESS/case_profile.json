@@ -1,0 +1,43 @@
+{
+  "case_id": "L03_CALENDAR_SHIFT_STRESS",
+  "title": "多日历与跨班次排程压力计划",
+  "test_profile": {
+    "purpose": "验证跨午夜夜班、24x7、双班制、停工、补班和跨日历Lag",
+    "scale_target": "约 130 项",
+    "coverage": [
+      "5种日历",
+      "跨午夜",
+      "24x7",
+      "节假日",
+      "补班",
+      "正负Lag",
+      "跨日历多前置"
+    ],
+    "oracle_scope": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+    "microsoft_project_observation": false
+  },
+  "metrics": {
+    "tasks": 133,
+    "summary_tasks": 6,
+    "leaf_tasks": 127,
+    "milestones": 7,
+    "dependencies": 134,
+    "dependency_types": {
+      "FS": 109,
+      "SS": 15,
+      "FF": 10,
+      "SF": 0
+    },
+    "nonzero_lags": 34,
+    "calendars": 5,
+    "resources": 0,
+    "assignments": 0,
+    "baseline_tasks": 0,
+    "completed_tasks": 0,
+    "in_progress_tasks": 0,
+    "expected_status": "SUCCEEDED",
+    "expected_issues": 0,
+    "expected_resource_conflicts": 0,
+    "expected_baseline_variances": 0
+  }
+}

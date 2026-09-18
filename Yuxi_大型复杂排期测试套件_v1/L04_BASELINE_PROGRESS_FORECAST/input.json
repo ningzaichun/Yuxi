@@ -1,0 +1,6440 @@
+{
+  "schema_version": "schedule_engine_test_input_v1",
+  "case_id": "L04_BASELINE_PROGRESS_FORECAST",
+  "title": "大型基线与进度更新预测计划",
+  "data_classification": "SYNTHETIC_TEST_DATA",
+  "oracle": {
+    "type": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+    "is_microsoft_project_observation": false,
+    "date_precision": "minute",
+    "tolerance_minutes": 0
+  },
+  "semantics": {
+    "timezone": "Asia/Shanghai",
+    "duration_unit": "working_minute",
+    "lag_unit": "working_minute",
+    "default_lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR",
+    "summary_rollup": "BOTTOM_UP_DIRECT_CHILD_MIN_START_MAX_FINISH",
+    "date_boundary": "START_INCLUSIVE_FINISH_EXCLUSIVE_WORK_INTERVALS"
+  },
+  "project": {
+    "project_id": "project:l04_baseline_progress_forecast",
+    "name": "大型基线与进度更新预测计划",
+    "planned_start": "2027-04-05T08:00:00+08:00",
+    "required_finish": "2027-07-15T12:00:00+08:00",
+    "status_date": "2027-05-06T17:00:00+08:00",
+    "default_calendar_id": "calendar:standard"
+  },
+  "calendars": [
+    {
+      "calendar_id": "calendar:standard",
+      "name": "标准工作日历",
+      "weekly_pattern": {
+        "MONDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "TUESDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "WEDNESDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "THURSDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "FRIDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "SATURDAY": {
+          "day_type": "NON_WORKING",
+          "intervals": []
+        },
+        "SUNDAY": {
+          "day_type": "NON_WORKING",
+          "intervals": []
+        }
+      },
+      "exceptions": []
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "task:root",
+      "parent_task_id": null,
+      "name": "大型基线与进度更新预测计划",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1",
+      "outline_level": 1
+    },
+    {
+      "task_id": "task:project-start",
+      "parent_task_id": "task:root",
+      "name": "项目开工",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 0,
+      "calendar_id": null,
+      "boundary_role": "PROJECT_START",
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-05T08:00:00+08:00",
+        "finish": "2027-04-05T08:00:00+08:00"
+      },
+      "wbs": "1.0",
+      "outline_level": 2,
+      "actual_start": "2027-04-05T08:00:00+08:00",
+      "actual_finish": "2027-04-05T08:00:00+08:00"
+    },
+    {
+      "task_id": "task:project-finish",
+      "parent_task_id": "task:root",
+      "name": "项目完工",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 0,
+      "calendar_id": null,
+      "boundary_role": "PROJECT_FINISH",
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-15T12:00:00+08:00",
+        "finish": "2027-07-15T12:00:00+08:00"
+      },
+      "wbs": "1.99",
+      "outline_level": 2
+    },
+    {
+      "task_id": "task:w01",
+      "parent_task_id": "task:root",
+      "name": "专业工作流1",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1",
+      "outline_level": 2
+    },
+    {
+      "task_id": "task:w01-a01",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务1",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-05T08:00:00+08:00",
+        "finish": "2027-04-07T17:00:00+08:00"
+      },
+      "wbs": "1.1.1",
+      "outline_level": 3,
+      "actual_start": "2027-04-05T08:00:00+08:00",
+      "actual_finish": "2027-04-07T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w01-a02",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务2",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-08T08:00:00+08:00",
+        "finish": "2027-04-13T17:00:00+08:00"
+      },
+      "wbs": "1.1.2",
+      "outline_level": 3,
+      "actual_start": "2027-04-08T08:00:00+08:00",
+      "actual_finish": "2027-04-13T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w01-a03",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务3",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-14T08:00:00+08:00",
+        "finish": "2027-04-20T17:00:00+08:00"
+      },
+      "wbs": "1.1.3",
+      "outline_level": 3,
+      "actual_start": "2027-04-14T08:00:00+08:00",
+      "actual_finish": "2027-04-20T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w01-a04",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务4",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-21T08:00:00+08:00",
+        "finish": "2027-04-21T17:00:00+08:00"
+      },
+      "wbs": "1.1.4",
+      "outline_level": 3,
+      "actual_start": "2027-04-21T08:00:00+08:00",
+      "actual_finish": "2027-04-22T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w01-a05",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务5",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-22T08:00:00+08:00",
+        "finish": "2027-04-23T17:00:00+08:00"
+      },
+      "wbs": "1.1.5",
+      "outline_level": 3,
+      "actual_start": "2027-04-22T08:00:00+08:00",
+      "actual_finish": "2027-04-23T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w01-a06",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务6",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-26T08:00:00+08:00",
+        "finish": "2027-04-28T17:00:00+08:00"
+      },
+      "wbs": "1.1.6",
+      "outline_level": 3,
+      "actual_start": "2027-04-26T08:00:00+08:00",
+      "actual_finish": "2027-04-28T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w01-a07",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务7",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "IN_PROGRESS",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-29T08:00:00+08:00",
+        "finish": "2027-05-04T17:00:00+08:00"
+      },
+      "wbs": "1.1.7",
+      "outline_level": 3,
+      "actual_start": "2027-04-29T08:00:00+08:00",
+      "remaining_duration_minutes": 1152
+    },
+    {
+      "task_id": "task:w01-a08",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务8",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-04T13:00:00+08:00",
+        "finish": "2027-05-11T12:00:00+08:00"
+      },
+      "wbs": "1.1.8",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a09",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务9",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-11T13:00:00+08:00",
+        "finish": "2027-05-12T12:00:00+08:00"
+      },
+      "wbs": "1.1.9",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a10",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务10",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-12T13:00:00+08:00",
+        "finish": "2027-05-14T12:00:00+08:00"
+      },
+      "wbs": "1.1.10",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a11",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务11",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-14T13:00:00+08:00",
+        "finish": "2027-05-19T12:00:00+08:00"
+      },
+      "wbs": "1.1.11",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a12",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务12",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-19T13:00:00+08:00",
+        "finish": "2027-05-25T12:00:00+08:00"
+      },
+      "wbs": "1.1.12",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a13",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务13",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-25T13:00:00+08:00",
+        "finish": "2027-06-01T12:00:00+08:00"
+      },
+      "wbs": "1.1.13",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a14",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务14",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-01T13:00:00+08:00",
+        "finish": "2027-06-02T12:00:00+08:00"
+      },
+      "wbs": "1.1.14",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a15",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务15",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-02T13:00:00+08:00",
+        "finish": "2027-06-04T12:00:00+08:00"
+      },
+      "wbs": "1.1.15",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a16",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务16",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-04T08:00:00+08:00",
+        "finish": "2027-06-08T17:00:00+08:00"
+      },
+      "wbs": "1.1.16",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a17",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务17",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-09T08:00:00+08:00",
+        "finish": "2027-06-14T17:00:00+08:00"
+      },
+      "wbs": "1.1.17",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a18",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务18",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-15T08:00:00+08:00",
+        "finish": "2027-06-21T17:00:00+08:00"
+      },
+      "wbs": "1.1.18",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a19",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务19",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-22T08:00:00+08:00",
+        "finish": "2027-06-22T17:00:00+08:00"
+      },
+      "wbs": "1.1.19",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a20",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务20",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-23T08:00:00+08:00",
+        "finish": "2027-06-24T17:00:00+08:00"
+      },
+      "wbs": "1.1.20",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a21",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务21",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-25T08:00:00+08:00",
+        "finish": "2027-06-29T17:00:00+08:00"
+      },
+      "wbs": "1.1.21",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a22",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务22",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-30T08:00:00+08:00",
+        "finish": "2027-07-05T17:00:00+08:00"
+      },
+      "wbs": "1.1.22",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a23",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务23",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-06T08:00:00+08:00",
+        "finish": "2027-07-12T17:00:00+08:00"
+      },
+      "wbs": "1.1.23",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a24",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务24",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-12T13:00:00+08:00",
+        "finish": "2027-07-13T12:00:00+08:00"
+      },
+      "wbs": "1.1.24",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-a25",
+      "parent_task_id": "task:w01",
+      "name": "工作流1-任务25",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-13T13:00:00+08:00",
+        "finish": "2027-07-15T12:00:00+08:00"
+      },
+      "wbs": "1.1.25",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w01-gate",
+      "parent_task_id": "task:w01",
+      "name": "专业1完成",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 0,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": "2027-07-10T12:00:00+08:00",
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-15T12:00:00+08:00",
+        "finish": "2027-07-15T12:00:00+08:00"
+      },
+      "wbs": "1.1.99",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02",
+      "parent_task_id": "task:root",
+      "name": "专业工作流2",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2",
+      "outline_level": 2
+    },
+    {
+      "task_id": "task:w02-a01",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务1",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-05T08:00:00+08:00",
+        "finish": "2027-04-08T17:00:00+08:00"
+      },
+      "wbs": "1.2.1",
+      "outline_level": 3,
+      "actual_start": "2027-04-05T08:00:00+08:00",
+      "actual_finish": "2027-04-08T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w02-a02",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务2",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-09T08:00:00+08:00",
+        "finish": "2027-04-15T17:00:00+08:00"
+      },
+      "wbs": "1.2.2",
+      "outline_level": 3,
+      "actual_start": "2027-04-09T08:00:00+08:00",
+      "actual_finish": "2027-04-15T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w02-a03",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务3",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-16T08:00:00+08:00",
+        "finish": "2027-04-16T17:00:00+08:00"
+      },
+      "wbs": "1.2.3",
+      "outline_level": 3,
+      "actual_start": "2027-04-16T08:00:00+08:00",
+      "actual_finish": "2027-04-16T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w02-a04",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务4",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-19T08:00:00+08:00",
+        "finish": "2027-04-20T17:00:00+08:00"
+      },
+      "wbs": "1.2.4",
+      "outline_level": 3,
+      "actual_start": "2027-04-19T08:00:00+08:00",
+      "actual_finish": "2027-04-20T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w02-a05",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务5",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-21T08:00:00+08:00",
+        "finish": "2027-04-23T17:00:00+08:00"
+      },
+      "wbs": "1.2.5",
+      "outline_level": 3,
+      "actual_start": "2027-04-21T08:00:00+08:00",
+      "actual_finish": "2027-04-23T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w02-a06",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务6",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-26T08:00:00+08:00",
+        "finish": "2027-04-29T17:00:00+08:00"
+      },
+      "wbs": "1.2.6",
+      "outline_level": 3,
+      "actual_start": "2027-04-26T08:00:00+08:00",
+      "actual_finish": "2027-04-29T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w02-a07",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务7",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "IN_PROGRESS",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-30T08:00:00+08:00",
+        "finish": "2027-05-06T17:00:00+08:00"
+      },
+      "wbs": "1.2.7",
+      "outline_level": 3,
+      "actual_start": "2027-04-30T08:00:00+08:00",
+      "remaining_duration_minutes": 1440
+    },
+    {
+      "task_id": "task:w02-a08",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务8",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-06T13:00:00+08:00",
+        "finish": "2027-05-07T12:00:00+08:00"
+      },
+      "wbs": "1.2.8",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a09",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务9",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-07T13:00:00+08:00",
+        "finish": "2027-05-11T12:00:00+08:00"
+      },
+      "wbs": "1.2.9",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a10",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务10",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-11T13:00:00+08:00",
+        "finish": "2027-05-14T12:00:00+08:00"
+      },
+      "wbs": "1.2.10",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a11",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务11",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-14T13:00:00+08:00",
+        "finish": "2027-05-20T12:00:00+08:00"
+      },
+      "wbs": "1.2.11",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a12",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务12",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-20T13:00:00+08:00",
+        "finish": "2027-05-27T12:00:00+08:00"
+      },
+      "wbs": "1.2.12",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a13",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务13",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-27T13:00:00+08:00",
+        "finish": "2027-05-28T12:00:00+08:00"
+      },
+      "wbs": "1.2.13",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a14",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务14",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-28T13:00:00+08:00",
+        "finish": "2027-06-01T12:00:00+08:00"
+      },
+      "wbs": "1.2.14",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a15",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务15",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-01T13:00:00+08:00",
+        "finish": "2027-06-04T12:00:00+08:00"
+      },
+      "wbs": "1.2.15",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a16",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务16",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-04T08:00:00+08:00",
+        "finish": "2027-06-09T17:00:00+08:00"
+      },
+      "wbs": "1.2.16",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a17",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务17",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-10T08:00:00+08:00",
+        "finish": "2027-06-16T17:00:00+08:00"
+      },
+      "wbs": "1.2.17",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a18",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务18",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-17T08:00:00+08:00",
+        "finish": "2027-06-17T17:00:00+08:00"
+      },
+      "wbs": "1.2.18",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a19",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务19",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-18T08:00:00+08:00",
+        "finish": "2027-06-21T17:00:00+08:00"
+      },
+      "wbs": "1.2.19",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a20",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务20",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-22T08:00:00+08:00",
+        "finish": "2027-06-24T17:00:00+08:00"
+      },
+      "wbs": "1.2.20",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a21",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务21",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-25T08:00:00+08:00",
+        "finish": "2027-06-30T17:00:00+08:00"
+      },
+      "wbs": "1.2.21",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a22",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务22",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-01T08:00:00+08:00",
+        "finish": "2027-07-07T17:00:00+08:00"
+      },
+      "wbs": "1.2.22",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a23",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务23",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-08T08:00:00+08:00",
+        "finish": "2027-07-08T17:00:00+08:00"
+      },
+      "wbs": "1.2.23",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a24",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务24",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-08T13:00:00+08:00",
+        "finish": "2027-07-12T12:00:00+08:00"
+      },
+      "wbs": "1.2.24",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-a25",
+      "parent_task_id": "task:w02",
+      "name": "工作流2-任务25",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-12T13:00:00+08:00",
+        "finish": "2027-07-15T12:00:00+08:00"
+      },
+      "wbs": "1.2.25",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w02-gate",
+      "parent_task_id": "task:w02",
+      "name": "专业2完成",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 0,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": "2027-07-11T12:00:00+08:00",
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-15T12:00:00+08:00",
+        "finish": "2027-07-15T12:00:00+08:00"
+      },
+      "wbs": "1.2.99",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03",
+      "parent_task_id": "task:root",
+      "name": "专业工作流3",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3",
+      "outline_level": 2
+    },
+    {
+      "task_id": "task:w03-a01",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务1",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-05T08:00:00+08:00",
+        "finish": "2027-04-09T17:00:00+08:00"
+      },
+      "wbs": "1.3.1",
+      "outline_level": 3,
+      "actual_start": "2027-04-05T08:00:00+08:00",
+      "actual_finish": "2027-04-09T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w03-a02",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务2",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-12T08:00:00+08:00",
+        "finish": "2027-04-12T17:00:00+08:00"
+      },
+      "wbs": "1.3.2",
+      "outline_level": 3,
+      "actual_start": "2027-04-12T08:00:00+08:00",
+      "actual_finish": "2027-04-12T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w03-a03",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务3",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-13T08:00:00+08:00",
+        "finish": "2027-04-14T17:00:00+08:00"
+      },
+      "wbs": "1.3.3",
+      "outline_level": 3,
+      "actual_start": "2027-04-13T08:00:00+08:00",
+      "actual_finish": "2027-04-14T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w03-a04",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务4",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-15T08:00:00+08:00",
+        "finish": "2027-04-19T17:00:00+08:00"
+      },
+      "wbs": "1.3.4",
+      "outline_level": 3,
+      "actual_start": "2027-04-15T08:00:00+08:00",
+      "actual_finish": "2027-04-19T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w03-a05",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务5",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-20T08:00:00+08:00",
+        "finish": "2027-04-23T17:00:00+08:00"
+      },
+      "wbs": "1.3.5",
+      "outline_level": 3,
+      "actual_start": "2027-04-20T08:00:00+08:00",
+      "actual_finish": "2027-04-23T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w03-a06",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务6",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-26T08:00:00+08:00",
+        "finish": "2027-04-30T17:00:00+08:00"
+      },
+      "wbs": "1.3.6",
+      "outline_level": 3,
+      "actual_start": "2027-04-26T08:00:00+08:00",
+      "actual_finish": "2027-04-30T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w03-a07",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务7",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "IN_PROGRESS",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-03T08:00:00+08:00",
+        "finish": "2027-05-03T17:00:00+08:00"
+      },
+      "wbs": "1.3.7",
+      "outline_level": 3,
+      "actual_start": "2027-05-03T08:00:00+08:00",
+      "remaining_duration_minutes": 480
+    },
+    {
+      "task_id": "task:w03-a08",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务8",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-03T13:00:00+08:00",
+        "finish": "2027-05-05T12:00:00+08:00"
+      },
+      "wbs": "1.3.8",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a09",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务9",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-05T13:00:00+08:00",
+        "finish": "2027-05-10T12:00:00+08:00"
+      },
+      "wbs": "1.3.9",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a10",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务10",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-10T13:00:00+08:00",
+        "finish": "2027-05-14T12:00:00+08:00"
+      },
+      "wbs": "1.3.10",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a11",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务11",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-14T13:00:00+08:00",
+        "finish": "2027-05-21T12:00:00+08:00"
+      },
+      "wbs": "1.3.11",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a12",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务12",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-21T13:00:00+08:00",
+        "finish": "2027-05-24T12:00:00+08:00"
+      },
+      "wbs": "1.3.12",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a13",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务13",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-24T13:00:00+08:00",
+        "finish": "2027-05-26T12:00:00+08:00"
+      },
+      "wbs": "1.3.13",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a14",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务14",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-26T13:00:00+08:00",
+        "finish": "2027-05-31T12:00:00+08:00"
+      },
+      "wbs": "1.3.14",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a15",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务15",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-31T13:00:00+08:00",
+        "finish": "2027-06-04T12:00:00+08:00"
+      },
+      "wbs": "1.3.15",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a16",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务16",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-04T08:00:00+08:00",
+        "finish": "2027-06-10T17:00:00+08:00"
+      },
+      "wbs": "1.3.16",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a17",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务17",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-11T08:00:00+08:00",
+        "finish": "2027-06-11T17:00:00+08:00"
+      },
+      "wbs": "1.3.17",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a18",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务18",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-14T08:00:00+08:00",
+        "finish": "2027-06-15T17:00:00+08:00"
+      },
+      "wbs": "1.3.18",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a19",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务19",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-16T08:00:00+08:00",
+        "finish": "2027-06-18T17:00:00+08:00"
+      },
+      "wbs": "1.3.19",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a20",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务20",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-21T08:00:00+08:00",
+        "finish": "2027-06-24T17:00:00+08:00"
+      },
+      "wbs": "1.3.20",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a21",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务21",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-25T08:00:00+08:00",
+        "finish": "2027-07-01T17:00:00+08:00"
+      },
+      "wbs": "1.3.21",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a22",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务22",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-02T08:00:00+08:00",
+        "finish": "2027-07-02T17:00:00+08:00"
+      },
+      "wbs": "1.3.22",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a23",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务23",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-05T08:00:00+08:00",
+        "finish": "2027-07-06T17:00:00+08:00"
+      },
+      "wbs": "1.3.23",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a24",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务24",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-06T13:00:00+08:00",
+        "finish": "2027-07-09T12:00:00+08:00"
+      },
+      "wbs": "1.3.24",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-a25",
+      "parent_task_id": "task:w03",
+      "name": "工作流3-任务25",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-09T13:00:00+08:00",
+        "finish": "2027-07-15T12:00:00+08:00"
+      },
+      "wbs": "1.3.25",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w03-gate",
+      "parent_task_id": "task:w03",
+      "name": "专业3完成",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 0,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": "2027-07-12T12:00:00+08:00",
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-15T12:00:00+08:00",
+        "finish": "2027-07-15T12:00:00+08:00"
+      },
+      "wbs": "1.3.99",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04",
+      "parent_task_id": "task:root",
+      "name": "专业工作流4",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4",
+      "outline_level": 2
+    },
+    {
+      "task_id": "task:w04-a01",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务1",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-05T08:00:00+08:00",
+        "finish": "2027-04-05T17:00:00+08:00"
+      },
+      "wbs": "1.4.1",
+      "outline_level": 3,
+      "actual_start": "2027-04-05T08:00:00+08:00",
+      "actual_finish": "2027-04-05T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w04-a02",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务2",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-06T08:00:00+08:00",
+        "finish": "2027-04-07T17:00:00+08:00"
+      },
+      "wbs": "1.4.2",
+      "outline_level": 3,
+      "actual_start": "2027-04-06T08:00:00+08:00",
+      "actual_finish": "2027-04-07T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w04-a03",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务3",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-08T08:00:00+08:00",
+        "finish": "2027-04-12T17:00:00+08:00"
+      },
+      "wbs": "1.4.3",
+      "outline_level": 3,
+      "actual_start": "2027-04-08T08:00:00+08:00",
+      "actual_finish": "2027-04-12T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w04-a04",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务4",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-13T08:00:00+08:00",
+        "finish": "2027-04-16T17:00:00+08:00"
+      },
+      "wbs": "1.4.4",
+      "outline_level": 3,
+      "actual_start": "2027-04-13T08:00:00+08:00",
+      "actual_finish": "2027-04-16T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w04-a05",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务5",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-19T08:00:00+08:00",
+        "finish": "2027-04-23T17:00:00+08:00"
+      },
+      "wbs": "1.4.5",
+      "outline_level": 3,
+      "actual_start": "2027-04-19T08:00:00+08:00",
+      "actual_finish": "2027-04-23T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w04-a06",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务6",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-26T08:00:00+08:00",
+        "finish": "2027-04-26T17:00:00+08:00"
+      },
+      "wbs": "1.4.6",
+      "outline_level": 3,
+      "actual_start": "2027-04-26T08:00:00+08:00",
+      "actual_finish": "2027-04-26T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w04-a07",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务7",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "IN_PROGRESS",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-27T08:00:00+08:00",
+        "finish": "2027-04-28T17:00:00+08:00"
+      },
+      "wbs": "1.4.7",
+      "outline_level": 3,
+      "actual_start": "2027-04-27T08:00:00+08:00",
+      "remaining_duration_minutes": 576
+    },
+    {
+      "task_id": "task:w04-a08",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务8",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-28T13:00:00+08:00",
+        "finish": "2027-05-03T12:00:00+08:00"
+      },
+      "wbs": "1.4.8",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a09",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务9",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-03T13:00:00+08:00",
+        "finish": "2027-05-07T12:00:00+08:00"
+      },
+      "wbs": "1.4.9",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a10",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务10",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-07T13:00:00+08:00",
+        "finish": "2027-05-14T12:00:00+08:00"
+      },
+      "wbs": "1.4.10",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a11",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务11",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-14T13:00:00+08:00",
+        "finish": "2027-05-17T12:00:00+08:00"
+      },
+      "wbs": "1.4.11",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a12",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务12",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-17T13:00:00+08:00",
+        "finish": "2027-05-19T12:00:00+08:00"
+      },
+      "wbs": "1.4.12",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a13",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务13",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-19T13:00:00+08:00",
+        "finish": "2027-05-24T12:00:00+08:00"
+      },
+      "wbs": "1.4.13",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a14",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务14",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-24T13:00:00+08:00",
+        "finish": "2027-05-28T12:00:00+08:00"
+      },
+      "wbs": "1.4.14",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a15",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务15",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-28T13:00:00+08:00",
+        "finish": "2027-06-04T12:00:00+08:00"
+      },
+      "wbs": "1.4.15",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a16",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务16",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-04T08:00:00+08:00",
+        "finish": "2027-06-04T17:00:00+08:00"
+      },
+      "wbs": "1.4.16",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a17",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务17",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-07T08:00:00+08:00",
+        "finish": "2027-06-08T17:00:00+08:00"
+      },
+      "wbs": "1.4.17",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a18",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务18",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-09T08:00:00+08:00",
+        "finish": "2027-06-11T17:00:00+08:00"
+      },
+      "wbs": "1.4.18",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a19",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务19",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-14T08:00:00+08:00",
+        "finish": "2027-06-17T17:00:00+08:00"
+      },
+      "wbs": "1.4.19",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a20",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务20",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-18T08:00:00+08:00",
+        "finish": "2027-06-24T17:00:00+08:00"
+      },
+      "wbs": "1.4.20",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a21",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务21",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-25T08:00:00+08:00",
+        "finish": "2027-06-25T17:00:00+08:00"
+      },
+      "wbs": "1.4.21",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a22",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务22",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-28T08:00:00+08:00",
+        "finish": "2027-06-29T17:00:00+08:00"
+      },
+      "wbs": "1.4.22",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a23",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务23",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-30T08:00:00+08:00",
+        "finish": "2027-07-02T17:00:00+08:00"
+      },
+      "wbs": "1.4.23",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a24",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务24",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-02T13:00:00+08:00",
+        "finish": "2027-07-08T12:00:00+08:00"
+      },
+      "wbs": "1.4.24",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-a25",
+      "parent_task_id": "task:w04",
+      "name": "工作流4-任务25",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-08T13:00:00+08:00",
+        "finish": "2027-07-15T12:00:00+08:00"
+      },
+      "wbs": "1.4.25",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w04-gate",
+      "parent_task_id": "task:w04",
+      "name": "专业4完成",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 0,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": "2027-07-13T12:00:00+08:00",
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-15T12:00:00+08:00",
+        "finish": "2027-07-15T12:00:00+08:00"
+      },
+      "wbs": "1.4.99",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05",
+      "parent_task_id": "task:root",
+      "name": "专业工作流5",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5",
+      "outline_level": 2
+    },
+    {
+      "task_id": "task:w05-a01",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务1",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-05T08:00:00+08:00",
+        "finish": "2027-04-06T17:00:00+08:00"
+      },
+      "wbs": "1.5.1",
+      "outline_level": 3,
+      "actual_start": "2027-04-05T08:00:00+08:00",
+      "actual_finish": "2027-04-06T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w05-a02",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务2",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-07T08:00:00+08:00",
+        "finish": "2027-04-09T17:00:00+08:00"
+      },
+      "wbs": "1.5.2",
+      "outline_level": 3,
+      "actual_start": "2027-04-07T08:00:00+08:00",
+      "actual_finish": "2027-04-09T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w05-a03",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务3",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-12T08:00:00+08:00",
+        "finish": "2027-04-15T17:00:00+08:00"
+      },
+      "wbs": "1.5.3",
+      "outline_level": 3,
+      "actual_start": "2027-04-12T08:00:00+08:00",
+      "actual_finish": "2027-04-15T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w05-a04",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务4",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-16T08:00:00+08:00",
+        "finish": "2027-04-22T17:00:00+08:00"
+      },
+      "wbs": "1.5.4",
+      "outline_level": 3,
+      "actual_start": "2027-04-16T08:00:00+08:00",
+      "actual_finish": "2027-04-22T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w05-a05",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务5",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-23T08:00:00+08:00",
+        "finish": "2027-04-23T17:00:00+08:00"
+      },
+      "wbs": "1.5.5",
+      "outline_level": 3,
+      "actual_start": "2027-04-23T08:00:00+08:00",
+      "actual_finish": "2027-04-23T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w05-a06",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务6",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-26T08:00:00+08:00",
+        "finish": "2027-04-27T17:00:00+08:00"
+      },
+      "wbs": "1.5.6",
+      "outline_level": 3,
+      "actual_start": "2027-04-26T08:00:00+08:00",
+      "actual_finish": "2027-04-27T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w05-a07",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务7",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "IN_PROGRESS",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-28T08:00:00+08:00",
+        "finish": "2027-04-30T17:00:00+08:00"
+      },
+      "wbs": "1.5.7",
+      "outline_level": 3,
+      "actual_start": "2027-04-28T08:00:00+08:00",
+      "remaining_duration_minutes": 864
+    },
+    {
+      "task_id": "task:w05-a08",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务8",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-30T13:00:00+08:00",
+        "finish": "2027-05-06T12:00:00+08:00"
+      },
+      "wbs": "1.5.8",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a09",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务9",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-06T13:00:00+08:00",
+        "finish": "2027-05-13T12:00:00+08:00"
+      },
+      "wbs": "1.5.9",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a10",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务10",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-13T13:00:00+08:00",
+        "finish": "2027-05-14T12:00:00+08:00"
+      },
+      "wbs": "1.5.10",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a11",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务11",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-14T13:00:00+08:00",
+        "finish": "2027-05-18T12:00:00+08:00"
+      },
+      "wbs": "1.5.11",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a12",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务12",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-18T13:00:00+08:00",
+        "finish": "2027-05-21T12:00:00+08:00"
+      },
+      "wbs": "1.5.12",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a13",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务13",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-21T13:00:00+08:00",
+        "finish": "2027-05-27T12:00:00+08:00"
+      },
+      "wbs": "1.5.13",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a14",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务14",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-27T13:00:00+08:00",
+        "finish": "2027-06-03T12:00:00+08:00"
+      },
+      "wbs": "1.5.14",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a15",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务15",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-03T13:00:00+08:00",
+        "finish": "2027-06-04T12:00:00+08:00"
+      },
+      "wbs": "1.5.15",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a16",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务16",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-04T08:00:00+08:00",
+        "finish": "2027-06-07T17:00:00+08:00"
+      },
+      "wbs": "1.5.16",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a17",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务17",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-08T08:00:00+08:00",
+        "finish": "2027-06-10T17:00:00+08:00"
+      },
+      "wbs": "1.5.17",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a18",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务18",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-11T08:00:00+08:00",
+        "finish": "2027-06-16T17:00:00+08:00"
+      },
+      "wbs": "1.5.18",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a19",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务19",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-17T08:00:00+08:00",
+        "finish": "2027-06-23T17:00:00+08:00"
+      },
+      "wbs": "1.5.19",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a20",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务20",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-24T08:00:00+08:00",
+        "finish": "2027-06-24T17:00:00+08:00"
+      },
+      "wbs": "1.5.20",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a21",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务21",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-25T08:00:00+08:00",
+        "finish": "2027-06-28T17:00:00+08:00"
+      },
+      "wbs": "1.5.21",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a22",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务22",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-29T08:00:00+08:00",
+        "finish": "2027-07-01T17:00:00+08:00"
+      },
+      "wbs": "1.5.22",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a23",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务23",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-02T08:00:00+08:00",
+        "finish": "2027-07-07T17:00:00+08:00"
+      },
+      "wbs": "1.5.23",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a24",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务24",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-07T13:00:00+08:00",
+        "finish": "2027-07-14T12:00:00+08:00"
+      },
+      "wbs": "1.5.24",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-a25",
+      "parent_task_id": "task:w05",
+      "name": "工作流5-任务25",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-14T13:00:00+08:00",
+        "finish": "2027-07-15T12:00:00+08:00"
+      },
+      "wbs": "1.5.25",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w05-gate",
+      "parent_task_id": "task:w05",
+      "name": "专业5完成",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 0,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": "2027-07-14T12:00:00+08:00",
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-15T12:00:00+08:00",
+        "finish": "2027-07-15T12:00:00+08:00"
+      },
+      "wbs": "1.5.99",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06",
+      "parent_task_id": "task:root",
+      "name": "专业工作流6",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6",
+      "outline_level": 2
+    },
+    {
+      "task_id": "task:w06-a01",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务1",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-05T08:00:00+08:00",
+        "finish": "2027-04-07T17:00:00+08:00"
+      },
+      "wbs": "1.6.1",
+      "outline_level": 3,
+      "actual_start": "2027-04-05T08:00:00+08:00",
+      "actual_finish": "2027-04-07T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w06-a02",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务2",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-08T08:00:00+08:00",
+        "finish": "2027-04-13T17:00:00+08:00"
+      },
+      "wbs": "1.6.2",
+      "outline_level": 3,
+      "actual_start": "2027-04-08T08:00:00+08:00",
+      "actual_finish": "2027-04-13T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w06-a03",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务3",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-14T08:00:00+08:00",
+        "finish": "2027-04-20T17:00:00+08:00"
+      },
+      "wbs": "1.6.3",
+      "outline_level": 3,
+      "actual_start": "2027-04-14T08:00:00+08:00",
+      "actual_finish": "2027-04-20T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w06-a04",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务4",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-21T08:00:00+08:00",
+        "finish": "2027-04-21T17:00:00+08:00"
+      },
+      "wbs": "1.6.4",
+      "outline_level": 3,
+      "actual_start": "2027-04-21T08:00:00+08:00",
+      "actual_finish": "2027-04-21T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w06-a05",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务5",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-22T08:00:00+08:00",
+        "finish": "2027-04-23T17:00:00+08:00"
+      },
+      "wbs": "1.6.5",
+      "outline_level": 3,
+      "actual_start": "2027-04-22T08:00:00+08:00",
+      "actual_finish": "2027-04-23T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w06-a06",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务6",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "COMPLETED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-26T08:00:00+08:00",
+        "finish": "2027-04-28T17:00:00+08:00"
+      },
+      "wbs": "1.6.6",
+      "outline_level": 3,
+      "actual_start": "2027-04-26T08:00:00+08:00",
+      "actual_finish": "2027-04-28T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:w06-a07",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务7",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "IN_PROGRESS",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-04-29T08:00:00+08:00",
+        "finish": "2027-05-04T17:00:00+08:00"
+      },
+      "wbs": "1.6.7",
+      "outline_level": 3,
+      "actual_start": "2027-04-29T08:00:00+08:00",
+      "remaining_duration_minutes": 1152
+    },
+    {
+      "task_id": "task:w06-a08",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务8",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-04T13:00:00+08:00",
+        "finish": "2027-05-11T12:00:00+08:00"
+      },
+      "wbs": "1.6.8",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a09",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务9",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-11T13:00:00+08:00",
+        "finish": "2027-05-12T12:00:00+08:00"
+      },
+      "wbs": "1.6.9",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a10",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务10",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-12T13:00:00+08:00",
+        "finish": "2027-05-14T12:00:00+08:00"
+      },
+      "wbs": "1.6.10",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a11",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务11",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-14T13:00:00+08:00",
+        "finish": "2027-05-19T12:00:00+08:00"
+      },
+      "wbs": "1.6.11",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a12",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务12",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-19T13:00:00+08:00",
+        "finish": "2027-05-25T12:00:00+08:00"
+      },
+      "wbs": "1.6.12",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a13",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务13",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-05-25T13:00:00+08:00",
+        "finish": "2027-06-01T12:00:00+08:00"
+      },
+      "wbs": "1.6.13",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a14",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务14",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-01T13:00:00+08:00",
+        "finish": "2027-06-02T12:00:00+08:00"
+      },
+      "wbs": "1.6.14",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a15",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务15",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-02T13:00:00+08:00",
+        "finish": "2027-06-04T12:00:00+08:00"
+      },
+      "wbs": "1.6.15",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a16",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务16",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-04T08:00:00+08:00",
+        "finish": "2027-06-08T17:00:00+08:00"
+      },
+      "wbs": "1.6.16",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a17",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务17",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-09T08:00:00+08:00",
+        "finish": "2027-06-14T17:00:00+08:00"
+      },
+      "wbs": "1.6.17",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a18",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务18",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-15T08:00:00+08:00",
+        "finish": "2027-06-21T17:00:00+08:00"
+      },
+      "wbs": "1.6.18",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a19",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务19",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-22T08:00:00+08:00",
+        "finish": "2027-06-22T17:00:00+08:00"
+      },
+      "wbs": "1.6.19",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a20",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务20",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-23T08:00:00+08:00",
+        "finish": "2027-06-24T17:00:00+08:00"
+      },
+      "wbs": "1.6.20",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a21",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务21",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-25T08:00:00+08:00",
+        "finish": "2027-06-29T17:00:00+08:00"
+      },
+      "wbs": "1.6.21",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a22",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务22",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-06-30T08:00:00+08:00",
+        "finish": "2027-07-05T17:00:00+08:00"
+      },
+      "wbs": "1.6.22",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a23",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务23",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 2400,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-06T08:00:00+08:00",
+        "finish": "2027-07-12T17:00:00+08:00"
+      },
+      "wbs": "1.6.23",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a24",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务24",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-12T13:00:00+08:00",
+        "finish": "2027-07-13T12:00:00+08:00"
+      },
+      "wbs": "1.6.24",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-a25",
+      "parent_task_id": "task:w06",
+      "name": "工作流6-任务25",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-13T13:00:00+08:00",
+        "finish": "2027-07-15T12:00:00+08:00"
+      },
+      "wbs": "1.6.25",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:w06-gate",
+      "parent_task_id": "task:w06",
+      "name": "专业6完成",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 0,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": "2027-07-14T12:00:00+08:00",
+      "baseline_0": {
+        "exists": true,
+        "start": "2027-07-15T12:00:00+08:00",
+        "finish": "2027-07-15T12:00:00+08:00"
+      },
+      "wbs": "1.6.99",
+      "outline_level": 3
+    }
+  ],
+  "dependencies": [
+    {
+      "dependency_id": "dep:project-start:w01-a01:FS:0",
+      "predecessor_task_id": "task:project-start",
+      "successor_task_id": "task:w01-a01",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a01:w01-a02:FS:0",
+      "predecessor_task_id": "task:w01-a01",
+      "successor_task_id": "task:w01-a02",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a02:w01-a03:FS:0",
+      "predecessor_task_id": "task:w01-a02",
+      "successor_task_id": "task:w01-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a03:w01-a04:FS:0",
+      "predecessor_task_id": "task:w01-a03",
+      "successor_task_id": "task:w01-a04",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a04:w01-a05:FS:0",
+      "predecessor_task_id": "task:w01-a04",
+      "successor_task_id": "task:w01-a05",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a05:w01-a06:FS:0",
+      "predecessor_task_id": "task:w01-a05",
+      "successor_task_id": "task:w01-a06",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a06:w01-a07:FS:0",
+      "predecessor_task_id": "task:w01-a06",
+      "successor_task_id": "task:w01-a07",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a07:w01-a08:FS:-240",
+      "predecessor_task_id": "task:w01-a07",
+      "successor_task_id": "task:w01-a08",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a08:w01-a09:FS:0",
+      "predecessor_task_id": "task:w01-a08",
+      "successor_task_id": "task:w01-a09",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a09:w01-a10:FS:0",
+      "predecessor_task_id": "task:w01-a09",
+      "successor_task_id": "task:w01-a10",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a10:w01-a11:FS:0",
+      "predecessor_task_id": "task:w01-a10",
+      "successor_task_id": "task:w01-a11",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a11:w01-a12:FS:0",
+      "predecessor_task_id": "task:w01-a11",
+      "successor_task_id": "task:w01-a12",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a12:w01-a13:FS:0",
+      "predecessor_task_id": "task:w01-a12",
+      "successor_task_id": "task:w01-a13",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a13:w01-a14:FS:0",
+      "predecessor_task_id": "task:w01-a13",
+      "successor_task_id": "task:w01-a14",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a14:w01-a15:FS:0",
+      "predecessor_task_id": "task:w01-a14",
+      "successor_task_id": "task:w01-a15",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a15:w01-a16:FS:-240",
+      "predecessor_task_id": "task:w01-a15",
+      "successor_task_id": "task:w01-a16",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a16:w01-a17:FS:0",
+      "predecessor_task_id": "task:w01-a16",
+      "successor_task_id": "task:w01-a17",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a17:w01-a18:FS:0",
+      "predecessor_task_id": "task:w01-a17",
+      "successor_task_id": "task:w01-a18",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a18:w01-a19:FS:0",
+      "predecessor_task_id": "task:w01-a18",
+      "successor_task_id": "task:w01-a19",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a19:w01-a20:FS:0",
+      "predecessor_task_id": "task:w01-a19",
+      "successor_task_id": "task:w01-a20",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a20:w01-a21:FS:0",
+      "predecessor_task_id": "task:w01-a20",
+      "successor_task_id": "task:w01-a21",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a21:w01-a22:FS:0",
+      "predecessor_task_id": "task:w01-a21",
+      "successor_task_id": "task:w01-a22",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a22:w01-a23:FS:0",
+      "predecessor_task_id": "task:w01-a22",
+      "successor_task_id": "task:w01-a23",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a23:w01-a24:FS:-240",
+      "predecessor_task_id": "task:w01-a23",
+      "successor_task_id": "task:w01-a24",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a24:w01-a25:FS:0",
+      "predecessor_task_id": "task:w01-a24",
+      "successor_task_id": "task:w01-a25",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-a25:w01-gate:FS:0",
+      "predecessor_task_id": "task:w01-a25",
+      "successor_task_id": "task:w01-gate",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:project-start:w02-a01:FS:0",
+      "predecessor_task_id": "task:project-start",
+      "successor_task_id": "task:w02-a01",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a01:w02-a02:FS:0",
+      "predecessor_task_id": "task:w02-a01",
+      "successor_task_id": "task:w02-a02",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a02:w02-a03:FS:0",
+      "predecessor_task_id": "task:w02-a02",
+      "successor_task_id": "task:w02-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a03:w02-a04:FS:0",
+      "predecessor_task_id": "task:w02-a03",
+      "successor_task_id": "task:w02-a04",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a04:w02-a05:FS:0",
+      "predecessor_task_id": "task:w02-a04",
+      "successor_task_id": "task:w02-a05",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a05:w02-a06:FS:0",
+      "predecessor_task_id": "task:w02-a05",
+      "successor_task_id": "task:w02-a06",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a06:w02-a07:FS:0",
+      "predecessor_task_id": "task:w02-a06",
+      "successor_task_id": "task:w02-a07",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a07:w02-a08:FS:-240",
+      "predecessor_task_id": "task:w02-a07",
+      "successor_task_id": "task:w02-a08",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a08:w02-a09:FS:0",
+      "predecessor_task_id": "task:w02-a08",
+      "successor_task_id": "task:w02-a09",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a09:w02-a10:FS:0",
+      "predecessor_task_id": "task:w02-a09",
+      "successor_task_id": "task:w02-a10",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a10:w02-a11:FS:0",
+      "predecessor_task_id": "task:w02-a10",
+      "successor_task_id": "task:w02-a11",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a11:w02-a12:FS:0",
+      "predecessor_task_id": "task:w02-a11",
+      "successor_task_id": "task:w02-a12",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a12:w02-a13:FS:0",
+      "predecessor_task_id": "task:w02-a12",
+      "successor_task_id": "task:w02-a13",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a13:w02-a14:FS:0",
+      "predecessor_task_id": "task:w02-a13",
+      "successor_task_id": "task:w02-a14",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a14:w02-a15:FS:0",
+      "predecessor_task_id": "task:w02-a14",
+      "successor_task_id": "task:w02-a15",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a15:w02-a16:FS:-240",
+      "predecessor_task_id": "task:w02-a15",
+      "successor_task_id": "task:w02-a16",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a16:w02-a17:FS:0",
+      "predecessor_task_id": "task:w02-a16",
+      "successor_task_id": "task:w02-a17",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a17:w02-a18:FS:0",
+      "predecessor_task_id": "task:w02-a17",
+      "successor_task_id": "task:w02-a18",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a18:w02-a19:FS:0",
+      "predecessor_task_id": "task:w02-a18",
+      "successor_task_id": "task:w02-a19",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a19:w02-a20:FS:0",
+      "predecessor_task_id": "task:w02-a19",
+      "successor_task_id": "task:w02-a20",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a20:w02-a21:FS:0",
+      "predecessor_task_id": "task:w02-a20",
+      "successor_task_id": "task:w02-a21",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a21:w02-a22:FS:0",
+      "predecessor_task_id": "task:w02-a21",
+      "successor_task_id": "task:w02-a22",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a22:w02-a23:FS:0",
+      "predecessor_task_id": "task:w02-a22",
+      "successor_task_id": "task:w02-a23",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a23:w02-a24:FS:-240",
+      "predecessor_task_id": "task:w02-a23",
+      "successor_task_id": "task:w02-a24",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a24:w02-a25:FS:0",
+      "predecessor_task_id": "task:w02-a24",
+      "successor_task_id": "task:w02-a25",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-a25:w02-gate:FS:0",
+      "predecessor_task_id": "task:w02-a25",
+      "successor_task_id": "task:w02-gate",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:project-start:w03-a01:FS:0",
+      "predecessor_task_id": "task:project-start",
+      "successor_task_id": "task:w03-a01",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a01:w03-a02:FS:0",
+      "predecessor_task_id": "task:w03-a01",
+      "successor_task_id": "task:w03-a02",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a02:w03-a03:FS:0",
+      "predecessor_task_id": "task:w03-a02",
+      "successor_task_id": "task:w03-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a03:w03-a04:FS:0",
+      "predecessor_task_id": "task:w03-a03",
+      "successor_task_id": "task:w03-a04",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a04:w03-a05:FS:0",
+      "predecessor_task_id": "task:w03-a04",
+      "successor_task_id": "task:w03-a05",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a05:w03-a06:FS:0",
+      "predecessor_task_id": "task:w03-a05",
+      "successor_task_id": "task:w03-a06",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a06:w03-a07:FS:0",
+      "predecessor_task_id": "task:w03-a06",
+      "successor_task_id": "task:w03-a07",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a07:w03-a08:FS:-240",
+      "predecessor_task_id": "task:w03-a07",
+      "successor_task_id": "task:w03-a08",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a08:w03-a09:FS:0",
+      "predecessor_task_id": "task:w03-a08",
+      "successor_task_id": "task:w03-a09",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a09:w03-a10:FS:0",
+      "predecessor_task_id": "task:w03-a09",
+      "successor_task_id": "task:w03-a10",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a10:w03-a11:FS:0",
+      "predecessor_task_id": "task:w03-a10",
+      "successor_task_id": "task:w03-a11",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a11:w03-a12:FS:0",
+      "predecessor_task_id": "task:w03-a11",
+      "successor_task_id": "task:w03-a12",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a12:w03-a13:FS:0",
+      "predecessor_task_id": "task:w03-a12",
+      "successor_task_id": "task:w03-a13",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a13:w03-a14:FS:0",
+      "predecessor_task_id": "task:w03-a13",
+      "successor_task_id": "task:w03-a14",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a14:w03-a15:FS:0",
+      "predecessor_task_id": "task:w03-a14",
+      "successor_task_id": "task:w03-a15",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a15:w03-a16:FS:-240",
+      "predecessor_task_id": "task:w03-a15",
+      "successor_task_id": "task:w03-a16",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a16:w03-a17:FS:0",
+      "predecessor_task_id": "task:w03-a16",
+      "successor_task_id": "task:w03-a17",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a17:w03-a18:FS:0",
+      "predecessor_task_id": "task:w03-a17",
+      "successor_task_id": "task:w03-a18",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a18:w03-a19:FS:0",
+      "predecessor_task_id": "task:w03-a18",
+      "successor_task_id": "task:w03-a19",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a19:w03-a20:FS:0",
+      "predecessor_task_id": "task:w03-a19",
+      "successor_task_id": "task:w03-a20",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a20:w03-a21:FS:0",
+      "predecessor_task_id": "task:w03-a20",
+      "successor_task_id": "task:w03-a21",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a21:w03-a22:FS:0",
+      "predecessor_task_id": "task:w03-a21",
+      "successor_task_id": "task:w03-a22",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a22:w03-a23:FS:0",
+      "predecessor_task_id": "task:w03-a22",
+      "successor_task_id": "task:w03-a23",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a23:w03-a24:FS:-240",
+      "predecessor_task_id": "task:w03-a23",
+      "successor_task_id": "task:w03-a24",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a24:w03-a25:FS:0",
+      "predecessor_task_id": "task:w03-a24",
+      "successor_task_id": "task:w03-a25",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-a25:w03-gate:FS:0",
+      "predecessor_task_id": "task:w03-a25",
+      "successor_task_id": "task:w03-gate",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:project-start:w04-a01:FS:0",
+      "predecessor_task_id": "task:project-start",
+      "successor_task_id": "task:w04-a01",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a01:w04-a02:FS:0",
+      "predecessor_task_id": "task:w04-a01",
+      "successor_task_id": "task:w04-a02",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a02:w04-a03:FS:0",
+      "predecessor_task_id": "task:w04-a02",
+      "successor_task_id": "task:w04-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a03:w04-a04:FS:0",
+      "predecessor_task_id": "task:w04-a03",
+      "successor_task_id": "task:w04-a04",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a04:w04-a05:FS:0",
+      "predecessor_task_id": "task:w04-a04",
+      "successor_task_id": "task:w04-a05",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a05:w04-a06:FS:0",
+      "predecessor_task_id": "task:w04-a05",
+      "successor_task_id": "task:w04-a06",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a06:w04-a07:FS:0",
+      "predecessor_task_id": "task:w04-a06",
+      "successor_task_id": "task:w04-a07",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a07:w04-a08:FS:-240",
+      "predecessor_task_id": "task:w04-a07",
+      "successor_task_id": "task:w04-a08",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a08:w04-a09:FS:0",
+      "predecessor_task_id": "task:w04-a08",
+      "successor_task_id": "task:w04-a09",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a09:w04-a10:FS:0",
+      "predecessor_task_id": "task:w04-a09",
+      "successor_task_id": "task:w04-a10",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a10:w04-a11:FS:0",
+      "predecessor_task_id": "task:w04-a10",
+      "successor_task_id": "task:w04-a11",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a11:w04-a12:FS:0",
+      "predecessor_task_id": "task:w04-a11",
+      "successor_task_id": "task:w04-a12",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a12:w04-a13:FS:0",
+      "predecessor_task_id": "task:w04-a12",
+      "successor_task_id": "task:w04-a13",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a13:w04-a14:FS:0",
+      "predecessor_task_id": "task:w04-a13",
+      "successor_task_id": "task:w04-a14",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a14:w04-a15:FS:0",
+      "predecessor_task_id": "task:w04-a14",
+      "successor_task_id": "task:w04-a15",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a15:w04-a16:FS:-240",
+      "predecessor_task_id": "task:w04-a15",
+      "successor_task_id": "task:w04-a16",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a16:w04-a17:FS:0",
+      "predecessor_task_id": "task:w04-a16",
+      "successor_task_id": "task:w04-a17",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a17:w04-a18:FS:0",
+      "predecessor_task_id": "task:w04-a17",
+      "successor_task_id": "task:w04-a18",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a18:w04-a19:FS:0",
+      "predecessor_task_id": "task:w04-a18",
+      "successor_task_id": "task:w04-a19",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a19:w04-a20:FS:0",
+      "predecessor_task_id": "task:w04-a19",
+      "successor_task_id": "task:w04-a20",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a20:w04-a21:FS:0",
+      "predecessor_task_id": "task:w04-a20",
+      "successor_task_id": "task:w04-a21",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a21:w04-a22:FS:0",
+      "predecessor_task_id": "task:w04-a21",
+      "successor_task_id": "task:w04-a22",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a22:w04-a23:FS:0",
+      "predecessor_task_id": "task:w04-a22",
+      "successor_task_id": "task:w04-a23",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a23:w04-a24:FS:-240",
+      "predecessor_task_id": "task:w04-a23",
+      "successor_task_id": "task:w04-a24",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a24:w04-a25:FS:0",
+      "predecessor_task_id": "task:w04-a24",
+      "successor_task_id": "task:w04-a25",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-a25:w04-gate:FS:0",
+      "predecessor_task_id": "task:w04-a25",
+      "successor_task_id": "task:w04-gate",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:project-start:w05-a01:FS:0",
+      "predecessor_task_id": "task:project-start",
+      "successor_task_id": "task:w05-a01",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a01:w05-a02:FS:0",
+      "predecessor_task_id": "task:w05-a01",
+      "successor_task_id": "task:w05-a02",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a02:w05-a03:FS:0",
+      "predecessor_task_id": "task:w05-a02",
+      "successor_task_id": "task:w05-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a03:w05-a04:FS:0",
+      "predecessor_task_id": "task:w05-a03",
+      "successor_task_id": "task:w05-a04",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a04:w05-a05:FS:0",
+      "predecessor_task_id": "task:w05-a04",
+      "successor_task_id": "task:w05-a05",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a05:w05-a06:FS:0",
+      "predecessor_task_id": "task:w05-a05",
+      "successor_task_id": "task:w05-a06",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a06:w05-a07:FS:0",
+      "predecessor_task_id": "task:w05-a06",
+      "successor_task_id": "task:w05-a07",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a07:w05-a08:FS:-240",
+      "predecessor_task_id": "task:w05-a07",
+      "successor_task_id": "task:w05-a08",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a08:w05-a09:FS:0",
+      "predecessor_task_id": "task:w05-a08",
+      "successor_task_id": "task:w05-a09",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a09:w05-a10:FS:0",
+      "predecessor_task_id": "task:w05-a09",
+      "successor_task_id": "task:w05-a10",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a10:w05-a11:FS:0",
+      "predecessor_task_id": "task:w05-a10",
+      "successor_task_id": "task:w05-a11",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a11:w05-a12:FS:0",
+      "predecessor_task_id": "task:w05-a11",
+      "successor_task_id": "task:w05-a12",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a12:w05-a13:FS:0",
+      "predecessor_task_id": "task:w05-a12",
+      "successor_task_id": "task:w05-a13",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a13:w05-a14:FS:0",
+      "predecessor_task_id": "task:w05-a13",
+      "successor_task_id": "task:w05-a14",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a14:w05-a15:FS:0",
+      "predecessor_task_id": "task:w05-a14",
+      "successor_task_id": "task:w05-a15",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a15:w05-a16:FS:-240",
+      "predecessor_task_id": "task:w05-a15",
+      "successor_task_id": "task:w05-a16",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a16:w05-a17:FS:0",
+      "predecessor_task_id": "task:w05-a16",
+      "successor_task_id": "task:w05-a17",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a17:w05-a18:FS:0",
+      "predecessor_task_id": "task:w05-a17",
+      "successor_task_id": "task:w05-a18",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a18:w05-a19:FS:0",
+      "predecessor_task_id": "task:w05-a18",
+      "successor_task_id": "task:w05-a19",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a19:w05-a20:FS:0",
+      "predecessor_task_id": "task:w05-a19",
+      "successor_task_id": "task:w05-a20",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a20:w05-a21:FS:0",
+      "predecessor_task_id": "task:w05-a20",
+      "successor_task_id": "task:w05-a21",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a21:w05-a22:FS:0",
+      "predecessor_task_id": "task:w05-a21",
+      "successor_task_id": "task:w05-a22",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a22:w05-a23:FS:0",
+      "predecessor_task_id": "task:w05-a22",
+      "successor_task_id": "task:w05-a23",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a23:w05-a24:FS:-240",
+      "predecessor_task_id": "task:w05-a23",
+      "successor_task_id": "task:w05-a24",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a24:w05-a25:FS:0",
+      "predecessor_task_id": "task:w05-a24",
+      "successor_task_id": "task:w05-a25",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-a25:w05-gate:FS:0",
+      "predecessor_task_id": "task:w05-a25",
+      "successor_task_id": "task:w05-gate",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:project-start:w06-a01:FS:0",
+      "predecessor_task_id": "task:project-start",
+      "successor_task_id": "task:w06-a01",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a01:w06-a02:FS:0",
+      "predecessor_task_id": "task:w06-a01",
+      "successor_task_id": "task:w06-a02",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a02:w06-a03:FS:0",
+      "predecessor_task_id": "task:w06-a02",
+      "successor_task_id": "task:w06-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a03:w06-a04:FS:0",
+      "predecessor_task_id": "task:w06-a03",
+      "successor_task_id": "task:w06-a04",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a04:w06-a05:FS:0",
+      "predecessor_task_id": "task:w06-a04",
+      "successor_task_id": "task:w06-a05",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a05:w06-a06:FS:0",
+      "predecessor_task_id": "task:w06-a05",
+      "successor_task_id": "task:w06-a06",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a06:w06-a07:FS:0",
+      "predecessor_task_id": "task:w06-a06",
+      "successor_task_id": "task:w06-a07",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a07:w06-a08:FS:-240",
+      "predecessor_task_id": "task:w06-a07",
+      "successor_task_id": "task:w06-a08",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a08:w06-a09:FS:0",
+      "predecessor_task_id": "task:w06-a08",
+      "successor_task_id": "task:w06-a09",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a09:w06-a10:FS:0",
+      "predecessor_task_id": "task:w06-a09",
+      "successor_task_id": "task:w06-a10",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a10:w06-a11:FS:0",
+      "predecessor_task_id": "task:w06-a10",
+      "successor_task_id": "task:w06-a11",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a11:w06-a12:FS:0",
+      "predecessor_task_id": "task:w06-a11",
+      "successor_task_id": "task:w06-a12",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a12:w06-a13:FS:0",
+      "predecessor_task_id": "task:w06-a12",
+      "successor_task_id": "task:w06-a13",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a13:w06-a14:FS:0",
+      "predecessor_task_id": "task:w06-a13",
+      "successor_task_id": "task:w06-a14",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a14:w06-a15:FS:0",
+      "predecessor_task_id": "task:w06-a14",
+      "successor_task_id": "task:w06-a15",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a15:w06-a16:FS:-240",
+      "predecessor_task_id": "task:w06-a15",
+      "successor_task_id": "task:w06-a16",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a16:w06-a17:FS:0",
+      "predecessor_task_id": "task:w06-a16",
+      "successor_task_id": "task:w06-a17",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a17:w06-a18:FS:0",
+      "predecessor_task_id": "task:w06-a17",
+      "successor_task_id": "task:w06-a18",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a18:w06-a19:FS:0",
+      "predecessor_task_id": "task:w06-a18",
+      "successor_task_id": "task:w06-a19",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a19:w06-a20:FS:0",
+      "predecessor_task_id": "task:w06-a19",
+      "successor_task_id": "task:w06-a20",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a20:w06-a21:FS:0",
+      "predecessor_task_id": "task:w06-a20",
+      "successor_task_id": "task:w06-a21",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a21:w06-a22:FS:0",
+      "predecessor_task_id": "task:w06-a21",
+      "successor_task_id": "task:w06-a22",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a22:w06-a23:FS:0",
+      "predecessor_task_id": "task:w06-a22",
+      "successor_task_id": "task:w06-a23",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a23:w06-a24:FS:-240",
+      "predecessor_task_id": "task:w06-a23",
+      "successor_task_id": "task:w06-a24",
+      "type": "FS",
+      "lag_minutes": -240,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a24:w06-a25:FS:0",
+      "predecessor_task_id": "task:w06-a24",
+      "successor_task_id": "task:w06-a25",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-a25:w06-gate:FS:0",
+      "predecessor_task_id": "task:w06-a25",
+      "successor_task_id": "task:w06-gate",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w01-gate:project-finish:FS:0",
+      "predecessor_task_id": "task:w01-gate",
+      "successor_task_id": "task:project-finish",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w02-gate:project-finish:FS:0",
+      "predecessor_task_id": "task:w02-gate",
+      "successor_task_id": "task:project-finish",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w03-gate:project-finish:FS:0",
+      "predecessor_task_id": "task:w03-gate",
+      "successor_task_id": "task:project-finish",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w04-gate:project-finish:FS:0",
+      "predecessor_task_id": "task:w04-gate",
+      "successor_task_id": "task:project-finish",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w05-gate:project-finish:FS:0",
+      "predecessor_task_id": "task:w05-gate",
+      "successor_task_id": "task:project-finish",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:w06-gate:project-finish:FS:0",
+      "predecessor_task_id": "task:w06-gate",
+      "successor_task_id": "task:project-finish",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    }
+  ],
+  "resources": [
+    {
+      "resource_id": "resource:r01",
+      "name": "项目管理组",
+      "type": "WORK",
+      "max_units": 2.0,
+      "standard_rate_per_hour": 180.0
+    },
+    {
+      "resource_id": "resource:r02",
+      "name": "设计一组",
+      "type": "WORK",
+      "max_units": 2.0,
+      "standard_rate_per_hour": 160.0
+    },
+    {
+      "resource_id": "resource:r03",
+      "name": "设计二组",
+      "type": "WORK",
+      "max_units": 2.0,
+      "standard_rate_per_hour": 160.0
+    },
+    {
+      "resource_id": "resource:r04",
+      "name": "采购工程师",
+      "type": "WORK",
+      "max_units": 2.0,
+      "standard_rate_per_hour": 150.0
+    },
+    {
+      "resource_id": "resource:r05",
+      "name": "土建一班",
+      "type": "WORK",
+      "max_units": 1.0,
+      "standard_rate_per_hour": 120.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "name": "土建二班",
+      "type": "WORK",
+      "max_units": 1.0,
+      "standard_rate_per_hour": 120.0
+    },
+    {
+      "resource_id": "resource:r07",
+      "name": "安装一班",
+      "type": "WORK",
+      "max_units": 1.0,
+      "standard_rate_per_hour": 135.0
+    },
+    {
+      "resource_id": "resource:r08",
+      "name": "安装二班",
+      "type": "WORK",
+      "max_units": 1.0,
+      "standard_rate_per_hour": 135.0
+    }
+  ],
+  "assignments": [
+    {
+      "assignment_id": "assign:w01-a01:owner",
+      "task_id": "task:w01-a01",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a02:owner",
+      "task_id": "task:w01-a02",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a03:owner",
+      "task_id": "task:w01-a03",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a04:owner",
+      "task_id": "task:w01-a04",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a05:owner",
+      "task_id": "task:w01-a05",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a06:owner",
+      "task_id": "task:w01-a06",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a07:owner",
+      "task_id": "task:w01-a07",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a08:owner",
+      "task_id": "task:w01-a08",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a09:owner",
+      "task_id": "task:w01-a09",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a10:owner",
+      "task_id": "task:w01-a10",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a11:owner",
+      "task_id": "task:w01-a11",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a12:owner",
+      "task_id": "task:w01-a12",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a13:owner",
+      "task_id": "task:w01-a13",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a14:owner",
+      "task_id": "task:w01-a14",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a15:owner",
+      "task_id": "task:w01-a15",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a16:owner",
+      "task_id": "task:w01-a16",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a17:owner",
+      "task_id": "task:w01-a17",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a18:owner",
+      "task_id": "task:w01-a18",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a19:owner",
+      "task_id": "task:w01-a19",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a20:owner",
+      "task_id": "task:w01-a20",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a21:owner",
+      "task_id": "task:w01-a21",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a22:owner",
+      "task_id": "task:w01-a22",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a23:owner",
+      "task_id": "task:w01-a23",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a24:owner",
+      "task_id": "task:w01-a24",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w01-a25:owner",
+      "task_id": "task:w01-a25",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a01:owner",
+      "task_id": "task:w02-a01",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a02:owner",
+      "task_id": "task:w02-a02",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a03:owner",
+      "task_id": "task:w02-a03",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a04:owner",
+      "task_id": "task:w02-a04",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a05:owner",
+      "task_id": "task:w02-a05",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a06:owner",
+      "task_id": "task:w02-a06",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a07:owner",
+      "task_id": "task:w02-a07",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a08:owner",
+      "task_id": "task:w02-a08",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a09:owner",
+      "task_id": "task:w02-a09",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a10:owner",
+      "task_id": "task:w02-a10",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a11:owner",
+      "task_id": "task:w02-a11",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a12:owner",
+      "task_id": "task:w02-a12",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a13:owner",
+      "task_id": "task:w02-a13",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a14:owner",
+      "task_id": "task:w02-a14",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a15:owner",
+      "task_id": "task:w02-a15",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a16:owner",
+      "task_id": "task:w02-a16",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a17:owner",
+      "task_id": "task:w02-a17",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a18:owner",
+      "task_id": "task:w02-a18",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a19:owner",
+      "task_id": "task:w02-a19",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a20:owner",
+      "task_id": "task:w02-a20",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a21:owner",
+      "task_id": "task:w02-a21",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a22:owner",
+      "task_id": "task:w02-a22",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a23:owner",
+      "task_id": "task:w02-a23",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a24:owner",
+      "task_id": "task:w02-a24",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w02-a25:owner",
+      "task_id": "task:w02-a25",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a01:owner",
+      "task_id": "task:w03-a01",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a02:owner",
+      "task_id": "task:w03-a02",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a03:owner",
+      "task_id": "task:w03-a03",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a04:owner",
+      "task_id": "task:w03-a04",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a05:owner",
+      "task_id": "task:w03-a05",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a06:owner",
+      "task_id": "task:w03-a06",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a07:owner",
+      "task_id": "task:w03-a07",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a08:owner",
+      "task_id": "task:w03-a08",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a09:owner",
+      "task_id": "task:w03-a09",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a10:owner",
+      "task_id": "task:w03-a10",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a11:owner",
+      "task_id": "task:w03-a11",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a12:owner",
+      "task_id": "task:w03-a12",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a13:owner",
+      "task_id": "task:w03-a13",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a14:owner",
+      "task_id": "task:w03-a14",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a15:owner",
+      "task_id": "task:w03-a15",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a16:owner",
+      "task_id": "task:w03-a16",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a17:owner",
+      "task_id": "task:w03-a17",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a18:owner",
+      "task_id": "task:w03-a18",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a19:owner",
+      "task_id": "task:w03-a19",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a20:owner",
+      "task_id": "task:w03-a20",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a21:owner",
+      "task_id": "task:w03-a21",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a22:owner",
+      "task_id": "task:w03-a22",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a23:owner",
+      "task_id": "task:w03-a23",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a24:owner",
+      "task_id": "task:w03-a24",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w03-a25:owner",
+      "task_id": "task:w03-a25",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a01:owner",
+      "task_id": "task:w04-a01",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a02:owner",
+      "task_id": "task:w04-a02",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a03:owner",
+      "task_id": "task:w04-a03",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a04:owner",
+      "task_id": "task:w04-a04",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a05:owner",
+      "task_id": "task:w04-a05",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a06:owner",
+      "task_id": "task:w04-a06",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a07:owner",
+      "task_id": "task:w04-a07",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a08:owner",
+      "task_id": "task:w04-a08",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a09:owner",
+      "task_id": "task:w04-a09",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a10:owner",
+      "task_id": "task:w04-a10",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a11:owner",
+      "task_id": "task:w04-a11",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a12:owner",
+      "task_id": "task:w04-a12",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a13:owner",
+      "task_id": "task:w04-a13",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a14:owner",
+      "task_id": "task:w04-a14",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a15:owner",
+      "task_id": "task:w04-a15",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a16:owner",
+      "task_id": "task:w04-a16",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a17:owner",
+      "task_id": "task:w04-a17",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a18:owner",
+      "task_id": "task:w04-a18",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a19:owner",
+      "task_id": "task:w04-a19",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a20:owner",
+      "task_id": "task:w04-a20",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a21:owner",
+      "task_id": "task:w04-a21",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a22:owner",
+      "task_id": "task:w04-a22",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a23:owner",
+      "task_id": "task:w04-a23",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a24:owner",
+      "task_id": "task:w04-a24",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w04-a25:owner",
+      "task_id": "task:w04-a25",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a01:owner",
+      "task_id": "task:w05-a01",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a02:owner",
+      "task_id": "task:w05-a02",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a03:owner",
+      "task_id": "task:w05-a03",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a04:owner",
+      "task_id": "task:w05-a04",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a05:owner",
+      "task_id": "task:w05-a05",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a06:owner",
+      "task_id": "task:w05-a06",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a07:owner",
+      "task_id": "task:w05-a07",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a08:owner",
+      "task_id": "task:w05-a08",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a09:owner",
+      "task_id": "task:w05-a09",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a10:owner",
+      "task_id": "task:w05-a10",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a11:owner",
+      "task_id": "task:w05-a11",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a12:owner",
+      "task_id": "task:w05-a12",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a13:owner",
+      "task_id": "task:w05-a13",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a14:owner",
+      "task_id": "task:w05-a14",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a15:owner",
+      "task_id": "task:w05-a15",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a16:owner",
+      "task_id": "task:w05-a16",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a17:owner",
+      "task_id": "task:w05-a17",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a18:owner",
+      "task_id": "task:w05-a18",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a19:owner",
+      "task_id": "task:w05-a19",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a20:owner",
+      "task_id": "task:w05-a20",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a21:owner",
+      "task_id": "task:w05-a21",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a22:owner",
+      "task_id": "task:w05-a22",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a23:owner",
+      "task_id": "task:w05-a23",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a24:owner",
+      "task_id": "task:w05-a24",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w05-a25:owner",
+      "task_id": "task:w05-a25",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a01:owner",
+      "task_id": "task:w06-a01",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a02:owner",
+      "task_id": "task:w06-a02",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a03:owner",
+      "task_id": "task:w06-a03",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a04:owner",
+      "task_id": "task:w06-a04",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a05:owner",
+      "task_id": "task:w06-a05",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a06:owner",
+      "task_id": "task:w06-a06",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a07:owner",
+      "task_id": "task:w06-a07",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a08:owner",
+      "task_id": "task:w06-a08",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a09:owner",
+      "task_id": "task:w06-a09",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a10:owner",
+      "task_id": "task:w06-a10",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a11:owner",
+      "task_id": "task:w06-a11",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a12:owner",
+      "task_id": "task:w06-a12",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a13:owner",
+      "task_id": "task:w06-a13",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a14:owner",
+      "task_id": "task:w06-a14",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a15:owner",
+      "task_id": "task:w06-a15",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a16:owner",
+      "task_id": "task:w06-a16",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a17:owner",
+      "task_id": "task:w06-a17",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a18:owner",
+      "task_id": "task:w06-a18",
+      "resource_id": "resource:r01",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a19:owner",
+      "task_id": "task:w06-a19",
+      "resource_id": "resource:r02",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a20:owner",
+      "task_id": "task:w06-a20",
+      "resource_id": "resource:r03",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a21:owner",
+      "task_id": "task:w06-a21",
+      "resource_id": "resource:r04",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a22:owner",
+      "task_id": "task:w06-a22",
+      "resource_id": "resource:r05",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a23:owner",
+      "task_id": "task:w06-a23",
+      "resource_id": "resource:r06",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a24:owner",
+      "task_id": "task:w06-a24",
+      "resource_id": "resource:r07",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:w06-a25:owner",
+      "task_id": "task:w06-a25",
+      "resource_id": "resource:r08",
+      "units": 1.0
+    }
+  ],
+  "boundary_whitelist": {
+    "open_start_task_ids": [
+      "task:project-start"
+    ],
+    "open_finish_task_ids": [
+      "task:project-finish"
+    ]
+  },
+  "test_profile": {
+    "purpose": "验证大规模 Baseline、状态日期、实际完成、进行中剩余工期和预测偏差",
+    "scale_target": "约 160 项",
+    "coverage": [
+      "Baseline 0",
+      "状态日期",
+      "36项已完成",
+      "6项进行中",
+      "实际网络冲突",
+      "Deadline",
+      "负浮时",
+      "资源"
+    ],
+    "oracle_scope": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+    "microsoft_project_observation": false
+  }
+}

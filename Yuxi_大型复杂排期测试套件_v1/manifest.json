@@ -1,0 +1,327 @@
+{
+  "suite_id": "YUXI_LARGE_COMPLEX_SCHEDULE_SUITE_V1",
+  "oracle_type": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+  "case_count": 6,
+  "root_files": [
+    {
+      "path": "README.md",
+      "size_bytes": 2413,
+      "sha256": "fb3002f0a2a04b774ba63d4965eaa7c63269c7eec71f3374138db8a3a7ffe9f8"
+    },
+    {
+      "path": "adapter_mapping.json",
+      "size_bytes": 2236,
+      "sha256": "b08905164534dc60a853ef49694430400cd1fcc4f70e0adc194b984a1b8872ca"
+    },
+    {
+      "path": "coverage_matrix.json",
+      "size_bytes": 6005,
+      "sha256": "fce29e7ed4d6e3d5525f61da5127f4e3310770026c1de411a6643d33092c6e11"
+    },
+    {
+      "path": "generate_large_suite.py",
+      "size_bytes": 27177,
+      "sha256": "dedb2b08512f149db2a6b01ff42ceff20bd59319ee5192269b0691a0cf2c4372"
+    },
+    {
+      "path": "verify_package.py",
+      "size_bytes": 1960,
+      "sha256": "a14ea5783e9f53cb20c34dc56c7cabd626c5bd069ce2cfb80a86989dffc60bea"
+    },
+    {
+      "path": "verify_suite.py",
+      "size_bytes": 3563,
+      "sha256": "9cb01afcc012e6ba52aa9beaf3cb9185557e0bd0ee2cb606c35b605477027d39"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "L01_EPC_FULL_LIFECYCLE",
+      "title": "大型水处理厂 EPC 全生命周期计划",
+      "tasks": 195,
+      "summary_tasks": 37,
+      "leaf_tasks": 158,
+      "milestones": 8,
+      "dependencies": 181,
+      "dependency_types": {
+        "FS": 121,
+        "SS": 30,
+        "FF": 24,
+        "SF": 6
+      },
+      "nonzero_lags": 90,
+      "calendars": 1,
+      "resources": 12,
+      "assignments": 300,
+      "baseline_tasks": 158,
+      "completed_tasks": 0,
+      "in_progress_tasks": 0,
+      "expected_status": "SUCCEEDED_WITH_ISSUES",
+      "expected_issues": 68,
+      "expected_resource_conflicts": 68,
+      "expected_baseline_variances": 158,
+      "files": [
+        {
+          "path": "actual_template.json",
+          "size_bytes": 286,
+          "sha256": "90d9403e08287e7e05aa28a9451caa2fe4acd32f4df4250dd1188714e9a03ad3"
+        },
+        {
+          "path": "case_profile.json",
+          "size_bytes": 1112,
+          "sha256": "a17ce87511214b16f1de315462828bd191b1bdab705d508fa6b3cea6026f9183"
+        },
+        {
+          "path": "expected.json",
+          "size_bytes": 127158,
+          "sha256": "bb0d5bb9848405f43a3e1bc239a370d1e0afdab2b22dcab894cfebd67008615e"
+        },
+        {
+          "path": "input.json",
+          "size_bytes": 235933,
+          "sha256": "510503932ad0ad4e3cf4386bb9a1cff857d2e76b597c303df485af3cb245e42e"
+        }
+      ]
+    },
+    {
+      "case_id": "L02_MULTI_SITE_PARALLEL",
+      "title": "八标段多作业面并行施工计划",
+      "tasks": 235,
+      "summary_tasks": 33,
+      "leaf_tasks": 202,
+      "milestones": 10,
+      "dependencies": 231,
+      "dependency_types": {
+        "FS": 176,
+        "SS": 48,
+        "FF": 7,
+        "SF": 0
+      },
+      "nonzero_lags": 103,
+      "calendars": 2,
+      "resources": 10,
+      "assignments": 192,
+      "baseline_tasks": 0,
+      "completed_tasks": 0,
+      "in_progress_tasks": 0,
+      "expected_status": "SUCCEEDED_WITH_ISSUES",
+      "expected_issues": 325,
+      "expected_resource_conflicts": 325,
+      "expected_baseline_variances": 0,
+      "files": [
+        {
+          "path": "actual_template.json",
+          "size_bytes": 287,
+          "sha256": "7758bbcc385bba269283a42ea87dc28d2a7d95df7e3e6afc2c6ac0042accd52c"
+        },
+        {
+          "path": "case_profile.json",
+          "size_bytes": 1105,
+          "sha256": "564b29c5745891e9f148796394b572f1eba295cba7e97e6605de021cbef8fda1"
+        },
+        {
+          "path": "expected.json",
+          "size_bytes": 231869,
+          "sha256": "752e5782ccc0497cf6238478da6e5aefd97f088a7f9e931403209a40762d7ae9"
+        },
+        {
+          "path": "input.json",
+          "size_bytes": 248734,
+          "sha256": "2ff27cac6a18264fd5a19dc1bea0ad7700fd7fe7feb2c734ab7ad14514e1e8bd"
+        }
+      ]
+    },
+    {
+      "case_id": "L03_CALENDAR_SHIFT_STRESS",
+      "title": "多日历与跨班次排程压力计划",
+      "tasks": 133,
+      "summary_tasks": 6,
+      "leaf_tasks": 127,
+      "milestones": 7,
+      "dependencies": 134,
+      "dependency_types": {
+        "FS": 109,
+        "SS": 15,
+        "FF": 10,
+        "SF": 0
+      },
+      "nonzero_lags": 34,
+      "calendars": 5,
+      "resources": 0,
+      "assignments": 0,
+      "baseline_tasks": 0,
+      "completed_tasks": 0,
+      "in_progress_tasks": 0,
+      "expected_status": "SUCCEEDED",
+      "expected_issues": 0,
+      "expected_resource_conflicts": 0,
+      "expected_baseline_variances": 0,
+      "files": [
+        {
+          "path": "actual_template.json",
+          "size_bytes": 289,
+          "sha256": "23717d904b8a4bfb70e056ccf25c41bc3e1dc8b73712c321496d98e5d364495c"
+        },
+        {
+          "path": "case_profile.json",
+          "size_bytes": 1087,
+          "sha256": "bcf183f1de776065fb876e945ee511ba81c1513b08b1e9cdc107e24878b49e95"
+        },
+        {
+          "path": "expected.json",
+          "size_bytes": 24444,
+          "sha256": "6d614525e28f264108c6d007c793488989dc06a07c1242eb4a2fb4505eff54ee"
+        },
+        {
+          "path": "input.json",
+          "size_bytes": 130871,
+          "sha256": "dcec958e3a35c8cb93b1b693141dfb988a1b91be7850b63e3a01e93a6418bcb7"
+        }
+      ]
+    },
+    {
+      "case_id": "L04_BASELINE_PROGRESS_FORECAST",
+      "title": "大型基线与进度更新预测计划",
+      "tasks": 165,
+      "summary_tasks": 7,
+      "leaf_tasks": 158,
+      "milestones": 8,
+      "dependencies": 162,
+      "dependency_types": {
+        "FS": 162,
+        "SS": 0,
+        "FF": 0,
+        "SF": 0
+      },
+      "nonzero_lags": 18,
+      "calendars": 1,
+      "resources": 8,
+      "assignments": 150,
+      "baseline_tasks": 158,
+      "completed_tasks": 37,
+      "in_progress_tasks": 6,
+      "expected_status": "SUCCEEDED_WITH_ISSUES",
+      "expected_issues": 40,
+      "expected_resource_conflicts": 32,
+      "expected_baseline_variances": 158,
+      "files": [
+        {
+          "path": "actual_template.json",
+          "size_bytes": 294,
+          "sha256": "10ef3104fd437249dcf9a1e581ec422dcee54823c05e1174d3cdcb22949e5097"
+        },
+        {
+          "path": "case_profile.json",
+          "size_bytes": 1167,
+          "sha256": "2f299dc39af123e83c91b0f6d46a09e0e73bb2b42ec3026a87e7956dbc10b5e6"
+        },
+        {
+          "path": "expected.json",
+          "size_bytes": 84054,
+          "sha256": "ad824f6518c128c50a8dab2718a415fcd74e2a8701dfab2da68e584057f80a78"
+        },
+        {
+          "path": "input.json",
+          "size_bytes": 181648,
+          "sha256": "4a66479f76ee144c23ae97270946761ea8412531e46cc3b0af908bf56d4b327a"
+        }
+      ]
+    },
+    {
+      "case_id": "L05_BULK_INVALID_GUARDRAILS",
+      "title": "大规模错误输入与防御性校验",
+      "tasks": 127,
+      "summary_tasks": 7,
+      "leaf_tasks": 120,
+      "milestones": 12,
+      "dependencies": 126,
+      "dependency_types": {
+        "FS": 126,
+        "SS": 0,
+        "FF": 0,
+        "SF": 0
+      },
+      "nonzero_lags": 0,
+      "calendars": 1,
+      "resources": 0,
+      "assignments": 12,
+      "baseline_tasks": 0,
+      "completed_tasks": 0,
+      "in_progress_tasks": 0,
+      "expected_status": "VALIDATION_FAILED",
+      "expected_issues": 55,
+      "expected_resource_conflicts": 0,
+      "expected_baseline_variances": 0,
+      "files": [
+        {
+          "path": "actual_template.json",
+          "size_bytes": 291,
+          "sha256": "350e4a99ae88ce3f59e092ecb05d722560e1c3176772c5e69c9aab08bffa1b80"
+        },
+        {
+          "path": "case_profile.json",
+          "size_bytes": 1117,
+          "sha256": "156de7226a132c55e55354a13f331b4461f4890031741229f2e5c354b09c38e5"
+        },
+        {
+          "path": "expected.json",
+          "size_bytes": 10989,
+          "sha256": "b016734627760b57b6534df47d3e5902d15bdb8d0fed24172c7ff89dc6bab48d"
+        },
+        {
+          "path": "input.json",
+          "size_bytes": 114555,
+          "sha256": "6c4ab18b99ae69b9b73d2d32b7e13e4f8ff0e53efa9afbab90f13797df62a621"
+        }
+      ]
+    },
+    {
+      "case_id": "L06_SCALE_500_DAG",
+      "title": "500 活动大型 DAG 性能计划",
+      "tasks": 573,
+      "summary_tasks": 61,
+      "leaf_tasks": 512,
+      "milestones": 12,
+      "dependencies": 551,
+      "dependency_types": {
+        "FS": 451,
+        "SS": 100,
+        "FF": 0,
+        "SF": 0
+      },
+      "nonzero_lags": 150,
+      "calendars": 1,
+      "resources": 20,
+      "assignments": 500,
+      "baseline_tasks": 0,
+      "completed_tasks": 0,
+      "in_progress_tasks": 0,
+      "expected_status": "SUCCEEDED_WITH_ISSUES",
+      "expected_issues": 100,
+      "expected_resource_conflicts": 100,
+      "expected_baseline_variances": 0,
+      "files": [
+        {
+          "path": "actual_template.json",
+          "size_bytes": 281,
+          "sha256": "44202edd9c550fa82539eaf90a94fe8782fb419c0f3bd366349deffc20a7c7cb"
+        },
+        {
+          "path": "case_profile.json",
+          "size_bytes": 1135,
+          "sha256": "a3bfa8e25c80394f0d7bff9e7951869e0946d502e894c20519f50e70b7db2228"
+        },
+        {
+          "path": "expected.json",
+          "size_bytes": 225899,
+          "sha256": "36fa627f3ad09898d6d8a8e53153f23928767874a466d2f97d4ffa2be581a57f"
+        },
+        {
+          "path": "input.json",
+          "size_bytes": 622157,
+          "sha256": "83b9c5748f2ad75fd4028f2b0e31d3c941fab6fc7b3b4296e5aaf47eafd46ede"
+        }
+      ]
+    }
+  ]
+}

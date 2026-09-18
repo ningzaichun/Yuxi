@@ -1,2 +1,5 @@
 # Preserve byte-for-byte test artifacts whose manifest records file hashes.
 Microsoft_Project_水泵站排期_MOCK_v1.1/** -text whitespace=cr-at-eol
+MPP_clean_v1/** -text whitespace=cr-at-eol,-blank-at-eof
+Yuxi_复杂排期测试套件_v1/** -text whitespace=cr-at-eol,-blank-at-eof
+Yuxi_大型复杂排期测试套件_v1/** -text whitespace=cr-at-eol,-blank-at-eof

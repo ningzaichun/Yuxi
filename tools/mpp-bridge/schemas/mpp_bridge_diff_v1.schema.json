@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuxi.local/schemas/mpp_bridge_diff_v1.schema.json",
+  "title": "MPP Bridge Semantic Diff v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "comparator_version",
+    "compared_at",
+    "left_snapshot_semantic_sha256",
+    "right_snapshot_semantic_sha256",
+    "status",
+    "summary",
+    "differences"
+  ],
+  "properties": {
+    "schema_version": { "const": "mpp_bridge_diff_v1" },
+    "run_id": { "type": "string", "format": "uuid" },
+    "comparator_version": { "type": "string", "minLength": 1 },
+    "compared_at": { "type": "string", "format": "date-time" },
+    "left_snapshot_semantic_sha256": { "$ref": "#/$defs/sha256" },
+    "right_snapshot_semantic_sha256": { "$ref": "#/$defs/sha256" },
+    "status": { "enum": ["PASS", "FAIL", "UNSUPPORTED"] },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["difference_count", "blocker_count", "allowed_reassignment_count", "unsupported_count"],
+      "properties": {
+        "difference_count": { "type": "integer", "minimum": 0 },
+        "blocker_count": { "type": "integer", "minimum": 0 },
+        "allowed_reassignment_count": { "type": "integer", "minimum": 0 },
+        "unsupported_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "differences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "disposition", "reason_code", "left", "right"],
+        "properties": {
+          "path": { "type": "string", "pattern": "^/" },
+          "disposition": { "enum": ["BLOCKER", "ALLOWED_REASSIGNMENT", "UNSUPPORTED"] },
+          "reason_code": { "type": "string", "minLength": 1 },
+          "left": true,
+          "right": true
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

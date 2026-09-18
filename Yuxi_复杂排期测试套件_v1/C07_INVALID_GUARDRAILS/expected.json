@@ -1,0 +1,47 @@
+{
+  "case_id": "C07_INVALID_GUARDRAILS",
+  "status": "VALIDATION_FAILED",
+  "project_dates": null,
+  "task_dates": [],
+  "summary_dates": [],
+  "issues": [
+    {
+      "severity": "BLOCKER",
+      "code": "ASSIGNMENT_RESOURCE_NOT_FOUND",
+      "object_ref": "assign:bad"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "DEPENDENCY_CYCLE",
+      "object_refs": [
+        "task:a",
+        "task:b"
+      ]
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "DEPENDENCY_TASK_NOT_FOUND",
+      "object_ref": "dep:a:not-found:FS:0"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "MILESTONE_DURATION_NONZERO",
+      "object_ref": "task:bad-milestone"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "PARENT_TASK_NOT_FOUND",
+      "object_ref": "task:orphan",
+      "parent_task_id": "task:no-parent"
+    },
+    {
+      "severity": "BLOCKER",
+      "code": "TASK_CALENDAR_NOT_FOUND",
+      "object_ref": "task:bad-calendar",
+      "calendar_id": "calendar:missing"
+    }
+  ],
+  "resource_conflicts": [],
+  "assignment_costs": [],
+  "baseline_variances": []
+}

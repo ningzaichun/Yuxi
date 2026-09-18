@@ -1,0 +1,89 @@
+{
+  "case_id": "C03_NESTED_SUMMARY_BRANCHES",
+  "status": "SUCCEEDED",
+  "project_dates": {
+    "start": "2026-09-07T08:00:00+08:00",
+    "finish": "2026-09-30T17:00:00+08:00"
+  },
+  "task_dates": [
+    {
+      "task_id": "task:c1",
+      "start": "2026-09-16T08:00:00+08:00",
+      "finish": "2026-09-22T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:c2",
+      "start": "2026-09-23T08:00:00+08:00",
+      "finish": "2026-09-28T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:d1",
+      "start": "2026-09-07T08:00:00+08:00",
+      "finish": "2026-09-09T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:d2",
+      "start": "2026-09-10T08:00:00+08:00",
+      "finish": "2026-09-15T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:finish",
+      "start": "2026-09-30T17:00:00+08:00",
+      "finish": "2026-09-30T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:m1",
+      "start": "2026-09-16T08:00:00+08:00",
+      "finish": "2026-09-18T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:m2",
+      "start": "2026-09-14T08:00:00+08:00",
+      "finish": "2026-09-16T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:test",
+      "start": "2026-09-29T08:00:00+08:00",
+      "finish": "2026-09-30T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    }
+  ],
+  "summary_dates": [
+    {
+      "task_id": "task:build",
+      "start": "2026-09-14T08:00:00+08:00",
+      "finish": "2026-09-30T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:civil",
+      "start": "2026-09-16T08:00:00+08:00",
+      "finish": "2026-09-28T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:design",
+      "start": "2026-09-07T08:00:00+08:00",
+      "finish": "2026-09-15T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:mep",
+      "start": "2026-09-14T08:00:00+08:00",
+      "finish": "2026-09-18T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:root",
+      "start": "2026-09-07T08:00:00+08:00",
+      "finish": "2026-09-30T17:00:00+08:00"
+    }
+  ],
+  "issues": [],
+  "resource_conflicts": [],
+  "assignment_costs": [],
+  "baseline_variances": []
+}

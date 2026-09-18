@@ -1,0 +1,51 @@
+{
+  "case_id": "C02_MULTI_CALENDAR_EXCEPTIONS",
+  "status": "SUCCEEDED",
+  "project_dates": {
+    "start": "2026-09-07T08:00:00+08:00",
+    "finish": "2026-09-14T17:00:00+08:00"
+  },
+  "task_dates": [
+    {
+      "task_id": "task:finish",
+      "start": "2026-09-14T17:00:00+08:00",
+      "finish": "2026-09-14T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:handover",
+      "start": "2026-09-13T08:00:00+08:00",
+      "finish": "2026-09-14T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:office",
+      "start": "2026-09-07T08:00:00+08:00",
+      "finish": "2026-09-10T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:site",
+      "start": "2026-09-07T08:00:00+08:00",
+      "finish": "2026-09-12T18:00:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:start",
+      "start": "2026-09-07T08:00:00+08:00",
+      "finish": "2026-09-07T08:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    }
+  ],
+  "summary_dates": [
+    {
+      "task_id": "task:root",
+      "start": "2026-09-07T08:00:00+08:00",
+      "finish": "2026-09-14T17:00:00+08:00"
+    }
+  ],
+  "issues": [],
+  "resource_conflicts": [],
+  "assignment_costs": [],
+  "baseline_variances": []
+}

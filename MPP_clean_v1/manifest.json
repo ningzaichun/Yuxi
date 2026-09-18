@@ -1,0 +1,130 @@
+{
+  "manifest_schema_version": "1.0",
+  "package": "MPP_clean_v1",
+  "data_classification": "SYNTHETIC_BUSINESS_LIKE_TEST_DATA",
+  "hash_algorithm": "SHA-256",
+  "scope": "Every package file except manifest.json itself.",
+  "file_count": 24,
+  "files": [
+    {
+      "path": "A_msproject_oracle.xml",
+      "size": 264799,
+      "sha256": "04aa1c0be224cbe73e2a9eda7f488a8d1323072e320b263ab99247e571f90ed0"
+    },
+    {
+      "path": "A_road_drainage_clean.mpp",
+      "size": 303616,
+      "sha256": "1d0e1a47f53e70891aaf583e4ba310d9f7a9b7a4eee33795d2b0f0cde3926a08"
+    },
+    {
+      "path": "A_source_input.json",
+      "size": 11401,
+      "sha256": "3ae5a2aa21ef12b112f056e5f59e191284e12203dc4b3b00968361d8aa03ac9b"
+    },
+    {
+      "path": "A_validation_report.json",
+      "size": 44622,
+      "sha256": "77a68aa091cf17bf1ebd6cfe35834839f717b6526b29628f5da8ee4c3c234bb5"
+    },
+    {
+      "path": "B_msproject_oracle.xml",
+      "size": 333101,
+      "sha256": "03a41af53584b286c189a8adbdadb1baba368a8ada0aa0959211a7f0fb9f3b1f"
+    },
+    {
+      "path": "B_source_input.json",
+      "size": 15899,
+      "sha256": "bfe98e8e8ff4f6e3145a2b7747004e4742216d904e08166d1753342a3470d076"
+    },
+    {
+      "path": "B_substation_clean.mpp",
+      "size": 325632,
+      "sha256": "9fa44f4a672f0ce148c39672079eb87d7a366d859201a5f3e872ebe320c7b89d"
+    },
+    {
+      "path": "B_validation_report.json",
+      "size": 57244,
+      "sha256": "d4259aa3ea66fcc5d3de910723adcbb9e36b62418ca310f8539b3075e83e1666"
+    },
+    {
+      "path": "README.md",
+      "size": 4043,
+      "sha256": "8443eefd415017196271b6d9303fb410fbb017d18b2e91a6d96336c0f42e134f"
+    },
+    {
+      "path": "build_specs.json",
+      "size": 31974,
+      "sha256": "875be0a0bda71da404fc7a8ce8aea92229832c95df365960d550808b96ea91c8"
+    },
+    {
+      "path": "cases/A_ROAD_DRAINAGE_CLEAN/msproject_oracle_export.xml",
+      "size": 264799,
+      "sha256": "04aa1c0be224cbe73e2a9eda7f488a8d1323072e320b263ab99247e571f90ed0"
+    },
+    {
+      "path": "cases/A_ROAD_DRAINAGE_CLEAN/source/A_ROAD_DRAINAGE_CLEAN.mpp",
+      "size": 303616,
+      "sha256": "1d0e1a47f53e70891aaf583e4ba310d9f7a9b7a4eee33795d2b0f0cde3926a08"
+    },
+    {
+      "path": "cases/A_ROAD_DRAINAGE_CLEAN/source/A_ROAD_DRAINAGE_CLEAN.mspdi.xml",
+      "size": 68452,
+      "sha256": "4d636d8f05ce44b11f59ec2ee6f51c81b9e8401b7fa952fffbfa86c45a9f6cb4"
+    },
+    {
+      "path": "cases/A_ROAD_DRAINAGE_CLEAN/source_input.json",
+      "size": 11401,
+      "sha256": "3ae5a2aa21ef12b112f056e5f59e191284e12203dc4b3b00968361d8aa03ac9b"
+    },
+    {
+      "path": "cases/A_ROAD_DRAINAGE_CLEAN/validation_report.json",
+      "size": 44622,
+      "sha256": "77a68aa091cf17bf1ebd6cfe35834839f717b6526b29628f5da8ee4c3c234bb5"
+    },
+    {
+      "path": "cases/B_SUBSTATION_CLEAN/msproject_oracle_export.xml",
+      "size": 333101,
+      "sha256": "03a41af53584b286c189a8adbdadb1baba368a8ada0aa0959211a7f0fb9f3b1f"
+    },
+    {
+      "path": "cases/B_SUBSTATION_CLEAN/source/B_SUBSTATION_CLEAN.mpp",
+      "size": 325632,
+      "sha256": "9fa44f4a672f0ce148c39672079eb87d7a366d859201a5f3e872ebe320c7b89d"
+    },
+    {
+      "path": "cases/B_SUBSTATION_CLEAN/source/B_SUBSTATION_CLEAN.mspdi.xml",
+      "size": 91418,
+      "sha256": "776a02491046187ec62c171f6e67329ec056ad285c3d994e20424888842580b7"
+    },
+    {
+      "path": "cases/B_SUBSTATION_CLEAN/source_input.json",
+      "size": 15899,
+      "sha256": "bfe98e8e8ff4f6e3145a2b7747004e4742216d904e08166d1753342a3470d076"
+    },
+    {
+      "path": "cases/B_SUBSTATION_CLEAN/validation_report.json",
+      "size": 57244,
+      "sha256": "d4259aa3ea66fcc5d3de910723adcbb9e36b62418ca310f8539b3075e83e1666"
+    },
+    {
+      "path": "cases/build_manifest.json",
+      "size": 334,
+      "sha256": "6bdf3de0922c6c8851f93f4ceae3446d7c608d1b6be20d2ac5248982e4110045"
+    },
+    {
+      "path": "cases/msproject_build_results.json",
+      "size": 1198,
+      "sha256": "c19feef2fd746b31311b402f72e099c5984d2978285d7c3be5daf255cbfb014e"
+    },
+    {
+      "path": "validation_summary.json",
+      "size": 978,
+      "sha256": "33ff4c832484bbb98fce61e94084966a9efaf9db9b8a52b964c2ee3f53b4bb7a"
+    },
+    {
+      "path": "verify_package.py",
+      "size": 3049,
+      "sha256": "23112bb48e633d976c4bbb5bf7ad4ed557f00b2dff085a1ab0585e69a503a30d"
+    }
+  ]
+}

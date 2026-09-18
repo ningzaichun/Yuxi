@@ -1,0 +1,344 @@
+{
+  "schema_version": "schedule_engine_test_input_v1",
+  "case_id": "C06_RESOURCE_OVERALLOCATION",
+  "title": "资源分配、超配与成本",
+  "data_classification": "SYNTHETIC_TEST_DATA",
+  "oracle": {
+    "type": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+    "is_microsoft_project_observation": false,
+    "date_precision": "minute",
+    "tolerance_minutes": 0
+  },
+  "semantics": {
+    "timezone": "Asia/Shanghai",
+    "duration_unit": "working_minute",
+    "lag_unit": "working_minute",
+    "default_lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR",
+    "summary_rollup": "BOTTOM_UP_DIRECT_CHILD_MIN_START_MAX_FINISH",
+    "date_boundary": "START_INCLUSIVE_FINISH_EXCLUSIVE_WORK_INTERVALS"
+  },
+  "project": {
+    "project_id": "project:c06_resource_overallocation",
+    "name": "资源分配、超配与成本",
+    "planned_start": "2026-09-07T08:00:00+08:00",
+    "required_finish": null,
+    "status_date": null,
+    "default_calendar_id": "calendar:standard"
+  },
+  "calendars": [
+    {
+      "calendar_id": "calendar:standard",
+      "name": "标准工作日历",
+      "weekly_pattern": {
+        "MONDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "TUESDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "WEDNESDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "THURSDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "FRIDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "SATURDAY": {
+          "day_type": "NON_WORKING",
+          "intervals": []
+        },
+        "SUNDAY": {
+          "day_type": "NON_WORKING",
+          "intervals": []
+        }
+      },
+      "exceptions": []
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "task:root",
+      "parent_task_id": null,
+      "name": "资源分配、超配与成本",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:start",
+      "parent_task_id": "task:root",
+      "name": "开工",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 0,
+      "calendar_id": null,
+      "boundary_role": "PROJECT_START",
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:a",
+      "parent_task_id": "task:root",
+      "name": "A 区安装",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:b",
+      "parent_task_id": "task:root",
+      "name": "B 区安装",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:c",
+      "parent_task_id": "task:root",
+      "name": "吊装作业",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:finish",
+      "parent_task_id": "task:root",
+      "name": "完成",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 0,
+      "calendar_id": null,
+      "boundary_role": "PROJECT_FINISH",
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    }
+  ],
+  "dependencies": [
+    {
+      "dependency_id": "dep:start:a:FS:0",
+      "predecessor_task_id": "task:start",
+      "successor_task_id": "task:a",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:start:b:FS:0",
+      "predecessor_task_id": "task:start",
+      "successor_task_id": "task:b",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:start:c:FS:0",
+      "predecessor_task_id": "task:start",
+      "successor_task_id": "task:c",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:a:finish:FS:0",
+      "predecessor_task_id": "task:a",
+      "successor_task_id": "task:finish",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:b:finish:FS:0",
+      "predecessor_task_id": "task:b",
+      "successor_task_id": "task:finish",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:c:finish:FS:0",
+      "predecessor_task_id": "task:c",
+      "successor_task_id": "task:finish",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    }
+  ],
+  "resources": [
+    {
+      "resource_id": "resource:crew",
+      "name": "安装班组",
+      "type": "WORK",
+      "max_units": 1.0,
+      "standard_rate_per_hour": 120.0
+    },
+    {
+      "resource_id": "resource:crane",
+      "name": "汽车吊",
+      "type": "EQUIPMENT",
+      "max_units": 1.0,
+      "standard_rate_per_hour": 300.0
+    }
+  ],
+  "assignments": [
+    {
+      "assignment_id": "assign:a:crew",
+      "task_id": "task:a",
+      "resource_id": "resource:crew",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:b:crew",
+      "task_id": "task:b",
+      "resource_id": "resource:crew",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:a:crane",
+      "task_id": "task:a",
+      "resource_id": "resource:crane",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:c:crane",
+      "task_id": "task:c",
+      "resource_id": "resource:crane",
+      "units": 1.0
+    }
+  ],
+  "boundary_whitelist": {
+    "open_start_task_ids": [
+      "task:start"
+    ],
+    "open_finish_task_ids": [
+      "task:finish"
+    ]
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuxi.local/schemas/mpp_bridge_roundtrip_report_v1.schema.json",
+  "title": "MPP Bridge Roundtrip Report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "tool_version",
+    "command",
+    "status",
+    "created_at",
+    "timezone",
+    "execution_system_timezone",
+    "source",
+    "build",
+    "output",
+    "comparator",
+    "source_unchanged"
+  ],
+  "properties": {
+    "schema_version": { "const": "mpp_bridge_roundtrip_report_v1" },
+    "run_id": { "type": "string", "format": "uuid" },
+    "tool_version": { "type": "string", "minLength": 1 },
+    "command": { "const": "roundtrip" },
+    "status": { "enum": ["PASS", "FAIL", "UNSUPPORTED"] },
+    "created_at": { "type": "string", "format": "date-time" },
+    "timezone": { "type": "string", "minLength": 1 },
+    "execution_system_timezone": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_file_name", "input_mpp_sha256", "snapshot_file", "snapshot_semantic_sha256", "microsoft_project_version"],
+      "properties": {
+        "input_file_name": { "type": "string", "minLength": 1 },
+        "input_mpp_sha256": { "$ref": "#/$defs/sha256" },
+        "snapshot_file": { "type": "string", "minLength": 1 },
+        "snapshot_semantic_sha256": { "$ref": "#/$defs/sha256" },
+        "microsoft_project_version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["output_mpp_file", "output_mpp_sha256", "identity_map_file", "manifest_file"],
+      "properties": {
+        "output_mpp_file": { "type": "string", "minLength": 1 },
+        "output_mpp_sha256": { "$ref": "#/$defs/sha256" },
+        "identity_map_file": { "type": "string", "minLength": 1 },
+        "manifest_file": { "type": "string", "minLength": 1 }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["snapshot_file", "snapshot_semantic_sha256", "microsoft_project_version", "roundtrip_eligible", "unsupported_count"],
+      "properties": {
+        "snapshot_file": { "type": "string", "minLength": 1 },
+        "snapshot_semantic_sha256": { "$ref": "#/$defs/sha256" },
+        "microsoft_project_version": { "type": "string", "minLength": 1 },
+        "roundtrip_eligible": { "type": "boolean" },
+        "unsupported_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "comparator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["diff_file", "diff_sha256", "summary_file", "difference_count", "blocker_count", "allowed_reassignment_count", "unsupported_count"],
+      "properties": {
+        "diff_file": { "type": "string", "minLength": 1 },
+        "diff_sha256": { "$ref": "#/$defs/sha256" },
+        "summary_file": { "type": "string", "minLength": 1 },
+        "difference_count": { "type": "integer", "minimum": 0 },
+        "blocker_count": { "type": "integer", "minimum": 0 },
+        "allowed_reassignment_count": { "type": "integer", "minimum": 0 },
+        "unsupported_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "source_unchanged": { "const": true }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

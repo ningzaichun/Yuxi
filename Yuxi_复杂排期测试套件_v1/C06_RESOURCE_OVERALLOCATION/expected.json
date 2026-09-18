@@ -1,0 +1,114 @@
+{
+  "case_id": "C06_RESOURCE_OVERALLOCATION",
+  "status": "SUCCEEDED_WITH_ISSUES",
+  "project_dates": {
+    "start": "2026-09-07T08:00:00+08:00",
+    "finish": "2026-09-09T17:00:00+08:00"
+  },
+  "task_dates": [
+    {
+      "task_id": "task:a",
+      "start": "2026-09-07T08:00:00+08:00",
+      "finish": "2026-09-09T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:b",
+      "start": "2026-09-07T08:00:00+08:00",
+      "finish": "2026-09-09T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:c",
+      "start": "2026-09-07T08:00:00+08:00",
+      "finish": "2026-09-08T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:finish",
+      "start": "2026-09-09T17:00:00+08:00",
+      "finish": "2026-09-09T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:start",
+      "start": "2026-09-07T08:00:00+08:00",
+      "finish": "2026-09-07T08:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    }
+  ],
+  "summary_dates": [
+    {
+      "task_id": "task:root",
+      "start": "2026-09-07T08:00:00+08:00",
+      "finish": "2026-09-09T17:00:00+08:00"
+    }
+  ],
+  "issues": [
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:crane",
+      "task_ids": [
+        "task:a",
+        "task:c"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:crew",
+      "task_ids": [
+        "task:a",
+        "task:b"
+      ]
+    }
+  ],
+  "resource_conflicts": [
+    {
+      "resource_id": "resource:crane",
+      "task_ids": [
+        "task:a",
+        "task:c"
+      ],
+      "overlap_start": "2026-09-07T08:00:00+08:00",
+      "overlap_finish": "2026-09-08T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:crew",
+      "task_ids": [
+        "task:a",
+        "task:b"
+      ],
+      "overlap_start": "2026-09-07T08:00:00+08:00",
+      "overlap_finish": "2026-09-09T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    }
+  ],
+  "assignment_costs": [
+    {
+      "assignment_id": "assign:a:crane",
+      "work_minutes": 1440,
+      "cost": 7200.0
+    },
+    {
+      "assignment_id": "assign:a:crew",
+      "work_minutes": 1440,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:b:crew",
+      "work_minutes": 1440,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:c:crane",
+      "work_minutes": 960,
+      "cost": 4800.0
+    }
+  ],
+  "baseline_variances": []
+}

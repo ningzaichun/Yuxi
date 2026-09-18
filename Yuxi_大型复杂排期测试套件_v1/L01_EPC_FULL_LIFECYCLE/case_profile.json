@@ -1,0 +1,43 @@
+{
+  "case_id": "L01_EPC_FULL_LIFECYCLE",
+  "title": "大型水处理厂 EPC 全生命周期计划",
+  "test_profile": {
+    "purpose": "验证大型 EPC WBS、混合依赖、Lag、基线、资源和成本",
+    "scale_target": "约 190 项",
+    "coverage": [
+      "4级WBS",
+      "FS/SS/FF/SF",
+      "正负Lag",
+      "Baseline 0",
+      "300条Assignment",
+      "资源超配",
+      "成本"
+    ],
+    "oracle_scope": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+    "microsoft_project_observation": false
+  },
+  "metrics": {
+    "tasks": 195,
+    "summary_tasks": 37,
+    "leaf_tasks": 158,
+    "milestones": 8,
+    "dependencies": 181,
+    "dependency_types": {
+      "FS": 121,
+      "SS": 30,
+      "FF": 24,
+      "SF": 6
+    },
+    "nonzero_lags": 90,
+    "calendars": 1,
+    "resources": 12,
+    "assignments": 300,
+    "baseline_tasks": 158,
+    "completed_tasks": 0,
+    "in_progress_tasks": 0,
+    "expected_status": "SUCCEEDED_WITH_ISSUES",
+    "expected_issues": 68,
+    "expected_resource_conflicts": 68,
+    "expected_baseline_variances": 158
+  }
+}

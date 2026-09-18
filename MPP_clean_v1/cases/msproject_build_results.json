@@ -1,0 +1,20 @@
+[
+  {
+    "case_id": "A_ROAD_DRAINAGE_CLEAN",
+    "mpp_path": "C:\\Users\\Administrator\\Documents\\Codex\\2026-08-07\\new-chat\\outputs\\MPP_clean_v1\\cases\\A_ROAD_DRAINAGE_CLEAN\\source\\A_ROAD_DRAINAGE_CLEAN.mpp",
+    "mpp_size": 303616,
+    "oracle_xml_path": "C:\\Users\\Administrator\\Documents\\Codex\\2026-08-07\\new-chat\\outputs\\MPP_clean_v1\\cases\\A_ROAD_DRAINAGE_CLEAN\\msproject_oracle_export.xml",
+    "oracle_xml_size": 264799,
+    "save_result": "PASS|A_ROAD_DRAINAGE_CLEAN.mpp|46|2027/3/1 8:00:00|2027/7/2 17:00:00",
+    "export_result": "PASS|A_ROAD_DRAINAGE_CLEAN.mpp|46"
+  },
+  {
+    "case_id": "B_SUBSTATION_CLEAN",
+    "mpp_path": "C:\\Users\\Administrator\\Documents\\Codex\\2026-08-07\\new-chat\\outputs\\MPP_clean_v1\\cases\\B_SUBSTATION_CLEAN\\source\\B_SUBSTATION_CLEAN.mpp",
+    "mpp_size": 325632,
+    "oracle_xml_path": "C:\\Users\\Administrator\\Documents\\Codex\\2026-08-07\\new-chat\\outputs\\MPP_clean_v1\\cases\\B_SUBSTATION_CLEAN\\msproject_oracle_export.xml",
+    "oracle_xml_size": 333101,
+    "save_result": "PASS|B_SUBSTATION_CLEAN.mpp|62|2027/6/7 8:00:00|2027/8/16 17:00:00",
+    "export_result": "PASS|B_SUBSTATION_CLEAN.mpp|62"
+  }
+]

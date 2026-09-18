@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuxi.local/schemas/mpp_bridge_build_report_v1.schema.json",
+  "title": "MPP Bridge Build Report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "tool_version", "source_snapshot_semantic_sha256", "output_mpp_sha256", "calendars_written", "tasks_written", "dependencies_written", "opened_after_save", "recalculated_after_reopen"],
+  "properties": {
+    "schema_version": { "const": "mpp_bridge_build_report_v1" },
+    "run_id": { "type": "string", "format": "uuid" },
+    "tool_version": { "type": "string", "minLength": 1 },
+    "source_snapshot_semantic_sha256": { "$ref": "#/$defs/sha256" },
+    "output_mpp_sha256": { "$ref": "#/$defs/sha256" },
+    "calendars_written": { "type": "integer", "minimum": 1 },
+    "tasks_written": { "type": "integer", "minimum": 1 },
+    "dependencies_written": { "type": "integer", "minimum": 0 },
+    "opened_after_save": { "const": true },
+    "recalculated_after_reopen": { "const": true }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

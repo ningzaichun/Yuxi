@@ -1,0 +1,44 @@
+{
+  "case_id": "L04_BASELINE_PROGRESS_FORECAST",
+  "title": "大型基线与进度更新预测计划",
+  "test_profile": {
+    "purpose": "验证大规模 Baseline、状态日期、实际完成、进行中剩余工期和预测偏差",
+    "scale_target": "约 160 项",
+    "coverage": [
+      "Baseline 0",
+      "状态日期",
+      "36项已完成",
+      "6项进行中",
+      "实际网络冲突",
+      "Deadline",
+      "负浮时",
+      "资源"
+    ],
+    "oracle_scope": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+    "microsoft_project_observation": false
+  },
+  "metrics": {
+    "tasks": 165,
+    "summary_tasks": 7,
+    "leaf_tasks": 158,
+    "milestones": 8,
+    "dependencies": 162,
+    "dependency_types": {
+      "FS": 162,
+      "SS": 0,
+      "FF": 0,
+      "SF": 0
+    },
+    "nonzero_lags": 18,
+    "calendars": 1,
+    "resources": 8,
+    "assignments": 150,
+    "baseline_tasks": 158,
+    "completed_tasks": 37,
+    "in_progress_tasks": 6,
+    "expected_status": "SUCCEEDED_WITH_ISSUES",
+    "expected_issues": 40,
+    "expected_resource_conflicts": 32,
+    "expected_baseline_variances": 158
+  }
+}

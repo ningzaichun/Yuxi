@@ -1,0 +1,249 @@
+{
+  "suite_id": "YUXI_COMPLEX_SCHEDULE_SUITE_V1",
+  "case_count": 8,
+  "root_files": [
+    {
+      "path": "README.md",
+      "size_bytes": 2510,
+      "sha256": "a25bcdbe626cb5f5ee9fb62e6b6ed894ebe5afe62687a64b57c4b479bb2e41f2"
+    },
+    {
+      "path": "adapter_mapping.json",
+      "size_bytes": 2236,
+      "sha256": "b08905164534dc60a853ef49694430400cd1fcc4f70e0adc194b984a1b8872ca"
+    },
+    {
+      "path": "verify_package.py",
+      "size_bytes": 1960,
+      "sha256": "a14ea5783e9f53cb20c34dc56c7cabd626c5bd069ce2cfb80a86989dffc60bea"
+    },
+    {
+      "path": "verify_suite.py",
+      "size_bytes": 3563,
+      "sha256": "9cb01afcc012e6ba52aa9beaf3cb9185557e0bd0ee2cb606c35b605477027d39"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "C01_RELATION_MATRIX",
+      "title": "四类依赖与正负 Lag",
+      "oracle_type": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+      "expected_status": "SUCCEEDED",
+      "tasks": 9,
+      "dependencies": 10,
+      "resources": 0,
+      "assignments": 0,
+      "files": [
+        {
+          "path": "actual_template.json",
+          "size_bytes": 283,
+          "sha256": "4afa8718b62abbe268e247f10428512b72733d3d3cff68d4093f7e8b994e9dcb"
+        },
+        {
+          "path": "expected.json",
+          "size_bytes": 1888,
+          "sha256": "fcd97615b9457a518140b0c7acf63a70c7e8839694fce74eeb6de9e25c674457"
+        },
+        {
+          "path": "input.json",
+          "size_bytes": 10411,
+          "sha256": "0f7e78a0dc764e2afef102815a83b5a7a265123ba06c10cf7e512523720c6773"
+        }
+      ]
+    },
+    {
+      "case_id": "C02_MULTI_CALENDAR_EXCEPTIONS",
+      "title": "多日历、停工与补班",
+      "oracle_type": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+      "expected_status": "SUCCEEDED",
+      "tasks": 6,
+      "dependencies": 5,
+      "resources": 0,
+      "assignments": 0,
+      "files": [
+        {
+          "path": "actual_template.json",
+          "size_bytes": 293,
+          "sha256": "b2e652920605e4e5e7fdd56ef9e79b1688ca8c72d8ad63f4dc88edc49a8590ca"
+        },
+        {
+          "path": "expected.json",
+          "size_bytes": 1384,
+          "sha256": "8b30c931d7a45f370737f60ed7b769ba0d6622290f13742ad83fa67af55468f0"
+        },
+        {
+          "path": "input.json",
+          "size_bytes": 10483,
+          "sha256": "f20349217868de347adb6add52c680bd40264d03b9ca39d45705b05695bf0bb3"
+        }
+      ]
+    },
+    {
+      "case_id": "C03_NESTED_SUMMARY_BRANCHES",
+      "title": "三级 WBS、多分支与汇总滚算",
+      "oracle_type": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+      "expected_status": "SUCCEEDED",
+      "tasks": 13,
+      "dependencies": 9,
+      "resources": 0,
+      "assignments": 0,
+      "files": [
+        {
+          "path": "actual_template.json",
+          "size_bytes": 291,
+          "sha256": "752d1505650e519b12b288856f853b69dbaff0857630c0e0f5667c1324015c0c"
+        },
+        {
+          "path": "expected.json",
+          "size_bytes": 2448,
+          "sha256": "9532b21a9ae75daa05516d55d7985885442fb8164e73e992a96ed061388b9a45"
+        },
+        {
+          "path": "input.json",
+          "size_bytes": 12370,
+          "sha256": "50a507f95d7991466b1493dab3a51c0da350dfd987259ad85d3b5de97ec62b09"
+        }
+      ]
+    },
+    {
+      "case_id": "C04_CONSTRAINTS_DEADLINES",
+      "title": "约束、截止日期与要求完成日期",
+      "oracle_type": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+      "expected_status": "SUCCEEDED_WITH_ISSUES",
+      "tasks": 7,
+      "dependencies": 5,
+      "resources": 0,
+      "assignments": 0,
+      "files": [
+        {
+          "path": "actual_template.json",
+          "size_bytes": 289,
+          "sha256": "33d0f22f74b325cb116ccdde830f436cc3532162f39f461f55daf638f91fa52c"
+        },
+        {
+          "path": "expected.json",
+          "size_bytes": 2140,
+          "sha256": "08edf5deec0d218b2a890658c2b4030f1e09e410c0a8a659652ee33c1c88af64"
+        },
+        {
+          "path": "input.json",
+          "size_bytes": 8312,
+          "sha256": "4efbe50b0edbc430b70095a3228f2a067e82de02010b726a46362999bda154f1"
+        }
+      ]
+    },
+    {
+      "case_id": "C05_BASELINE_PROGRESS",
+      "title": "Baseline、状态日期与实际进度",
+      "oracle_type": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+      "expected_status": "SUCCEEDED",
+      "tasks": 6,
+      "dependencies": 4,
+      "resources": 0,
+      "assignments": 0,
+      "files": [
+        {
+          "path": "actual_template.json",
+          "size_bytes": 285,
+          "sha256": "3de5a0eb5e13785e45e8601f9650d0d6bdc024740e11d5603434555c1ace424b"
+        },
+        {
+          "path": "expected.json",
+          "size_bytes": 1970,
+          "sha256": "d0eecd941c4ea515cb3acf252312a438a634e4f4c5a8036e1e6b2658de8f0b58"
+        },
+        {
+          "path": "input.json",
+          "size_bytes": 7954,
+          "sha256": "6d0af9f4e1856f39935b732871e7272e258854d5660aab879151dbf96e455063"
+        }
+      ]
+    },
+    {
+      "case_id": "C06_RESOURCE_OVERALLOCATION",
+      "title": "资源分配、超配与成本",
+      "oracle_type": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+      "expected_status": "SUCCEEDED_WITH_ISSUES",
+      "tasks": 6,
+      "dependencies": 6,
+      "resources": 2,
+      "assignments": 4,
+      "files": [
+        {
+          "path": "actual_template.json",
+          "size_bytes": 291,
+          "sha256": "4b2d8838a1ea02546e364522a31bc48c41549c5152e17bece30e7cb00ef39733"
+        },
+        {
+          "path": "expected.json",
+          "size_bytes": 2770,
+          "sha256": "10c13f5fb02743bbb1c08df81b21dfbcb72afdc2543be21bd3203db6e8173117"
+        },
+        {
+          "path": "input.json",
+          "size_bytes": 8792,
+          "sha256": "8b2a5628ab79994193ca3ae8433f5db7f822ffdd87537d4b7d0dee99c71ac13d"
+        }
+      ]
+    },
+    {
+      "case_id": "C07_INVALID_GUARDRAILS",
+      "title": "无效数据与防御性校验",
+      "oracle_type": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+      "expected_status": "VALIDATION_FAILED",
+      "tasks": 6,
+      "dependencies": 3,
+      "resources": 0,
+      "assignments": 1,
+      "files": [
+        {
+          "path": "actual_template.json",
+          "size_bytes": 286,
+          "sha256": "9d6c97b56638a9dc458d72d8bd23bf10bcb4d876c45c3a887fd74964a642f270"
+        },
+        {
+          "path": "expected.json",
+          "size_bytes": 1130,
+          "sha256": "560f515b901c9f4b2abc5a2def0abee6be113dbdfb2275f30bf27220d339d72b"
+        },
+        {
+          "path": "input.json",
+          "size_bytes": 7253,
+          "sha256": "46065dd9e535e79f13cf06073cbc4f342e341f81c923dbb808ea3b015186c61e"
+        }
+      ]
+    },
+    {
+      "case_id": "C08_MICROSOFT_PROJECT_OBSERVED",
+      "title": "Microsoft Project 实测 21 任务综合计划",
+      "oracle_type": "MICROSOFT_PROJECT_OBSERVED",
+      "expected_status": "SUCCEEDED",
+      "tasks": 21,
+      "dependencies": 19,
+      "resources": 0,
+      "assignments": 0,
+      "files": [
+        {
+          "path": "actual_template.json",
+          "size_bytes": 294,
+          "sha256": "7cc8e2bd59f4645c63bfe403076401a1edb0d0447e9b70990f590a244b5121ba"
+        },
+        {
+          "path": "expected.json",
+          "size_bytes": 3839,
+          "sha256": "d70c083190a506af757a4bb8d10b26261872d59cd9ac50b295f47bc5c1b73a6c"
+        },
+        {
+          "path": "input.json",
+          "size_bytes": 23109,
+          "sha256": "2e6c95259968df4cc3bcc8e5459b77b0d83917586898651078ca98848a4f6c69"
+        },
+        {
+          "path": "source.mpp",
+          "size_bytes": 258560,
+          "sha256": "95cf3719d44a85e12daf48e0b5d6a9b6fc1e42e7d2bc420d6f74d92b03aa5e55"
+        }
+      ]
+    }
+  ]
+}

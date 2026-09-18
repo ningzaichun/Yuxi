@@ -1,0 +1,808 @@
+{
+  "case_id": "L03_CALENDAR_SHIFT_STRESS",
+  "status": "SUCCEEDED",
+  "project_dates": {
+    "start": "2027-02-01T08:00:00+08:00",
+    "finish": "2027-04-01T09:07:00+08:00"
+  },
+  "task_dates": [
+    {
+      "task_id": "task:cal01-a01",
+      "start": "2027-02-01T08:00:00+08:00",
+      "finish": "2027-02-01T14:30:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a02",
+      "start": "2027-02-01T14:30:00+08:00",
+      "finish": "2027-02-02T11:53:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a03",
+      "start": "2027-02-02T11:53:00+08:00",
+      "finish": "2027-02-03T11:09:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a04",
+      "start": "2027-02-03T11:09:00+08:00",
+      "finish": "2027-02-04T11:18:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a05",
+      "start": "2027-02-05T11:18:00+08:00",
+      "finish": "2027-02-15T13:20:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a06",
+      "start": "2027-02-15T13:20:00+08:00",
+      "finish": "2027-02-16T15:15:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a07",
+      "start": "2027-02-15T13:20:00+08:00",
+      "finish": "2027-02-16T16:08:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a08",
+      "start": "2027-02-16T16:08:00+08:00",
+      "finish": "2027-02-18T10:49:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a09",
+      "start": "2027-02-17T15:49:00+08:00",
+      "finish": "2027-02-19T11:23:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a10",
+      "start": "2027-02-21T11:23:00+08:00",
+      "finish": "2027-02-23T08:50:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a11",
+      "start": "2027-02-21T10:30:00+08:00",
+      "finish": "2027-02-23T08:50:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a12",
+      "start": "2027-02-23T08:50:00+08:00",
+      "finish": "2027-02-25T08:03:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a13",
+      "start": "2027-02-25T08:03:00+08:00",
+      "finish": "2027-03-01T08:09:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a14",
+      "start": "2027-02-25T08:03:00+08:00",
+      "finish": "2027-03-01T09:02:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a15",
+      "start": "2027-03-02T09:02:00+08:00",
+      "finish": "2027-03-04T10:54:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a16",
+      "start": "2027-03-04T10:54:00+08:00",
+      "finish": "2027-03-08T14:39:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a17",
+      "start": "2027-03-08T14:39:00+08:00",
+      "finish": "2027-03-11T09:17:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a18",
+      "start": "2027-03-10T14:17:00+08:00",
+      "finish": "2027-03-15T09:48:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a19",
+      "start": "2027-03-15T09:48:00+08:00",
+      "finish": "2027-03-17T16:12:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a20",
+      "start": "2027-03-18T16:12:00+08:00",
+      "finish": "2027-03-23T14:29:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a21",
+      "start": "2027-03-18T16:12:00+08:00",
+      "finish": "2027-03-23T15:22:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a22",
+      "start": "2027-03-18T15:19:00+08:00",
+      "finish": "2027-03-23T15:22:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a23",
+      "start": "2027-03-23T15:22:00+08:00",
+      "finish": "2027-03-26T16:18:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-a24",
+      "start": "2027-03-26T16:18:00+08:00",
+      "finish": "2027-04-01T09:07:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal01-gate",
+      "start": "2027-04-01T09:07:00+08:00",
+      "finish": "2027-04-01T09:07:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:cal02-a01",
+      "start": "2027-02-01T08:00:00+08:00",
+      "finish": "2027-02-01T16:07:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a02",
+      "start": "2027-02-01T16:07:00+08:00",
+      "finish": "2027-02-02T16:07:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a03",
+      "start": "2027-02-02T16:07:00+08:00",
+      "finish": "2027-02-03T17:00:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a04",
+      "start": "2027-02-04T08:00:00+08:00",
+      "finish": "2027-02-05T09:46:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a05",
+      "start": "2027-02-06T08:46:00+08:00",
+      "finish": "2027-02-08T10:25:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a06",
+      "start": "2027-02-08T10:25:00+08:00",
+      "finish": "2027-02-09T14:57:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a07",
+      "start": "2027-02-08T10:25:00+08:00",
+      "finish": "2027-02-09T15:50:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a08",
+      "start": "2027-02-09T15:50:00+08:00",
+      "finish": "2027-02-11T13:08:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a09",
+      "start": "2027-02-11T08:08:00+08:00",
+      "finish": "2027-02-12T15:19:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a10",
+      "start": "2027-02-13T14:19:00+08:00",
+      "finish": "2027-02-16T11:23:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a11",
+      "start": "2027-02-13T13:26:00+08:00",
+      "finish": "2027-02-16T11:23:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a12",
+      "start": "2027-02-16T11:23:00+08:00",
+      "finish": "2027-02-18T13:13:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a13",
+      "start": "2027-02-18T13:13:00+08:00",
+      "finish": "2027-02-20T13:56:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a14",
+      "start": "2027-02-18T13:13:00+08:00",
+      "finish": "2027-02-20T14:49:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a15",
+      "start": "2027-02-22T13:49:00+08:00",
+      "finish": "2027-02-25T08:18:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a16",
+      "start": "2027-02-25T08:18:00+08:00",
+      "finish": "2027-02-27T11:40:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a17",
+      "start": "2027-02-27T11:40:00+08:00",
+      "finish": "2027-03-02T16:55:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a18",
+      "start": "2027-03-02T11:55:00+08:00",
+      "finish": "2027-03-05T10:03:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a19",
+      "start": "2027-03-05T10:03:00+08:00",
+      "finish": "2027-03-08T16:04:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a20",
+      "start": "2027-03-09T16:04:00+08:00",
+      "finish": "2027-03-12T15:58:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a21",
+      "start": "2027-03-09T16:04:00+08:00",
+      "finish": "2027-03-12T16:51:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a22",
+      "start": "2027-03-09T15:11:00+08:00",
+      "finish": "2027-03-12T16:51:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a23",
+      "start": "2027-03-12T16:51:00+08:00",
+      "finish": "2027-03-17T08:24:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-a24",
+      "start": "2027-03-17T08:24:00+08:00",
+      "finish": "2027-03-20T10:50:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal02-gate",
+      "start": "2027-03-20T10:50:00+08:00",
+      "finish": "2027-03-20T10:50:00+08:00",
+      "calendar_id": "calendar:six-day"
+    },
+    {
+      "task_id": "task:cal03-a01",
+      "start": "2027-02-01T20:00:00+08:00",
+      "finish": "2027-02-02T20:44:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a02",
+      "start": "2027-02-02T20:44:00+08:00",
+      "finish": "2027-02-03T22:21:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a03",
+      "start": "2027-02-03T22:21:00+08:00",
+      "finish": "2027-02-05T00:51:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a04",
+      "start": "2027-02-05T20:00:00+08:00",
+      "finish": "2027-02-06T23:23:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a05",
+      "start": "2027-02-07T23:23:00+08:00",
+      "finish": "2027-02-09T03:39:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a06",
+      "start": "2027-02-09T20:00:00+08:00",
+      "finish": "2027-02-11T01:09:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a07",
+      "start": "2027-02-09T20:00:00+08:00",
+      "finish": "2027-02-11T02:02:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a08",
+      "start": "2027-02-11T20:00:00+08:00",
+      "finish": "2027-02-13T02:55:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a09",
+      "start": "2027-02-11T23:58:59+08:00",
+      "finish": "2027-02-13T23:47:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a10",
+      "start": "2027-02-14T23:47:00+08:00",
+      "finish": "2027-02-17T00:28:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a11",
+      "start": "2027-02-12T22:21:59+08:00",
+      "finish": "2027-02-14T23:56:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a12",
+      "start": "2027-02-14T23:56:00+08:00",
+      "finish": "2027-02-17T02:23:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a13",
+      "start": "2027-02-17T20:00:00+08:00",
+      "finish": "2027-02-19T23:20:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a14",
+      "start": "2027-02-17T20:00:00+08:00",
+      "finish": "2027-02-20T00:13:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a15",
+      "start": "2027-02-21T20:00:00+08:00",
+      "finish": "2027-02-24T01:06:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a16",
+      "start": "2027-02-24T20:00:00+08:00",
+      "finish": "2027-02-27T01:59:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a17",
+      "start": "2027-02-27T20:00:00+08:00",
+      "finish": "2027-03-02T02:52:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a18",
+      "start": "2027-02-28T23:58:59+08:00",
+      "finish": "2027-03-03T23:44:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a19",
+      "start": "2027-03-03T23:44:00+08:00",
+      "finish": "2027-03-07T00:22:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a20",
+      "start": "2027-03-08T20:00:00+08:00",
+      "finish": "2027-03-11T21:31:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a21",
+      "start": "2027-03-08T20:00:00+08:00",
+      "finish": "2027-03-11T22:24:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a22",
+      "start": "2027-03-04T23:00:59+08:00",
+      "finish": "2027-03-08T02:18:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a23",
+      "start": "2027-03-08T20:00:00+08:00",
+      "finish": "2027-03-12T00:10:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-a24",
+      "start": "2027-03-12T20:00:00+08:00",
+      "finish": "2027-03-16T01:03:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal03-gate",
+      "start": "2027-03-16T01:03:00+08:00",
+      "finish": "2027-03-16T01:03:00+08:00",
+      "calendar_id": "calendar:night"
+    },
+    {
+      "task_id": "task:cal04-a01",
+      "start": "2027-02-01T08:00:00+08:00",
+      "finish": "2027-02-01T18:21:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a02",
+      "start": "2027-02-01T18:21:00+08:00",
+      "finish": "2027-02-02T05:35:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a03",
+      "start": "2027-02-02T05:35:00+08:00",
+      "finish": "2027-02-02T17:42:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a04",
+      "start": "2027-02-02T17:42:00+08:00",
+      "finish": "2027-02-03T06:42:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a05",
+      "start": "2027-02-03T14:42:00+08:00",
+      "finish": "2027-02-04T04:35:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a06",
+      "start": "2027-02-04T04:35:00+08:00",
+      "finish": "2027-02-04T19:21:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a07",
+      "start": "2027-02-04T04:35:00+08:00",
+      "finish": "2027-02-04T20:14:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a08",
+      "start": "2027-02-04T20:14:00+08:00",
+      "finish": "2027-02-05T12:46:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a09",
+      "start": "2027-02-05T08:46:00+08:00",
+      "finish": "2027-02-06T02:11:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a10",
+      "start": "2027-02-06T10:11:00+08:00",
+      "finish": "2027-02-07T04:29:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a11",
+      "start": "2027-02-06T09:17:59+08:00",
+      "finish": "2027-02-07T04:29:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a12",
+      "start": "2027-02-07T04:29:00+08:00",
+      "finish": "2027-02-08T00:33:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a13",
+      "start": "2027-02-08T00:33:00+08:00",
+      "finish": "2027-02-08T21:30:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a14",
+      "start": "2027-02-08T00:33:00+08:00",
+      "finish": "2027-02-08T22:23:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a15",
+      "start": "2027-02-09T06:23:00+08:00",
+      "finish": "2027-02-10T05:06:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a16",
+      "start": "2027-02-10T05:06:00+08:00",
+      "finish": "2027-02-11T04:42:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a17",
+      "start": "2027-02-11T04:42:00+08:00",
+      "finish": "2027-02-12T05:11:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a18",
+      "start": "2027-02-17T08:23:00+08:00",
+      "finish": "2027-02-19T09:45:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a19",
+      "start": "2027-02-19T09:45:00+08:00",
+      "finish": "2027-02-20T12:00:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a20",
+      "start": "2027-02-20T20:00:00+08:00",
+      "finish": "2027-02-21T23:08:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a21",
+      "start": "2027-02-20T20:00:00+08:00",
+      "finish": "2027-02-22T00:01:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a22",
+      "start": "2027-02-20T19:05:59+08:00",
+      "finish": "2027-02-22T00:00:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a23",
+      "start": "2027-02-22T00:00:00+08:00",
+      "finish": "2027-02-23T05:47:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-a24",
+      "start": "2027-02-23T05:47:00+08:00",
+      "finish": "2027-02-24T12:27:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal04-gate",
+      "start": "2027-02-24T12:27:00+08:00",
+      "finish": "2027-02-24T12:27:00+08:00",
+      "calendar_id": "calendar:24x7"
+    },
+    {
+      "task_id": "task:cal05-a01",
+      "start": "2027-02-01T08:00:00+08:00",
+      "finish": "2027-02-01T19:58:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a02",
+      "start": "2027-02-01T19:58:00+08:00",
+      "finish": "2027-02-02T16:49:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a03",
+      "start": "2027-02-02T16:49:00+08:00",
+      "finish": "2027-02-03T14:33:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a04",
+      "start": "2027-02-03T14:33:00+08:00",
+      "finish": "2027-02-04T13:10:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a05",
+      "start": "2027-02-04T21:10:00+08:00",
+      "finish": "2027-02-05T20:40:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a06",
+      "start": "2027-02-05T20:40:00+08:00",
+      "finish": "2027-02-06T21:03:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a07",
+      "start": "2027-02-05T20:40:00+08:00",
+      "finish": "2027-02-06T21:56:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a08",
+      "start": "2027-02-06T21:56:00+08:00",
+      "finish": "2027-02-08T08:05:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a09",
+      "start": "2027-02-07T20:05:00+08:00",
+      "finish": "2027-02-09T07:07:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a10",
+      "start": "2027-02-09T15:07:00+08:00",
+      "finish": "2027-02-10T19:02:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a11",
+      "start": "2027-02-09T14:14:00+08:00",
+      "finish": "2027-02-10T19:02:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a12",
+      "start": "2027-02-10T19:02:00+08:00",
+      "finish": "2027-02-12T08:43:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a13",
+      "start": "2027-02-12T08:43:00+08:00",
+      "finish": "2027-02-13T15:17:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a14",
+      "start": "2027-02-12T08:43:00+08:00",
+      "finish": "2027-02-13T16:10:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a15",
+      "start": "2027-02-14T08:10:00+08:00",
+      "finish": "2027-02-15T16:30:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a16",
+      "start": "2027-02-15T16:30:00+08:00",
+      "finish": "2027-02-17T09:43:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a17",
+      "start": "2027-02-17T09:43:00+08:00",
+      "finish": "2027-02-18T19:49:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a18",
+      "start": "2027-02-18T15:49:00+08:00",
+      "finish": "2027-02-20T10:48:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a19",
+      "start": "2027-02-20T10:48:00+08:00",
+      "finish": "2027-02-22T06:40:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a20",
+      "start": "2027-02-22T14:40:00+08:00",
+      "finish": "2027-02-24T11:25:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a21",
+      "start": "2027-02-22T14:40:00+08:00",
+      "finish": "2027-02-24T12:18:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a22",
+      "start": "2027-02-22T13:47:00+08:00",
+      "finish": "2027-02-24T12:18:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a23",
+      "start": "2027-02-24T12:18:00+08:00",
+      "finish": "2027-02-26T11:42:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-a24",
+      "start": "2027-02-26T11:42:00+08:00",
+      "finish": "2027-02-28T11:59:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:cal05-gate",
+      "start": "2027-02-28T11:59:00+08:00",
+      "finish": "2027-02-28T11:59:00+08:00",
+      "calendar_id": "calendar:double-shift"
+    },
+    {
+      "task_id": "task:project-finish",
+      "start": "2027-04-01T09:07:00+08:00",
+      "finish": "2027-04-01T09:07:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:project-start",
+      "start": "2027-02-01T08:00:00+08:00",
+      "finish": "2027-02-01T08:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    }
+  ],
+  "summary_dates": [
+    {
+      "task_id": "task:cal01",
+      "start": "2027-02-01T08:00:00+08:00",
+      "finish": "2027-04-01T09:07:00+08:00"
+    },
+    {
+      "task_id": "task:cal02",
+      "start": "2027-02-01T08:00:00+08:00",
+      "finish": "2027-03-20T10:50:00+08:00"
+    },
+    {
+      "task_id": "task:cal03",
+      "start": "2027-02-01T20:00:00+08:00",
+      "finish": "2027-03-16T01:03:00+08:00"
+    },
+    {
+      "task_id": "task:cal04",
+      "start": "2027-02-01T08:00:00+08:00",
+      "finish": "2027-02-24T12:27:00+08:00"
+    },
+    {
+      "task_id": "task:cal05",
+      "start": "2027-02-01T08:00:00+08:00",
+      "finish": "2027-02-28T11:59:00+08:00"
+    },
+    {
+      "task_id": "task:root",
+      "start": "2027-02-01T08:00:00+08:00",
+      "finish": "2027-04-01T09:07:00+08:00"
+    }
+  ],
+  "issues": [],
+  "resource_conflicts": [],
+  "assignment_costs": [],
+  "baseline_variances": []
+}

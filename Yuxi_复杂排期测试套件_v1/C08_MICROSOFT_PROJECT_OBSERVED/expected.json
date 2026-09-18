@@ -1,0 +1,137 @@
+{
+  "case_id": "C08_MICROSOFT_PROJECT_OBSERVED",
+  "status": "SUCCEEDED",
+  "project_dates": {
+    "start": "2026-10-12T08:00:00+08:00",
+    "finish": "2026-11-13T17:00:00+08:00"
+  },
+  "task_dates": [
+    {
+      "task_id": "task:3",
+      "start": "2026-10-12T08:00:00+08:00",
+      "finish": "2026-10-12T08:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:4",
+      "start": "2026-10-12T08:00:00+08:00",
+      "finish": "2026-10-13T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:5",
+      "start": "2026-10-12T08:00:00+08:00",
+      "finish": "2026-10-14T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:7",
+      "start": "2026-10-14T08:00:00+08:00",
+      "finish": "2026-10-20T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:8",
+      "start": "2026-10-21T08:00:00+08:00",
+      "finish": "2026-10-22T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:9",
+      "start": "2026-10-23T08:00:00+08:00",
+      "finish": "2026-10-28T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:10",
+      "start": "2026-10-29T08:00:00+08:00",
+      "finish": "2026-11-02T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:12",
+      "start": "2026-10-21T17:00:00+08:00",
+      "finish": "2026-10-21T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:13",
+      "start": "2026-11-03T08:00:00+08:00",
+      "finish": "2026-11-05T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:14",
+      "start": "2026-10-27T08:00:00+08:00",
+      "finish": "2026-10-30T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:15",
+      "start": "2026-11-04T08:00:00+08:00",
+      "finish": "2026-11-06T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:16",
+      "start": "2026-11-03T08:00:00+08:00",
+      "finish": "2026-11-09T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:18",
+      "start": "2026-11-09T08:00:00+08:00",
+      "finish": "2026-11-10T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:19",
+      "start": "2026-11-11T08:00:00+08:00",
+      "finish": "2026-11-13T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:20",
+      "start": "2026-11-13T17:00:00+08:00",
+      "finish": "2026-11-13T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:21",
+      "start": "2026-11-13T17:00:00+08:00",
+      "finish": "2026-11-13T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    }
+  ],
+  "summary_dates": [
+    {
+      "task_id": "task:1",
+      "start": "2026-10-12T08:00:00+08:00",
+      "finish": "2026-11-13T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:2",
+      "start": "2026-10-12T08:00:00+08:00",
+      "finish": "2026-10-14T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:6",
+      "start": "2026-10-14T08:00:00+08:00",
+      "finish": "2026-11-02T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:11",
+      "start": "2026-10-21T17:00:00+08:00",
+      "finish": "2026-11-09T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:17",
+      "start": "2026-11-09T08:00:00+08:00",
+      "finish": "2026-11-13T17:00:00+08:00"
+    }
+  ],
+  "issues": [],
+  "resource_conflicts": [],
+  "assignment_costs": [],
+  "baseline_variances": []
+}

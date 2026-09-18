@@ -1,0 +1,411 @@
+{
+  "schema_version": "schedule_engine_test_input_v1",
+  "case_id": "C02_MULTI_CALENDAR_EXCEPTIONS",
+  "title": "多日历、停工与补班",
+  "data_classification": "SYNTHETIC_TEST_DATA",
+  "oracle": {
+    "type": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+    "is_microsoft_project_observation": false,
+    "date_precision": "minute",
+    "tolerance_minutes": 0
+  },
+  "semantics": {
+    "timezone": "Asia/Shanghai",
+    "duration_unit": "working_minute",
+    "lag_unit": "working_minute",
+    "default_lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR",
+    "summary_rollup": "BOTTOM_UP_DIRECT_CHILD_MIN_START_MAX_FINISH",
+    "date_boundary": "START_INCLUSIVE_FINISH_EXCLUSIVE_WORK_INTERVALS"
+  },
+  "project": {
+    "project_id": "project:c02_multi_calendar_exceptions",
+    "name": "多日历、停工与补班",
+    "planned_start": "2026-09-07T08:00:00+08:00",
+    "required_finish": null,
+    "status_date": null,
+    "default_calendar_id": "calendar:standard"
+  },
+  "calendars": [
+    {
+      "calendar_id": "calendar:standard",
+      "name": "标准工作日历",
+      "weekly_pattern": {
+        "MONDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "TUESDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "WEDNESDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "THURSDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "FRIDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "SATURDAY": {
+          "day_type": "NON_WORKING",
+          "intervals": []
+        },
+        "SUNDAY": {
+          "day_type": "NON_WORKING",
+          "intervals": []
+        }
+      },
+      "exceptions": [
+        {
+          "exception_id": "holiday",
+          "name": "停工日",
+          "start_date": "2026-09-09T00:00:00+08:00",
+          "finish_date": "2026-09-09T23:59:59+08:00",
+          "working": false,
+          "intervals": []
+        },
+        {
+          "exception_id": "makeup",
+          "name": "周日补班",
+          "start_date": "2026-09-13T00:00:00+08:00",
+          "finish_date": "2026-09-13T23:59:59+08:00",
+          "working": true,
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "calendar_id": "calendar:six-day",
+      "name": "六天施工日历",
+      "weekly_pattern": {
+        "MONDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "TUESDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "WEDNESDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "THURSDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "FRIDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "SATURDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "07:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "18:00"
+            }
+          ]
+        },
+        "SUNDAY": {
+          "day_type": "NON_WORKING",
+          "intervals": []
+        }
+      },
+      "exceptions": []
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "task:root",
+      "parent_task_id": null,
+      "name": "多日历、停工与补班",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:start",
+      "parent_task_id": "task:root",
+      "name": "开工",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 0,
+      "calendar_id": null,
+      "boundary_role": "PROJECT_START",
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:office",
+      "parent_task_id": "task:root",
+      "name": "设计审批",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:site",
+      "parent_task_id": "task:root",
+      "name": "现场连续施工",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 3000,
+      "calendar_id": "calendar:six-day",
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:handover",
+      "parent_task_id": "task:root",
+      "name": "移交",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    },
+    {
+      "task_id": "task:finish",
+      "parent_task_id": "task:root",
+      "name": "完成",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 0,
+      "calendar_id": null,
+      "boundary_role": "PROJECT_FINISH",
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      }
+    }
+  ],
+  "dependencies": [
+    {
+      "dependency_id": "dep:start:office:FS:0",
+      "predecessor_task_id": "task:start",
+      "successor_task_id": "task:office",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:start:site:FS:0",
+      "predecessor_task_id": "task:start",
+      "successor_task_id": "task:site",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:office:handover:FS:0",
+      "predecessor_task_id": "task:office",
+      "successor_task_id": "task:handover",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:site:handover:FS:0",
+      "predecessor_task_id": "task:site",
+      "successor_task_id": "task:handover",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:handover:finish:FS:0",
+      "predecessor_task_id": "task:handover",
+      "successor_task_id": "task:finish",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    }
+  ],
+  "resources": [],
+  "assignments": [],
+  "boundary_whitelist": {
+    "open_start_task_ids": [
+      "task:start"
+    ],
+    "open_finish_task_ids": [
+      "task:finish"
+    ]
+  }
+}

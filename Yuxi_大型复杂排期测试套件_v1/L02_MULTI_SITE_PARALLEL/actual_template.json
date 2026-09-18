@@ -1,0 +1,11 @@
+{
+  "case_id": "L02_MULTI_SITE_PARALLEL",
+  "status": "<SUCCEEDED|SUCCEEDED_WITH_ISSUES|VALIDATION_FAILED>",
+  "project_dates": null,
+  "task_dates": [],
+  "summary_dates": [],
+  "issues": [],
+  "resource_conflicts": [],
+  "assignment_costs": [],
+  "baseline_variances": []
+}

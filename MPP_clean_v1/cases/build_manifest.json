@@ -1,0 +1,15 @@
+{
+  "suite_version": "1.0",
+  "cases": [
+    {
+      "case_id": "A_ROAD_DRAINAGE_CLEAN",
+      "title": "市政道路雨污分流改造工程",
+      "has_mpp": true
+    },
+    {
+      "case_id": "B_SUBSTATION_CLEAN",
+      "title": "110kV 变电站一次设备安装与投运工程",
+      "has_mpp": true
+    }
+  ]
+}

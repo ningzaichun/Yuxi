@@ -1,0 +1,77 @@
+{
+  "case_id": "C05_BASELINE_PROGRESS",
+  "status": "SUCCEEDED",
+  "project_dates": {
+    "start": "2026-09-07T08:00:00+08:00",
+    "finish": "2026-09-24T17:00:00+08:00"
+  },
+  "task_dates": [
+    {
+      "task_id": "task:a",
+      "start": "2026-09-08T08:00:00+08:00",
+      "finish": "2026-09-10T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:b",
+      "start": "2026-09-11T08:00:00+08:00",
+      "finish": "2026-09-21T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:c",
+      "start": "2026-09-22T08:00:00+08:00",
+      "finish": "2026-09-24T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:finish",
+      "start": "2026-09-24T17:00:00+08:00",
+      "finish": "2026-09-24T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:start",
+      "start": "2026-09-07T08:00:00+08:00",
+      "finish": "2026-09-07T08:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    }
+  ],
+  "summary_dates": [
+    {
+      "task_id": "task:root",
+      "start": "2026-09-07T08:00:00+08:00",
+      "finish": "2026-09-24T17:00:00+08:00"
+    }
+  ],
+  "issues": [],
+  "resource_conflicts": [],
+  "assignment_costs": [],
+  "baseline_variances": [
+    {
+      "task_id": "task:a",
+      "start_variance_minutes": 480,
+      "finish_variance_minutes": 480
+    },
+    {
+      "task_id": "task:b",
+      "start_variance_minutes": 480,
+      "finish_variance_minutes": 1440
+    },
+    {
+      "task_id": "task:c",
+      "start_variance_minutes": 1440,
+      "finish_variance_minutes": 1440
+    },
+    {
+      "task_id": "task:finish",
+      "start_variance_minutes": 1440,
+      "finish_variance_minutes": 1440
+    },
+    {
+      "task_id": "task:start",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    }
+  ]
+}

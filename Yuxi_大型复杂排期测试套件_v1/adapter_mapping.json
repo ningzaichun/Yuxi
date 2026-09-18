@@ -1,0 +1,45 @@
+{
+  "mapping_version": "test_input_to_canonical_schedule_v2.2_v1",
+  "purpose": "指导将测试套件输入映射到 Yuxi 现有 canonical_schedule_v2.2；最终字段名以仓库权威 Schema 为准",
+  "input_to_canonical": {
+    "project.planned_start": "project.planned_start",
+    "project.status_date": "project.status_date",
+    "project.default_calendar_id": "project.default_calendar_id",
+    "calendars[].weekly_pattern": "calendars[].weekly_pattern",
+    "calendars[].exceptions": "calendars[].exceptions",
+    "tasks[].task_id": "tasks[].task_id",
+    "tasks[].parent_task_id": "tasks[].parent_task_id",
+    "tasks[].task_type": "tasks[].task_type",
+    "tasks[].duration_minutes": "tasks[].duration_minutes",
+    "tasks[].calendar_id": "tasks[].calendar_id",
+    "tasks[].constraint": "tasks[].constraint",
+    "tasks[].baseline_0": "tasks[].baseline_0",
+    "dependencies[].type": "dependencies[].type",
+    "dependencies[].lag_minutes": "dependencies[].lag_minutes",
+    "dependencies[].lag_calendar_policy": "dependencies[].lag_calendar_policy",
+    "resources[]": "resources[]",
+    "assignments[]": "assignments[]"
+  },
+  "adapter_only_fields": {
+    "boundary_whitelist": "审查规则配置：合法开放起点和开放终点，不应转换成虚假依赖",
+    "oracle": "测试证据元数据，不进入生产排程计算",
+    "actual_template": "门禁输出合同，不属于排程输入"
+  },
+  "expected_output_mapping": {
+    "expected.project_dates": "engine result project dates",
+    "expected.task_dates": "engine result task_dates",
+    "expected.summary_dates": "engine result summary task dates",
+    "expected.issues": "validation/review issues",
+    "expected.resource_conflicts": "resource analysis conflicts",
+    "expected.assignment_costs": "resource cost result",
+    "expected.baseline_variances": "baseline variance result"
+  },
+  "normalization_before_compare": [
+    "时间统一输出 ISO-8601，并保留 +08:00",
+    "精度截断到分钟，秒必须为 00",
+    "task_dates 和 summary_dates 按 task_id 排序",
+    "issues 按 severity、code、object_ref 排序",
+    "resource_conflicts 按 resource_id 和 task_ids 排序",
+    "禁止使用容差掩盖一分钟差异"
+  ]
+}

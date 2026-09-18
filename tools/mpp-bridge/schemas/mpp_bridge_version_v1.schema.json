@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuxi.local/schemas/mpp_bridge_version_v1.schema.json",
+  "title": "MPP Bridge Version v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "bridge_version", "powershell_version", "operating_system", "is_windows", "microsoft_project_com_registered", "commands", "contracts"],
+  "properties": {
+    "schema_version": { "const": "mpp_bridge_version_v1" },
+    "bridge_version": { "type": "string", "minLength": 1 },
+    "powershell_version": { "type": "string", "minLength": 1 },
+    "operating_system": { "type": "string", "minLength": 1 },
+    "is_windows": { "type": "boolean" },
+    "microsoft_project_com_registered": { "type": "boolean" },
+    "commands": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^[a-z0-9_]+\\.schema\\.json$" },
+      "uniqueItems": true
+    }
+  }
+}

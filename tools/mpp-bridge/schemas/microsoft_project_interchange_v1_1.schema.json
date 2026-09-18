@@ -1,0 +1,662 @@
+{
+  "$defs": {
+    "MicrosoftProjectImportCalendar": {
+      "additionalProperties": true,
+      "properties": {
+        "calendar_id": {
+          "minLength": 1,
+          "title": "Calendar Id",
+          "type": "string"
+        },
+        "exceptions": {
+          "items": {
+            "$ref": "#/$defs/MicrosoftProjectImportCalendarException"
+          },
+          "title": "Exceptions",
+          "type": "array"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "week_days": {
+          "items": {
+            "$ref": "#/$defs/MicrosoftProjectImportWeekDay"
+          },
+          "maxItems": 7,
+          "minItems": 7,
+          "title": "Week Days",
+          "type": "array"
+        }
+      },
+      "required": [
+        "calendar_id",
+        "name",
+        "week_days",
+        "exceptions"
+      ],
+      "title": "MicrosoftProjectImportCalendar",
+      "type": "object"
+    },
+    "MicrosoftProjectImportCalendarException": {
+      "additionalProperties": true,
+      "properties": {
+        "exception_id": {
+          "minLength": 1,
+          "title": "Exception Id",
+          "type": "string"
+        },
+        "finish_date": {
+          "format": "date-time",
+          "title": "Finish Date",
+          "type": "string"
+        },
+        "intervals": {
+          "items": {
+            "$ref": "#/$defs/MicrosoftProjectImportInterval"
+          },
+          "title": "Intervals",
+          "type": "array"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "start_date": {
+          "format": "date-time",
+          "title": "Start Date",
+          "type": "string"
+        },
+        "working": {
+          "title": "Working",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "exception_id",
+        "name",
+        "start_date",
+        "finish_date",
+        "working",
+        "intervals"
+      ],
+      "title": "MicrosoftProjectImportCalendarException",
+      "type": "object"
+    },
+    "MicrosoftProjectImportDependency": {
+      "additionalProperties": true,
+      "properties": {
+        "dependency_id": {
+          "minLength": 1,
+          "title": "Dependency Id",
+          "type": "string"
+        },
+        "lag_calendar_policy": {
+          "const": "SUCCESSOR_TASK_CALENDAR",
+          "title": "Lag Calendar Policy",
+          "type": "string"
+        },
+        "lag_minutes": {
+          "title": "Lag Minutes",
+          "type": "integer"
+        },
+        "predecessor_task_id": {
+          "minLength": 1,
+          "title": "Predecessor Task Id",
+          "type": "string"
+        },
+        "source_type_code": {
+          "title": "Source Type Code",
+          "type": "integer"
+        },
+        "successor_task_id": {
+          "minLength": 1,
+          "title": "Successor Task Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "FS",
+            "SS",
+            "FF",
+            "SF"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dependency_id",
+        "predecessor_task_id",
+        "successor_task_id",
+        "type",
+        "source_type_code",
+        "lag_minutes",
+        "lag_calendar_policy"
+      ],
+      "title": "MicrosoftProjectImportDependency",
+      "type": "object"
+    },
+    "MicrosoftProjectImportInterval": {
+      "additionalProperties": true,
+      "properties": {
+        "finish": {
+          "format": "time",
+          "title": "Finish",
+          "type": "string"
+        },
+        "start": {
+          "format": "time",
+          "title": "Start",
+          "type": "string"
+        }
+      },
+      "required": [
+        "start",
+        "finish"
+      ],
+      "title": "MicrosoftProjectImportInterval",
+      "type": "object"
+    },
+    "MicrosoftProjectImportProject": {
+      "additionalProperties": true,
+      "properties": {
+        "default_calendar_id": {
+          "minLength": 1,
+          "title": "Default Calendar Id",
+          "type": "string"
+        },
+        "default_daily_work_minutes": {
+          "exclusiveMinimum": 0,
+          "title": "Default Daily Work Minutes",
+          "type": "integer"
+        },
+        "default_weekly_work_minutes": {
+          "exclusiveMinimum": 0,
+          "title": "Default Weekly Work Minutes",
+          "type": "integer"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "planned_finish": {
+          "format": "date-time",
+          "title": "Planned Finish",
+          "type": "string"
+        },
+        "planned_start": {
+          "format": "date-time",
+          "title": "Planned Start",
+          "type": "string"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "required_finish": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Required Finish"
+        }
+      },
+      "required": [
+        "project_id",
+        "name",
+        "planned_start",
+        "planned_finish",
+        "default_calendar_id",
+        "default_daily_work_minutes",
+        "default_weekly_work_minutes"
+      ],
+      "title": "MicrosoftProjectImportProject",
+      "type": "object"
+    },
+    "MicrosoftProjectImportSemantics": {
+      "additionalProperties": true,
+      "properties": {
+        "duration_unit": {
+          "const": "working_minute",
+          "title": "Duration Unit",
+          "type": "string"
+        },
+        "lag_calendar_policy": {
+          "const": "SUCCESSOR_TASK_CALENDAR",
+          "title": "Lag Calendar Policy",
+          "type": "string"
+        },
+        "lag_unit": {
+          "const": "working_minute",
+          "title": "Lag Unit",
+          "type": "string"
+        },
+        "task_calendar_resolution": {
+          "minLength": 1,
+          "title": "Task Calendar Resolution",
+          "type": "string"
+        },
+        "timezone": {
+          "minLength": 1,
+          "title": "Timezone",
+          "type": "string"
+        }
+      },
+      "required": [
+        "timezone",
+        "duration_unit",
+        "lag_unit",
+        "lag_calendar_policy",
+        "task_calendar_resolution"
+      ],
+      "title": "MicrosoftProjectImportSemantics",
+      "type": "object"
+    },
+    "MicrosoftProjectImportSource": {
+      "additionalProperties": true,
+      "properties": {
+        "extracted_at": {
+          "format": "date-time",
+          "title": "Extracted At",
+          "type": "string"
+        },
+        "extraction_method": {
+          "minLength": 1,
+          "title": "Extraction Method",
+          "type": "string"
+        },
+        "file_name": {
+          "minLength": 1,
+          "title": "File Name",
+          "type": "string"
+        },
+        "format": {
+          "const": "MPP",
+          "title": "Format",
+          "type": "string"
+        },
+        "microsoft_project_version": {
+          "minLength": 1,
+          "title": "Microsoft Project Version",
+          "type": "string"
+        },
+        "mpp_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Mpp Sha256",
+          "type": "string"
+        },
+        "opened_after_save": {
+          "title": "Opened After Save",
+          "type": "boolean"
+        },
+        "project_recalculated_after_reopen": {
+          "title": "Project Recalculated After Reopen",
+          "type": "boolean"
+        },
+        "timezone": {
+          "minLength": 1,
+          "title": "Timezone",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "file_name",
+        "microsoft_project_version",
+        "extraction_method",
+        "extracted_at",
+        "timezone",
+        "mpp_sha256",
+        "opened_after_save",
+        "project_recalculated_after_reopen"
+      ],
+      "title": "MicrosoftProjectImportSource",
+      "type": "object"
+    },
+    "MicrosoftProjectImportTask": {
+      "additionalProperties": true,
+      "properties": {
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "calendar_id": {
+          "minLength": 1,
+          "title": "Calendar Id",
+          "type": "string"
+        },
+        "constraint_date": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Constraint Date"
+        },
+        "constraint_type_code": {
+          "enum": [
+            0,
+            2,
+            4,
+            6,
+            7
+          ],
+          "title": "Constraint Type Code",
+          "type": "integer"
+        },
+        "deadline": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Deadline"
+        },
+        "duration_minutes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Duration Minutes"
+        },
+        "finish": {
+          "format": "date-time",
+          "title": "Finish",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "outline_level": {
+          "exclusiveMinimum": 0,
+          "title": "Outline Level",
+          "type": "integer"
+        },
+        "parent_task_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parent Task Id"
+        },
+        "percent_complete": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Percent Complete",
+          "type": "integer"
+        },
+        "project_rollup_duration_minutes": {
+          "minimum": 0,
+          "title": "Project Rollup Duration Minutes",
+          "type": "integer"
+        },
+        "scheduling_mode": {
+          "enum": [
+            "AUTO",
+            "MANUAL"
+          ],
+          "title": "Scheduling Mode",
+          "type": "string"
+        },
+        "source_id": {
+          "exclusiveMinimum": 0,
+          "title": "Source Id",
+          "type": "integer"
+        },
+        "source_unique_id": {
+          "exclusiveMinimum": 0,
+          "title": "Source Unique Id",
+          "type": "integer"
+        },
+        "start": {
+          "format": "date-time",
+          "title": "Start",
+          "type": "string"
+        },
+        "task_id": {
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "task_type": {
+          "enum": [
+            "TASK",
+            "SUMMARY",
+            "MILESTONE"
+          ],
+          "title": "Task Type",
+          "type": "string"
+        },
+        "wbs": {
+          "minLength": 1,
+          "title": "Wbs",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id",
+        "source_id",
+        "source_unique_id",
+        "parent_task_id",
+        "wbs",
+        "outline_level",
+        "name",
+        "task_type",
+        "scheduling_mode",
+        "duration_minutes",
+        "project_rollup_duration_minutes",
+        "start",
+        "finish",
+        "percent_complete",
+        "constraint_type_code",
+        "constraint_date",
+        "deadline",
+        "calendar_id"
+      ],
+      "title": "MicrosoftProjectImportTask",
+      "type": "object"
+    },
+    "MicrosoftProjectImportWeekDay": {
+      "additionalProperties": true,
+      "properties": {
+        "day": {
+          "enum": [
+            "SUNDAY",
+            "MONDAY",
+            "TUESDAY",
+            "WEDNESDAY",
+            "THURSDAY",
+            "FRIDAY",
+            "SATURDAY"
+          ],
+          "title": "Day",
+          "type": "string"
+        },
+        "intervals": {
+          "items": {
+            "$ref": "#/$defs/MicrosoftProjectImportInterval"
+          },
+          "title": "Intervals",
+          "type": "array"
+        },
+        "working": {
+          "title": "Working",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "day",
+        "working",
+        "intervals"
+      ],
+      "title": "MicrosoftProjectImportWeekDay",
+      "type": "object"
+    }
+  },
+  "additionalProperties": true,
+  "description": "Strict schema publication model for the maintained v1.1 source protocol.",
+  "properties": {
+    "artifact_version": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Artifact Version"
+    },
+    "assignments": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Assignments",
+      "type": "array"
+    },
+    "calendars": {
+      "items": {
+        "$ref": "#/$defs/MicrosoftProjectImportCalendar"
+      },
+      "title": "Calendars",
+      "type": "array"
+    },
+    "capabilities": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Capabilities"
+    },
+    "data_classification": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Data Classification"
+    },
+    "dependencies": {
+      "items": {
+        "$ref": "#/$defs/MicrosoftProjectImportDependency"
+      },
+      "maxItems": 25000,
+      "title": "Dependencies",
+      "type": "array"
+    },
+    "project": {
+      "$ref": "#/$defs/MicrosoftProjectImportProject"
+    },
+    "resources": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Resources",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "microsoft_project_interchange_v1.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "semantics": {
+      "$ref": "#/$defs/MicrosoftProjectImportSemantics"
+    },
+    "source": {
+      "$ref": "#/$defs/MicrosoftProjectImportSource"
+    },
+    "statistics": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Statistics"
+    },
+    "tasks": {
+      "items": {
+        "$ref": "#/$defs/MicrosoftProjectImportTask"
+      },
+      "maxItems": 5000,
+      "minItems": 1,
+      "title": "Tasks",
+      "type": "array"
+    },
+    "validation": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Validation"
+    }
+  },
+  "required": [
+    "schema_version",
+    "source",
+    "semantics",
+    "project",
+    "calendars",
+    "tasks",
+    "dependencies"
+  ],
+  "title": "MicrosoftProjectInterchangeFormalV11",
+  "type": "object"
+}

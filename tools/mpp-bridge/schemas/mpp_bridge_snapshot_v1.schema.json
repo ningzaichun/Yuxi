@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuxi.local/schemas/mpp_bridge_snapshot_v1.schema.json",
+  "title": "MPP Bridge Snapshot v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "tool_version",
+    "captured_at",
+    "timezone",
+    "source",
+    "project",
+    "calendars",
+    "tasks",
+    "dependencies",
+    "unsupported_semantics",
+    "roundtrip_eligible",
+    "snapshot_semantic_sha256"
+  ],
+  "properties": {
+    "schema_version": { "const": "mpp_bridge_snapshot_v1" },
+    "run_id": { "type": "string", "format": "uuid" },
+    "tool_version": { "type": "string", "minLength": 1 },
+    "captured_at": { "type": "string", "format": "date-time" },
+    "timezone": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input_file_name",
+        "input_mpp_sha256",
+        "working_copy_mpp_sha256",
+        "microsoft_project_version",
+        "opened_after_save",
+        "recalculated_after_reopen"
+      ],
+      "properties": {
+        "input_file_name": { "type": "string", "minLength": 1 },
+        "input_mpp_sha256": { "$ref": "#/$defs/sha256" },
+        "working_copy_mpp_sha256": { "$ref": "#/$defs/sha256" },
+        "microsoft_project_version": { "type": "string", "minLength": 1 },
+        "opened_after_save": { "const": true },
+        "recalculated_after_reopen": { "const": true }
+      }
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "planned_start", "planned_finish", "default_calendar_id", "default_calendar_name", "status_date"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "planned_start": { "type": "string", "format": "date-time" },
+        "planned_finish": { "type": "string", "format": "date-time" },
+        "default_calendar_id": { "type": "string", "minLength": 1 },
+        "default_calendar_name": { "type": "string", "minLength": 1 },
+        "status_date": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+    "calendars": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/calendar" }
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/task" }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dependency" }
+    },
+    "unsupported_semantics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/unsupported" }
+    },
+    "roundtrip_eligible": { "type": "boolean" },
+    "snapshot_semantic_sha256": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "interval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "finish"],
+      "properties": {
+        "start": { "type": "string", "pattern": "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$" },
+        "finish": { "type": "string", "pattern": "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$" }
+      }
+    },
+    "weekDay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["day", "working", "intervals"],
+      "properties": {
+        "day": { "enum": ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"] },
+        "working": { "type": "boolean" },
+        "intervals": { "type": "array", "items": { "$ref": "#/$defs/interval" } }
+      }
+    },
+    "calendarException": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exception_id", "name", "start_date", "finish_date", "working", "intervals", "source_type_code", "occurrences"],
+      "properties": {
+        "exception_id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "start_date": { "type": "string", "format": "date-time" },
+        "finish_date": { "type": "string", "format": "date-time" },
+        "working": { "type": "boolean" },
+        "intervals": { "type": "array", "items": { "$ref": "#/$defs/interval" } },
+        "source_type_code": { "type": "integer" },
+        "occurrences": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "calendar": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["calendar_id", "source_index", "name", "base_calendar_name", "week_days", "exceptions"],
+      "properties": {
+        "calendar_id": { "type": "string", "pattern": "^calendar:source:[1-9][0-9]*$" },
+        "source_index": { "type": "integer", "minimum": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "base_calendar_name": { "type": ["string", "null"] },
+        "week_days": { "type": "array", "minItems": 7, "maxItems": 7, "items": { "$ref": "#/$defs/weekDay" } },
+        "exceptions": { "type": "array", "items": { "$ref": "#/$defs/calendarException" } }
+      }
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bridge_task_id",
+        "source_id",
+        "source_unique_id",
+        "parent_task_id",
+        "name",
+        "outline_level",
+        "wbs",
+        "task_type",
+        "summary",
+        "milestone",
+        "scheduling_mode",
+        "active",
+        "start",
+        "finish",
+        "duration_minutes",
+        "project_rollup_duration_minutes",
+        "percent_complete",
+        "constraint_type_code",
+        "constraint_type",
+        "constraint_date",
+        "deadline",
+        "calendar_id",
+        "source_calendar_name",
+        "predecessors_text"
+      ],
+      "properties": {
+        "bridge_task_id": { "type": "string", "pattern": "^source-uid:[1-9][0-9]*$" },
+        "source_id": { "type": "integer", "minimum": 1 },
+        "source_unique_id": { "type": "integer", "minimum": 1 },
+        "parent_task_id": { "type": ["string", "null"], "pattern": "^source-uid:[1-9][0-9]*$" },
+        "name": { "type": "string", "minLength": 1 },
+        "outline_level": { "type": "integer", "minimum": 1 },
+        "wbs": { "type": "string", "minLength": 1 },
+        "task_type": { "enum": ["TASK", "SUMMARY", "MILESTONE"] },
+        "summary": { "type": "boolean" },
+        "milestone": { "type": "boolean" },
+        "scheduling_mode": { "enum": ["AUTO", "MANUAL"] },
+        "active": { "type": "boolean" },
+        "start": { "type": "string", "format": "date-time" },
+        "finish": { "type": "string", "format": "date-time" },
+        "duration_minutes": { "type": ["integer", "null"], "minimum": 0 },
+        "project_rollup_duration_minutes": { "type": "integer", "minimum": 0 },
+        "percent_complete": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "constraint_type_code": { "type": "integer", "minimum": 0, "maximum": 7 },
+        "constraint_type": { "enum": ["ASAP", "ALAP", "MSO", "MFO", "SNET", "SNLT", "FNET", "FNLT"] },
+        "constraint_date": { "type": ["string", "null"], "format": "date-time" },
+        "deadline": { "type": ["string", "null"], "format": "date-time" },
+        "calendar_id": { "type": "string", "minLength": 1 },
+        "source_calendar_name": { "type": ["string", "null"] },
+        "predecessors_text": { "type": "string" }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dependency_id", "predecessor_task_id", "successor_task_id", "type", "source_type_code", "lag_minutes"],
+      "properties": {
+        "dependency_id": { "type": "string", "minLength": 1 },
+        "predecessor_task_id": { "type": "string", "minLength": 1 },
+        "successor_task_id": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["FS", "SS", "FF", "SF", "UNKNOWN"] },
+        "source_type_code": { "type": "integer" },
+        "lag_minutes": { "type": "integer" }
+      }
+    },
+    "unsupported": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "severity", "object_type", "object_refs", "detail"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "severity": { "enum": ["BLOCKER", "WARNING"] },
+        "object_type": { "type": "string", "minLength": 1 },
+        "object_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "detail": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

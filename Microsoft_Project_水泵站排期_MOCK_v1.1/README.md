@@ -21,6 +21,7 @@
 主要文件：
 
 - `Microsoft_Project_水泵站排期_MOCK_v1.1.json`：直接交给案例程序的 JSON。
+- `Microsoft_Project_水泵站排期_MOCK_v1.1_no_milestones.json`：去里程碑变体，把 4 个里程碑改为 480 分钟活动任务（计划日期保留），用于跑通 CPM 与工期目标优化主链路；汇总滚算时长保留原始观测值，不作为 Project 重算结果。
 - `source/water_pump_station_schedule_mock_v1_1.mpp`：生成和计算该 JSON 的 Project 源文件。
 - `project_observation_raw.json`：Microsoft Project COM 原始观测，便于审计。
 - `manifest.json`：文件大小和 SHA-256。

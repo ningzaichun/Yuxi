@@ -1,0 +1,33 @@
+{
+  "schema_version": "clean_mpp_acceptance_summary_v1",
+  "overall_status": "PASS",
+  "data_classification": "SYNTHETIC_BUSINESS_LIKE_TEST_DATA",
+  "cases": [
+    {
+      "case_id": "A_ROAD_DRAINAGE_CLEAN",
+      "project_name": "市政道路雨污分流改造工程",
+      "status": "PASS",
+      "delivery_file": "A_road_drainage_clean.mpp",
+      "tasks": 46,
+      "dependencies": 48,
+      "resources": 0,
+      "assignments": 0,
+      "start": "2027-03-01T08:00:00",
+      "finish": "2027-07-02T17:00:00",
+      "failed_checks": []
+    },
+    {
+      "case_id": "B_SUBSTATION_CLEAN",
+      "project_name": "110kV 变电站一次设备安装与投运工程",
+      "status": "PASS",
+      "delivery_file": "B_substation_clean.mpp",
+      "tasks": 62,
+      "dependencies": 65,
+      "resources": 0,
+      "assignments": 0,
+      "start": "2027-06-07T08:00:00",
+      "finish": "2027-08-16T17:00:00",
+      "failed_checks": []
+    }
+  ]
+}

@@ -1,0 +1,1386 @@
+{
+  "schema_version": "clean_mpp_build_specs_v1",
+  "projects": [
+    {
+      "constraints": [],
+      "start": "2027-03-01 08:00",
+      "deadlines": [],
+      "name": "市政道路雨污分流改造工程",
+      "code": "A",
+      "links": [
+        {
+          "to": "drawing",
+          "from": "start",
+          "type": 1
+        },
+        {
+          "to": "survey",
+          "from": "start",
+          "type": 1
+        },
+        {
+          "to": "utility",
+          "from": "start",
+          "type": 1
+        },
+        {
+          "to": "traffic",
+          "from": "drawing",
+          "type": 1
+        },
+        {
+          "to": "fence",
+          "from": "traffic",
+          "type": 1
+        },
+        {
+          "to": "temporary",
+          "from": "traffic",
+          "type": 1
+        },
+        {
+          "to": "ready",
+          "from": "survey",
+          "type": 1
+        },
+        {
+          "to": "ready",
+          "from": "utility",
+          "type": 1
+        },
+        {
+          "to": "ready",
+          "from": "fence",
+          "type": 1
+        },
+        {
+          "to": "ready",
+          "from": "temporary",
+          "type": 1
+        },
+        {
+          "to": "a_layout",
+          "from": "ready",
+          "type": 1
+        },
+        {
+          "to": "a_break",
+          "from": "a_layout",
+          "type": 1
+        },
+        {
+          "to": "a_excavate",
+          "from": "a_break",
+          "type": 1
+        },
+        {
+          "to": "a_support",
+          "from": "a_excavate",
+          "type": 3
+        },
+        {
+          "to": "a_base",
+          "from": "a_excavate",
+          "type": 1
+        },
+        {
+          "to": "a_storm",
+          "from": "a_base",
+          "type": 1
+        },
+        {
+          "to": "a_sewer",
+          "from": "a_base",
+          "type": 1
+        },
+        {
+          "to": "a_well",
+          "from": "a_storm",
+          "type": 1
+        },
+        {
+          "to": "a_well",
+          "from": "a_sewer",
+          "type": 1
+        },
+        {
+          "to": "a_test",
+          "from": "a_well",
+          "type": 1
+        },
+        {
+          "to": "a_backfill",
+          "from": "a_test",
+          "type": 1
+        },
+        {
+          "to": "a_subbase",
+          "from": "a_backfill",
+          "type": 1
+        },
+        {
+          "to": "a_done",
+          "from": "a_subbase",
+          "type": 1
+        },
+        {
+          "to": "b_layout",
+          "from": "a_done",
+          "type": 1
+        },
+        {
+          "to": "b_break",
+          "from": "b_layout",
+          "type": 1
+        },
+        {
+          "to": "b_excavate",
+          "from": "b_break",
+          "type": 1
+        },
+        {
+          "to": "b_support",
+          "from": "b_excavate",
+          "type": 3
+        },
+        {
+          "to": "b_base",
+          "from": "b_excavate",
+          "type": 1
+        },
+        {
+          "to": "b_storm",
+          "from": "b_base",
+          "type": 1
+        },
+        {
+          "to": "b_sewer",
+          "from": "b_base",
+          "type": 1
+        },
+        {
+          "to": "b_well",
+          "from": "b_storm",
+          "type": 1
+        },
+        {
+          "to": "b_well",
+          "from": "b_sewer",
+          "type": 1
+        },
+        {
+          "to": "b_test",
+          "from": "b_well",
+          "type": 1
+        },
+        {
+          "to": "b_backfill",
+          "from": "b_test",
+          "type": 1
+        },
+        {
+          "to": "b_subbase",
+          "from": "b_backfill",
+          "type": 1
+        },
+        {
+          "to": "b_done",
+          "from": "b_subbase",
+          "type": 1
+        },
+        {
+          "to": "cctv",
+          "from": "a_done",
+          "type": 1
+        },
+        {
+          "to": "cctv",
+          "from": "b_done",
+          "type": 1
+        },
+        {
+          "to": "commission",
+          "from": "cctv",
+          "type": 1
+        },
+        {
+          "to": "surface",
+          "from": "commission",
+          "type": 1
+        },
+        {
+          "to": "marking",
+          "from": "surface",
+          "type": 1
+        },
+        {
+          "to": "final_survey",
+          "from": "surface",
+          "type": 1
+        },
+        {
+          "to": "documents",
+          "from": "commission",
+          "type": 1
+        },
+        {
+          "to": "preaccept",
+          "from": "marking",
+          "type": 1
+        },
+        {
+          "to": "preaccept",
+          "from": "final_survey",
+          "type": 1
+        },
+        {
+          "to": "preaccept",
+          "from": "documents",
+          "type": 1
+        },
+        {
+          "to": "rectify",
+          "from": "preaccept",
+          "type": 1
+        },
+        {
+          "to": "accept",
+          "from": "rectify",
+          "type": 1
+        }
+      ],
+      "file_name": "A_road_drainage_clean.mpp",
+      "tasks": [
+        {
+          "key": "root",
+          "duration": 0,
+          "level": 1,
+          "summary": true,
+          "name": "市政道路雨污分流改造工程"
+        },
+        {
+          "key": "prep",
+          "duration": 0,
+          "level": 2,
+          "summary": true,
+          "name": "前期准备与开工"
+        },
+        {
+          "key": "start",
+          "duration": 0,
+          "level": 3,
+          "summary": false,
+          "name": "项目启动"
+        },
+        {
+          "key": "drawing",
+          "duration": 960,
+          "level": 3,
+          "summary": false,
+          "name": "施工图会审"
+        },
+        {
+          "key": "survey",
+          "duration": 1440,
+          "level": 3,
+          "summary": false,
+          "name": "道路控制测量"
+        },
+        {
+          "key": "utility",
+          "duration": 1920,
+          "level": 3,
+          "summary": false,
+          "name": "地下管线探测"
+        },
+        {
+          "key": "traffic",
+          "duration": 1440,
+          "level": 3,
+          "summary": false,
+          "name": "交通导改方案审批"
+        },
+        {
+          "key": "fence",
+          "duration": 960,
+          "level": 3,
+          "summary": false,
+          "name": "现场围挡施工"
+        },
+        {
+          "key": "temporary",
+          "duration": 1440,
+          "level": 3,
+          "summary": false,
+          "name": "临建设施布置"
+        },
+        {
+          "key": "ready",
+          "duration": 0,
+          "level": 3,
+          "summary": false,
+          "name": "开工条件确认"
+        },
+        {
+          "key": "section_a",
+          "duration": 0,
+          "level": 2,
+          "summary": true,
+          "name": "第一施工段"
+        },
+        {
+          "key": "a_layout",
+          "duration": 480,
+          "level": 3,
+          "summary": false,
+          "name": "第一段测量放样"
+        },
+        {
+          "key": "a_break",
+          "duration": 1440,
+          "level": 3,
+          "summary": false,
+          "name": "第一段路面破除"
+        },
+        {
+          "key": "a_excavate",
+          "duration": 2400,
+          "level": 3,
+          "summary": false,
+          "name": "第一段沟槽开挖"
+        },
+        {
+          "key": "a_support",
+          "duration": 1440,
+          "level": 3,
+          "summary": false,
+          "name": "第一段沟槽支护"
+        },
+        {
+          "key": "a_base",
+          "duration": 960,
+          "level": 3,
+          "summary": false,
+          "name": "第一段管道基础"
+        },
+        {
+          "key": "a_storm",
+          "duration": 2400,
+          "level": 3,
+          "summary": false,
+          "name": "第一段雨水管安装"
+        },
+        {
+          "key": "a_sewer",
+          "duration": 2400,
+          "level": 3,
+          "summary": false,
+          "name": "第一段污水管安装"
+        },
+        {
+          "key": "a_well",
+          "duration": 1920,
+          "level": 3,
+          "summary": false,
+          "name": "第一段检查井施工"
+        },
+        {
+          "key": "a_test",
+          "duration": 960,
+          "level": 3,
+          "summary": false,
+          "name": "第一段闭水试验"
+        },
+        {
+          "key": "a_backfill",
+          "duration": 1440,
+          "level": 3,
+          "summary": false,
+          "name": "第一段沟槽回填"
+        },
+        {
+          "key": "a_subbase",
+          "duration": 1920,
+          "level": 3,
+          "summary": false,
+          "name": "第一段道路基层恢复"
+        },
+        {
+          "key": "a_done",
+          "duration": 0,
+          "level": 3,
+          "summary": false,
+          "name": "第一施工段完成"
+        },
+        {
+          "key": "section_b",
+          "duration": 0,
+          "level": 2,
+          "summary": true,
+          "name": "第二施工段"
+        },
+        {
+          "key": "b_layout",
+          "duration": 480,
+          "level": 3,
+          "summary": false,
+          "name": "第二段测量放样"
+        },
+        {
+          "key": "b_break",
+          "duration": 1920,
+          "level": 3,
+          "summary": false,
+          "name": "第二段路面破除"
+        },
+        {
+          "key": "b_excavate",
+          "duration": 2880,
+          "level": 3,
+          "summary": false,
+          "name": "第二段沟槽开挖"
+        },
+        {
+          "key": "b_support",
+          "duration": 1920,
+          "level": 3,
+          "summary": false,
+          "name": "第二段沟槽支护"
+        },
+        {
+          "key": "b_base",
+          "duration": 1440,
+          "level": 3,
+          "summary": false,
+          "name": "第二段砂石基础"
+        },
+        {
+          "key": "b_storm",
+          "duration": 3360,
+          "level": 3,
+          "summary": false,
+          "name": "第二段雨水箱涵施工"
+        },
+        {
+          "key": "b_sewer",
+          "duration": 2400,
+          "level": 3,
+          "summary": false,
+          "name": "第二段污水管安装"
+        },
+        {
+          "key": "b_well",
+          "duration": 2400,
+          "level": 3,
+          "summary": false,
+          "name": "第二段检查井施工"
+        },
+        {
+          "key": "b_test",
+          "duration": 960,
+          "level": 3,
+          "summary": false,
+          "name": "第二段闭水试验"
+        },
+        {
+          "key": "b_backfill",
+          "duration": 1920,
+          "level": 3,
+          "summary": false,
+          "name": "第二段分层回填"
+        },
+        {
+          "key": "b_subbase",
+          "duration": 2400,
+          "level": 3,
+          "summary": false,
+          "name": "第二段道路基层恢复"
+        },
+        {
+          "key": "b_done",
+          "duration": 0,
+          "level": 3,
+          "summary": false,
+          "name": "第二施工段完成"
+        },
+        {
+          "key": "close",
+          "duration": 0,
+          "level": 2,
+          "summary": true,
+          "name": "全线恢复与验收"
+        },
+        {
+          "key": "cctv",
+          "duration": 1440,
+          "level": 3,
+          "summary": false,
+          "name": "管道 CCTV 检测"
+        },
+        {
+          "key": "commission",
+          "duration": 960,
+          "level": 3,
+          "summary": false,
+          "name": "雨污系统联调"
+        },
+        {
+          "key": "surface",
+          "duration": 2400,
+          "level": 3,
+          "summary": false,
+          "name": "道路面层恢复"
+        },
+        {
+          "key": "marking",
+          "duration": 960,
+          "level": 3,
+          "summary": false,
+          "name": "交通标线恢复"
+        },
+        {
+          "key": "final_survey",
+          "duration": 960,
+          "level": 3,
+          "summary": false,
+          "name": "竣工测量"
+        },
+        {
+          "key": "documents",
+          "duration": 1920,
+          "level": 3,
+          "summary": false,
+          "name": "竣工资料汇编"
+        },
+        {
+          "key": "preaccept",
+          "duration": 480,
+          "level": 3,
+          "summary": false,
+          "name": "工程预验收"
+        },
+        {
+          "key": "rectify",
+          "duration": 1440,
+          "level": 3,
+          "summary": false,
+          "name": "预验收问题整改"
+        },
+        {
+          "key": "accept",
+          "duration": 0,
+          "level": 3,
+          "summary": false,
+          "name": "竣工验收"
+        }
+      ]
+    },
+    {
+      "constraints": [
+        {
+          "key": "handover",
+          "date": "2027-06-07 08:00",
+          "type": 2
+        },
+        {
+          "key": "tr_base",
+          "date": "2027-06-10 08:00",
+          "type": 4
+        },
+        {
+          "key": "gis_arrival",
+          "date": "2027-06-21 08:00",
+          "type": 4
+        },
+        {
+          "key": "integrated",
+          "date": "2027-08-02 17:00",
+          "type": 6
+        },
+        {
+          "key": "pre_grid",
+          "date": "2027-09-30 17:00",
+          "type": 7
+        }
+      ],
+      "start": "2027-06-07 08:00",
+      "deadlines": [
+        {
+          "key": "energize",
+          "date": "2027-10-15 17:00"
+        }
+      ],
+      "name": "110kV 变电站一次设备安装与投运工程",
+      "code": "B",
+      "links": [
+        {
+          "to": "design",
+          "from": "handover",
+          "type": 1
+        },
+        {
+          "to": "delivery_plan",
+          "from": "design",
+          "type": 1
+        },
+        {
+          "to": "method",
+          "from": "design",
+          "type": 1
+        },
+        {
+          "to": "safety",
+          "from": "method",
+          "type": 1
+        },
+        {
+          "to": "ready",
+          "from": "delivery_plan",
+          "type": 1
+        },
+        {
+          "to": "ready",
+          "from": "safety",
+          "type": 1
+        },
+        {
+          "to": "tr_base",
+          "from": "ready",
+          "type": 1
+        },
+        {
+          "to": "tr_arrival",
+          "from": "delivery_plan",
+          "lag": 1440,
+          "type": 1
+        },
+        {
+          "to": "tr_position",
+          "from": "tr_base",
+          "type": 1
+        },
+        {
+          "to": "tr_position",
+          "from": "tr_arrival",
+          "type": 1
+        },
+        {
+          "to": "tr_accessory",
+          "from": "tr_position",
+          "lag": 480,
+          "type": 1
+        },
+        {
+          "to": "tr_oil",
+          "from": "tr_accessory",
+          "type": 1
+        },
+        {
+          "to": "tr_settle",
+          "from": "tr_oil",
+          "type": 1
+        },
+        {
+          "to": "tr_test",
+          "from": "tr_settle",
+          "type": 1
+        },
+        {
+          "to": "tr_done",
+          "from": "tr_test",
+          "type": 1
+        },
+        {
+          "to": "gis_base",
+          "from": "ready",
+          "type": 1
+        },
+        {
+          "to": "gis_arrival",
+          "from": "delivery_plan",
+          "lag": 960,
+          "type": 1
+        },
+        {
+          "to": "gis_install",
+          "from": "gis_base",
+          "type": 1
+        },
+        {
+          "to": "gis_install",
+          "from": "gis_arrival",
+          "type": 1
+        },
+        {
+          "to": "bus",
+          "from": "gis_install",
+          "type": 1
+        },
+        {
+          "to": "sf6",
+          "from": "bus",
+          "type": 1
+        },
+        {
+          "to": "gis_test",
+          "from": "sf6",
+          "type": 1
+        },
+        {
+          "to": "gis_done",
+          "from": "gis_test",
+          "type": 1
+        },
+        {
+          "to": "panel_base",
+          "from": "ready",
+          "type": 1
+        },
+        {
+          "to": "panel",
+          "from": "panel_base",
+          "type": 1
+        },
+        {
+          "to": "tray",
+          "from": "panel_base",
+          "type": 1
+        },
+        {
+          "to": "cable_lay",
+          "from": "tray",
+          "lag": 480,
+          "type": 3
+        },
+        {
+          "to": "wire_check",
+          "from": "cable_lay",
+          "type": 0
+        },
+        {
+          "to": "terminal",
+          "from": "wire_check",
+          "type": 1
+        },
+        {
+          "to": "cable_done",
+          "from": "panel",
+          "type": 1
+        },
+        {
+          "to": "cable_done",
+          "from": "terminal",
+          "type": 1
+        },
+        {
+          "to": "setting",
+          "from": "delivery_plan",
+          "type": 1
+        },
+        {
+          "to": "unit_test",
+          "from": "cable_done",
+          "type": 1
+        },
+        {
+          "to": "unit_test",
+          "from": "setting",
+          "type": 1
+        },
+        {
+          "to": "loop",
+          "from": "unit_test",
+          "type": 1
+        },
+        {
+          "to": "integrated",
+          "from": "loop",
+          "type": 1
+        },
+        {
+          "to": "integrated",
+          "from": "tr_done",
+          "type": 1
+        },
+        {
+          "to": "integrated",
+          "from": "gis_done",
+          "type": 1
+        },
+        {
+          "to": "relay_done",
+          "from": "integrated",
+          "type": 1
+        },
+        {
+          "to": "ground_install",
+          "from": "ready",
+          "type": 1
+        },
+        {
+          "to": "ground_review",
+          "from": "ground_install",
+          "lag": -480,
+          "type": 1
+        },
+        {
+          "to": "ground_test",
+          "from": "ground_review",
+          "type": 1
+        },
+        {
+          "to": "ground_done",
+          "from": "ground_test",
+          "type": 1
+        },
+        {
+          "to": "temporary_power",
+          "from": "ready",
+          "type": 1
+        },
+        {
+          "to": "station_transformer",
+          "from": "ready",
+          "type": 1
+        },
+        {
+          "to": "lv_panel",
+          "from": "ready",
+          "type": 1
+        },
+        {
+          "to": "power_switch",
+          "from": "station_transformer",
+          "type": 1
+        },
+        {
+          "to": "power_switch",
+          "from": "lv_panel",
+          "type": 1
+        },
+        {
+          "to": "temporary_power",
+          "from": "power_switch",
+          "type": 2
+        },
+        {
+          "to": "power_done",
+          "from": "power_switch",
+          "type": 1
+        },
+        {
+          "to": "interlock",
+          "from": "relay_done",
+          "type": 1
+        },
+        {
+          "to": "interlock",
+          "from": "power_done",
+          "type": 1
+        },
+        {
+          "to": "remote",
+          "from": "relay_done",
+          "type": 1
+        },
+        {
+          "to": "pre_grid",
+          "from": "gis_done",
+          "type": 1
+        },
+        {
+          "to": "pre_grid",
+          "from": "tr_done",
+          "type": 1
+        },
+        {
+          "to": "pre_grid",
+          "from": "relay_done",
+          "type": 1
+        },
+        {
+          "to": "pre_grid",
+          "from": "ground_done",
+          "type": 1
+        },
+        {
+          "to": "pre_grid",
+          "from": "power_done",
+          "type": 1
+        },
+        {
+          "to": "defect",
+          "from": "interlock",
+          "type": 1
+        },
+        {
+          "to": "defect",
+          "from": "remote",
+          "type": 1
+        },
+        {
+          "to": "defect",
+          "from": "pre_grid",
+          "type": 1
+        },
+        {
+          "to": "plan_approved",
+          "from": "defect",
+          "type": 1
+        },
+        {
+          "to": "energize",
+          "from": "plan_approved",
+          "type": 1
+        },
+        {
+          "to": "trial",
+          "from": "energize",
+          "type": 1
+        },
+        {
+          "to": "handoff",
+          "from": "trial",
+          "type": 1
+        }
+      ],
+      "file_name": "B_substation_clean.mpp",
+      "tasks": [
+        {
+          "key": "root",
+          "duration": 0,
+          "level": 1,
+          "summary": true,
+          "name": "110kV 变电站一次设备安装与投运工程"
+        },
+        {
+          "key": "prep",
+          "duration": 0,
+          "level": 2,
+          "summary": true,
+          "name": "工程准备"
+        },
+        {
+          "key": "handover",
+          "duration": 0,
+          "level": 3,
+          "summary": false,
+          "name": "现场移交"
+        },
+        {
+          "key": "design",
+          "duration": 960,
+          "level": 3,
+          "summary": false,
+          "name": "设计交底"
+        },
+        {
+          "key": "delivery_plan",
+          "duration": 1440,
+          "level": 3,
+          "summary": false,
+          "name": "设备到货计划确认"
+        },
+        {
+          "key": "method",
+          "duration": 1920,
+          "level": 3,
+          "summary": false,
+          "name": "施工组织设计审批"
+        },
+        {
+          "key": "safety",
+          "duration": 480,
+          "level": 3,
+          "summary": false,
+          "name": "安全技术交底"
+        },
+        {
+          "key": "ready",
+          "duration": 0,
+          "level": 3,
+          "summary": false,
+          "name": "安装开工条件确认"
+        },
+        {
+          "key": "primary",
+          "duration": 0,
+          "level": 2,
+          "summary": true,
+          "name": "一次设备安装"
+        },
+        {
+          "key": "transformer",
+          "duration": 0,
+          "level": 3,
+          "summary": true,
+          "name": "主变压器系统"
+        },
+        {
+          "key": "tr_base",
+          "duration": 960,
+          "level": 4,
+          "summary": false,
+          "name": "主变基础复测"
+        },
+        {
+          "key": "tr_arrival",
+          "duration": 0,
+          "level": 4,
+          "summary": false,
+          "name": "主变到货"
+        },
+        {
+          "key": "tr_position",
+          "duration": 960,
+          "level": 4,
+          "summary": false,
+          "name": "主变卸车就位"
+        },
+        {
+          "key": "tr_accessory",
+          "duration": 2400,
+          "level": 4,
+          "summary": false,
+          "name": "主变附件安装"
+        },
+        {
+          "key": "tr_oil",
+          "duration": 1440,
+          "level": 4,
+          "summary": false,
+          "name": "主变真空注油"
+        },
+        {
+          "key": "tr_settle",
+          "duration": 960,
+          "level": 4,
+          "summary": false,
+          "name": "绝缘油静置"
+        },
+        {
+          "key": "tr_test",
+          "duration": 1920,
+          "level": 4,
+          "summary": false,
+          "name": "主变交接试验"
+        },
+        {
+          "key": "tr_done",
+          "duration": 0,
+          "level": 4,
+          "summary": false,
+          "name": "主变系统安装完成"
+        },
+        {
+          "key": "gis",
+          "duration": 0,
+          "level": 3,
+          "summary": true,
+          "name": "GIS 系统"
+        },
+        {
+          "key": "gis_base",
+          "duration": 960,
+          "level": 4,
+          "summary": false,
+          "name": "GIS 基础复测"
+        },
+        {
+          "key": "gis_arrival",
+          "duration": 0,
+          "level": 4,
+          "summary": false,
+          "name": "GIS 设备到货"
+        },
+        {
+          "key": "gis_install",
+          "duration": 3360,
+          "level": 4,
+          "summary": false,
+          "name": "GIS 间隔安装"
+        },
+        {
+          "key": "bus",
+          "duration": 1920,
+          "level": 4,
+          "summary": false,
+          "name": "母线连接"
+        },
+        {
+          "key": "sf6",
+          "duration": 1440,
+          "level": 4,
+          "summary": false,
+          "name": "SF6 充气与检漏"
+        },
+        {
+          "key": "gis_test",
+          "duration": 960,
+          "level": 4,
+          "summary": false,
+          "name": "GIS 交流耐压试验"
+        },
+        {
+          "key": "gis_done",
+          "duration": 0,
+          "level": 4,
+          "summary": false,
+          "name": "GIS 系统完成"
+        },
+        {
+          "key": "secondary",
+          "duration": 0,
+          "level": 2,
+          "summary": true,
+          "name": "二次系统安装与调试"
+        },
+        {
+          "key": "cable",
+          "duration": 0,
+          "level": 3,
+          "summary": true,
+          "name": "盘柜与电缆"
+        },
+        {
+          "key": "panel_base",
+          "duration": 480,
+          "level": 4,
+          "summary": false,
+          "name": "盘柜基础复测"
+        },
+        {
+          "key": "panel",
+          "duration": 1920,
+          "level": 4,
+          "summary": false,
+          "name": "保护屏及控制屏安装"
+        },
+        {
+          "key": "tray",
+          "duration": 2400,
+          "level": 4,
+          "summary": false,
+          "name": "电缆支架安装"
+        },
+        {
+          "key": "cable_lay",
+          "duration": 2880,
+          "level": 4,
+          "summary": false,
+          "name": "二次电缆敷设"
+        },
+        {
+          "key": "wire_check",
+          "duration": 1920,
+          "level": 4,
+          "summary": false,
+          "name": "控制电缆校线"
+        },
+        {
+          "key": "terminal",
+          "duration": 2400,
+          "level": 4,
+          "summary": false,
+          "name": "端子接线"
+        },
+        {
+          "key": "cable_done",
+          "duration": 0,
+          "level": 4,
+          "summary": false,
+          "name": "盘柜电缆安装完成"
+        },
+        {
+          "key": "relay",
+          "duration": 0,
+          "level": 3,
+          "summary": true,
+          "name": "继电保护调试"
+        },
+        {
+          "key": "setting",
+          "duration": 0,
+          "level": 4,
+          "summary": false,
+          "name": "保护定值下发"
+        },
+        {
+          "key": "unit_test",
+          "duration": 1920,
+          "level": 4,
+          "summary": false,
+          "name": "保护装置单体校验"
+        },
+        {
+          "key": "loop",
+          "duration": 2400,
+          "level": 4,
+          "summary": false,
+          "name": "二次回路传动"
+        },
+        {
+          "key": "integrated",
+          "duration": 1440,
+          "level": 4,
+          "summary": false,
+          "name": "继保整组试验"
+        },
+        {
+          "key": "relay_done",
+          "duration": 0,
+          "level": 4,
+          "summary": false,
+          "name": "继保调试完成"
+        },
+        {
+          "key": "auxiliary",
+          "duration": 0,
+          "level": 2,
+          "summary": true,
+          "name": "站用电与接地"
+        },
+        {
+          "key": "ground",
+          "duration": 0,
+          "level": 3,
+          "summary": true,
+          "name": "接地系统"
+        },
+        {
+          "key": "ground_install",
+          "duration": 3360,
+          "level": 4,
+          "summary": false,
+          "name": "接地网施工"
+        },
+        {
+          "key": "ground_review",
+          "duration": 1440,
+          "level": 4,
+          "summary": false,
+          "name": "接地网隐蔽复测"
+        },
+        {
+          "key": "ground_test",
+          "duration": 480,
+          "level": 4,
+          "summary": false,
+          "name": "接地电阻测试"
+        },
+        {
+          "key": "ground_done",
+          "duration": 0,
+          "level": 4,
+          "summary": false,
+          "name": "接地系统完成"
+        },
+        {
+          "key": "station_power",
+          "duration": 0,
+          "level": 3,
+          "summary": true,
+          "name": "站用电系统"
+        },
+        {
+          "key": "temporary_power",
+          "duration": 960,
+          "level": 4,
+          "summary": false,
+          "name": "临时供电保障"
+        },
+        {
+          "key": "station_transformer",
+          "duration": 1920,
+          "level": 4,
+          "summary": false,
+          "name": "站用变安装"
+        },
+        {
+          "key": "lv_panel",
+          "duration": 1920,
+          "level": 4,
+          "summary": false,
+          "name": "低压柜安装"
+        },
+        {
+          "key": "power_switch",
+          "duration": 480,
+          "level": 4,
+          "summary": false,
+          "name": "正式站用电切换"
+        },
+        {
+          "key": "power_done",
+          "duration": 0,
+          "level": 4,
+          "summary": false,
+          "name": "站用电系统完成"
+        },
+        {
+          "key": "commissioning",
+          "duration": 0,
+          "level": 2,
+          "summary": true,
+          "name": "投运与验收"
+        },
+        {
+          "key": "interlock",
+          "duration": 1440,
+          "level": 3,
+          "summary": false,
+          "name": "五防闭锁联调"
+        },
+        {
+          "key": "remote",
+          "duration": 1920,
+          "level": 3,
+          "summary": false,
+          "name": "远动通信联调"
+        },
+        {
+          "key": "pre_grid",
+          "duration": 960,
+          "level": 3,
+          "summary": false,
+          "name": "并网前专项验收"
+        },
+        {
+          "key": "defect",
+          "duration": 1440,
+          "level": 3,
+          "summary": false,
+          "name": "投运前缺陷整改"
+        },
+        {
+          "key": "plan_approved",
+          "duration": 0,
+          "level": 3,
+          "summary": false,
+          "name": "受电方案批准"
+        },
+        {
+          "key": "energize",
+          "duration": 0,
+          "level": 3,
+          "summary": false,
+          "name": "变电站受电投运"
+        },
+        {
+          "key": "trial",
+          "duration": 1440,
+          "level": 3,
+          "summary": false,
+          "name": "72 小时试运行"
+        },
+        {
+          "key": "handoff",
+          "duration": 0,
+          "level": 3,
+          "summary": false,
+          "name": "工程移交"
+        }
+      ]
+    }
+  ]
+}

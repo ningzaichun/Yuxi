@@ -1,0 +1,595 @@
+{
+  "schema_version": "clean_mpp_source_v1",
+  "case_id": "A_ROAD_DRAINAGE_CLEAN",
+  "project": {
+    "name": "市政道路雨污分流改造工程",
+    "planned_start": "2027-03-01T08:00:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "schedule_from_start": true
+  },
+  "calendar": {
+    "name": "标准工作周",
+    "monday_to_friday": [
+      [
+        "08:00",
+        "12:00"
+      ],
+      [
+        "13:00",
+        "17:00"
+      ]
+    ],
+    "exceptions": []
+  },
+  "tasks": [
+    {
+      "key": "root",
+      "duration": 0,
+      "level": 1,
+      "summary": true,
+      "name": "市政道路雨污分流改造工程"
+    },
+    {
+      "key": "prep",
+      "duration": 0,
+      "level": 2,
+      "summary": true,
+      "name": "前期准备与开工"
+    },
+    {
+      "key": "start",
+      "duration": 0,
+      "level": 3,
+      "summary": false,
+      "name": "项目启动"
+    },
+    {
+      "key": "drawing",
+      "duration": 960,
+      "level": 3,
+      "summary": false,
+      "name": "施工图会审"
+    },
+    {
+      "key": "survey",
+      "duration": 1440,
+      "level": 3,
+      "summary": false,
+      "name": "道路控制测量"
+    },
+    {
+      "key": "utility",
+      "duration": 1920,
+      "level": 3,
+      "summary": false,
+      "name": "地下管线探测"
+    },
+    {
+      "key": "traffic",
+      "duration": 1440,
+      "level": 3,
+      "summary": false,
+      "name": "交通导改方案审批"
+    },
+    {
+      "key": "fence",
+      "duration": 960,
+      "level": 3,
+      "summary": false,
+      "name": "现场围挡施工"
+    },
+    {
+      "key": "temporary",
+      "duration": 1440,
+      "level": 3,
+      "summary": false,
+      "name": "临建设施布置"
+    },
+    {
+      "key": "ready",
+      "duration": 0,
+      "level": 3,
+      "summary": false,
+      "name": "开工条件确认"
+    },
+    {
+      "key": "section_a",
+      "duration": 0,
+      "level": 2,
+      "summary": true,
+      "name": "第一施工段"
+    },
+    {
+      "key": "a_layout",
+      "duration": 480,
+      "level": 3,
+      "summary": false,
+      "name": "第一段测量放样"
+    },
+    {
+      "key": "a_break",
+      "duration": 1440,
+      "level": 3,
+      "summary": false,
+      "name": "第一段路面破除"
+    },
+    {
+      "key": "a_excavate",
+      "duration": 2400,
+      "level": 3,
+      "summary": false,
+      "name": "第一段沟槽开挖"
+    },
+    {
+      "key": "a_support",
+      "duration": 1440,
+      "level": 3,
+      "summary": false,
+      "name": "第一段沟槽支护"
+    },
+    {
+      "key": "a_base",
+      "duration": 960,
+      "level": 3,
+      "summary": false,
+      "name": "第一段管道基础"
+    },
+    {
+      "key": "a_storm",
+      "duration": 2400,
+      "level": 3,
+      "summary": false,
+      "name": "第一段雨水管安装"
+    },
+    {
+      "key": "a_sewer",
+      "duration": 2400,
+      "level": 3,
+      "summary": false,
+      "name": "第一段污水管安装"
+    },
+    {
+      "key": "a_well",
+      "duration": 1920,
+      "level": 3,
+      "summary": false,
+      "name": "第一段检查井施工"
+    },
+    {
+      "key": "a_test",
+      "duration": 960,
+      "level": 3,
+      "summary": false,
+      "name": "第一段闭水试验"
+    },
+    {
+      "key": "a_backfill",
+      "duration": 1440,
+      "level": 3,
+      "summary": false,
+      "name": "第一段沟槽回填"
+    },
+    {
+      "key": "a_subbase",
+      "duration": 1920,
+      "level": 3,
+      "summary": false,
+      "name": "第一段道路基层恢复"
+    },
+    {
+      "key": "a_done",
+      "duration": 0,
+      "level": 3,
+      "summary": false,
+      "name": "第一施工段完成"
+    },
+    {
+      "key": "section_b",
+      "duration": 0,
+      "level": 2,
+      "summary": true,
+      "name": "第二施工段"
+    },
+    {
+      "key": "b_layout",
+      "duration": 480,
+      "level": 3,
+      "summary": false,
+      "name": "第二段测量放样"
+    },
+    {
+      "key": "b_break",
+      "duration": 1920,
+      "level": 3,
+      "summary": false,
+      "name": "第二段路面破除"
+    },
+    {
+      "key": "b_excavate",
+      "duration": 2880,
+      "level": 3,
+      "summary": false,
+      "name": "第二段沟槽开挖"
+    },
+    {
+      "key": "b_support",
+      "duration": 1920,
+      "level": 3,
+      "summary": false,
+      "name": "第二段沟槽支护"
+    },
+    {
+      "key": "b_base",
+      "duration": 1440,
+      "level": 3,
+      "summary": false,
+      "name": "第二段砂石基础"
+    },
+    {
+      "key": "b_storm",
+      "duration": 3360,
+      "level": 3,
+      "summary": false,
+      "name": "第二段雨水箱涵施工"
+    },
+    {
+      "key": "b_sewer",
+      "duration": 2400,
+      "level": 3,
+      "summary": false,
+      "name": "第二段污水管安装"
+    },
+    {
+      "key": "b_well",
+      "duration": 2400,
+      "level": 3,
+      "summary": false,
+      "name": "第二段检查井施工"
+    },
+    {
+      "key": "b_test",
+      "duration": 960,
+      "level": 3,
+      "summary": false,
+      "name": "第二段闭水试验"
+    },
+    {
+      "key": "b_backfill",
+      "duration": 1920,
+      "level": 3,
+      "summary": false,
+      "name": "第二段分层回填"
+    },
+    {
+      "key": "b_subbase",
+      "duration": 2400,
+      "level": 3,
+      "summary": false,
+      "name": "第二段道路基层恢复"
+    },
+    {
+      "key": "b_done",
+      "duration": 0,
+      "level": 3,
+      "summary": false,
+      "name": "第二施工段完成"
+    },
+    {
+      "key": "close",
+      "duration": 0,
+      "level": 2,
+      "summary": true,
+      "name": "全线恢复与验收"
+    },
+    {
+      "key": "cctv",
+      "duration": 1440,
+      "level": 3,
+      "summary": false,
+      "name": "管道 CCTV 检测"
+    },
+    {
+      "key": "commission",
+      "duration": 960,
+      "level": 3,
+      "summary": false,
+      "name": "雨污系统联调"
+    },
+    {
+      "key": "surface",
+      "duration": 2400,
+      "level": 3,
+      "summary": false,
+      "name": "道路面层恢复"
+    },
+    {
+      "key": "marking",
+      "duration": 960,
+      "level": 3,
+      "summary": false,
+      "name": "交通标线恢复"
+    },
+    {
+      "key": "final_survey",
+      "duration": 960,
+      "level": 3,
+      "summary": false,
+      "name": "竣工测量"
+    },
+    {
+      "key": "documents",
+      "duration": 1920,
+      "level": 3,
+      "summary": false,
+      "name": "竣工资料汇编"
+    },
+    {
+      "key": "preaccept",
+      "duration": 480,
+      "level": 3,
+      "summary": false,
+      "name": "工程预验收"
+    },
+    {
+      "key": "rectify",
+      "duration": 1440,
+      "level": 3,
+      "summary": false,
+      "name": "预验收问题整改"
+    },
+    {
+      "key": "accept",
+      "duration": 0,
+      "level": 3,
+      "summary": false,
+      "name": "竣工验收"
+    }
+  ],
+  "dependencies": [
+    {
+      "to": "drawing",
+      "from": "start",
+      "type": 1
+    },
+    {
+      "to": "survey",
+      "from": "start",
+      "type": 1
+    },
+    {
+      "to": "utility",
+      "from": "start",
+      "type": 1
+    },
+    {
+      "to": "traffic",
+      "from": "drawing",
+      "type": 1
+    },
+    {
+      "to": "fence",
+      "from": "traffic",
+      "type": 1
+    },
+    {
+      "to": "temporary",
+      "from": "traffic",
+      "type": 1
+    },
+    {
+      "to": "ready",
+      "from": "survey",
+      "type": 1
+    },
+    {
+      "to": "ready",
+      "from": "utility",
+      "type": 1
+    },
+    {
+      "to": "ready",
+      "from": "fence",
+      "type": 1
+    },
+    {
+      "to": "ready",
+      "from": "temporary",
+      "type": 1
+    },
+    {
+      "to": "a_layout",
+      "from": "ready",
+      "type": 1
+    },
+    {
+      "to": "a_break",
+      "from": "a_layout",
+      "type": 1
+    },
+    {
+      "to": "a_excavate",
+      "from": "a_break",
+      "type": 1
+    },
+    {
+      "to": "a_support",
+      "from": "a_excavate",
+      "type": 3
+    },
+    {
+      "to": "a_base",
+      "from": "a_excavate",
+      "type": 1
+    },
+    {
+      "to": "a_storm",
+      "from": "a_base",
+      "type": 1
+    },
+    {
+      "to": "a_sewer",
+      "from": "a_base",
+      "type": 1
+    },
+    {
+      "to": "a_well",
+      "from": "a_storm",
+      "type": 1
+    },
+    {
+      "to": "a_well",
+      "from": "a_sewer",
+      "type": 1
+    },
+    {
+      "to": "a_test",
+      "from": "a_well",
+      "type": 1
+    },
+    {
+      "to": "a_backfill",
+      "from": "a_test",
+      "type": 1
+    },
+    {
+      "to": "a_subbase",
+      "from": "a_backfill",
+      "type": 1
+    },
+    {
+      "to": "a_done",
+      "from": "a_subbase",
+      "type": 1
+    },
+    {
+      "to": "b_layout",
+      "from": "a_done",
+      "type": 1
+    },
+    {
+      "to": "b_break",
+      "from": "b_layout",
+      "type": 1
+    },
+    {
+      "to": "b_excavate",
+      "from": "b_break",
+      "type": 1
+    },
+    {
+      "to": "b_support",
+      "from": "b_excavate",
+      "type": 3
+    },
+    {
+      "to": "b_base",
+      "from": "b_excavate",
+      "type": 1
+    },
+    {
+      "to": "b_storm",
+      "from": "b_base",
+      "type": 1
+    },
+    {
+      "to": "b_sewer",
+      "from": "b_base",
+      "type": 1
+    },
+    {
+      "to": "b_well",
+      "from": "b_storm",
+      "type": 1
+    },
+    {
+      "to": "b_well",
+      "from": "b_sewer",
+      "type": 1
+    },
+    {
+      "to": "b_test",
+      "from": "b_well",
+      "type": 1
+    },
+    {
+      "to": "b_backfill",
+      "from": "b_test",
+      "type": 1
+    },
+    {
+      "to": "b_subbase",
+      "from": "b_backfill",
+      "type": 1
+    },
+    {
+      "to": "b_done",
+      "from": "b_subbase",
+      "type": 1
+    },
+    {
+      "to": "cctv",
+      "from": "a_done",
+      "type": 1
+    },
+    {
+      "to": "cctv",
+      "from": "b_done",
+      "type": 1
+    },
+    {
+      "to": "commission",
+      "from": "cctv",
+      "type": 1
+    },
+    {
+      "to": "surface",
+      "from": "commission",
+      "type": 1
+    },
+    {
+      "to": "marking",
+      "from": "surface",
+      "type": 1
+    },
+    {
+      "to": "final_survey",
+      "from": "surface",
+      "type": 1
+    },
+    {
+      "to": "documents",
+      "from": "commission",
+      "type": 1
+    },
+    {
+      "to": "preaccept",
+      "from": "marking",
+      "type": 1
+    },
+    {
+      "to": "preaccept",
+      "from": "final_survey",
+      "type": 1
+    },
+    {
+      "to": "preaccept",
+      "from": "documents",
+      "type": 1
+    },
+    {
+      "to": "rectify",
+      "from": "preaccept",
+      "type": 1
+    },
+    {
+      "to": "accept",
+      "from": "rectify",
+      "type": 1
+    }
+  ],
+  "constraints": [],
+  "deadlines": [],
+  "resources": [],
+  "assignments": [],
+  "data_classification": "SYNTHETIC_BUSINESS_LIKE_TEST_DATA"
+}

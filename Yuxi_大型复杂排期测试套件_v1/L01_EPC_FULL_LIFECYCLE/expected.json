@@ -1,0 +1,4803 @@
+{
+  "case_id": "L01_EPC_FULL_LIFECYCLE",
+  "status": "SUCCEEDED_WITH_ISSUES",
+  "project_dates": {
+    "start": "2027-01-04T08:00:00+08:00",
+    "finish": "2027-05-06T17:00:00+08:00"
+  },
+  "task_dates": [
+    {
+      "task_id": "task:p01-gate",
+      "start": "2027-01-25T12:00:00+08:00",
+      "finish": "2027-01-25T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg01-a01",
+      "start": "2027-01-04T08:00:00+08:00",
+      "finish": "2027-01-08T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg01-a02",
+      "start": "2027-01-11T08:00:00+08:00",
+      "finish": "2027-01-18T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg01-a03",
+      "start": "2027-01-12T08:00:00+08:00",
+      "finish": "2027-01-13T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg01-a04",
+      "start": "2027-01-13T08:00:00+08:00",
+      "finish": "2027-01-15T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg01-a05",
+      "start": "2027-01-12T08:00:00+08:00",
+      "finish": "2027-01-15T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg02-a01",
+      "start": "2027-01-04T13:00:00+08:00",
+      "finish": "2027-01-12T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg02-a02",
+      "start": "2027-01-12T13:00:00+08:00",
+      "finish": "2027-01-14T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg02-a03",
+      "start": "2027-01-13T13:00:00+08:00",
+      "finish": "2027-01-18T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg02-a04",
+      "start": "2027-01-15T13:00:00+08:00",
+      "finish": "2027-01-21T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg02-a05",
+      "start": "2027-01-14T13:00:00+08:00",
+      "finish": "2027-01-21T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg03-a01",
+      "start": "2027-01-05T08:00:00+08:00",
+      "finish": "2027-01-06T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg03-a02",
+      "start": "2027-01-07T08:00:00+08:00",
+      "finish": "2027-01-11T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg03-a03",
+      "start": "2027-01-08T08:00:00+08:00",
+      "finish": "2027-01-13T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg03-a04",
+      "start": "2027-01-13T08:00:00+08:00",
+      "finish": "2027-01-19T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg03-a05",
+      "start": "2027-01-12T08:00:00+08:00",
+      "finish": "2027-01-19T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg04-a01",
+      "start": "2027-01-05T13:00:00+08:00",
+      "finish": "2027-01-08T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg04-a02",
+      "start": "2027-01-08T13:00:00+08:00",
+      "finish": "2027-01-14T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg04-a03",
+      "start": "2027-01-11T13:00:00+08:00",
+      "finish": "2027-01-18T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg04-a04",
+      "start": "2027-01-15T13:00:00+08:00",
+      "finish": "2027-01-25T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg04-a05",
+      "start": "2027-01-21T13:00:00+08:00",
+      "finish": "2027-01-25T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg05-a01",
+      "start": "2027-01-06T08:00:00+08:00",
+      "finish": "2027-01-11T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg05-a02",
+      "start": "2027-01-12T08:00:00+08:00",
+      "finish": "2027-01-18T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg05-a03",
+      "start": "2027-01-13T08:00:00+08:00",
+      "finish": "2027-01-20T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg05-a04",
+      "start": "2027-01-20T08:00:00+08:00",
+      "finish": "2027-01-21T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p01-pkg05-a05",
+      "start": "2027-01-18T08:00:00+08:00",
+      "finish": "2027-01-20T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-gate",
+      "start": "2027-02-15T12:00:00+08:00",
+      "finish": "2027-02-15T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg01-a01",
+      "start": "2027-01-25T13:00:00+08:00",
+      "finish": "2027-02-02T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg01-a02",
+      "start": "2027-02-02T13:00:00+08:00",
+      "finish": "2027-02-04T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg01-a03",
+      "start": "2027-02-03T13:00:00+08:00",
+      "finish": "2027-02-08T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg01-a04",
+      "start": "2027-02-05T13:00:00+08:00",
+      "finish": "2027-02-11T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg01-a05",
+      "start": "2027-02-04T13:00:00+08:00",
+      "finish": "2027-02-11T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg02-a01",
+      "start": "2027-01-26T08:00:00+08:00",
+      "finish": "2027-01-27T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg02-a02",
+      "start": "2027-01-28T08:00:00+08:00",
+      "finish": "2027-02-01T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg02-a03",
+      "start": "2027-01-29T08:00:00+08:00",
+      "finish": "2027-02-03T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg02-a04",
+      "start": "2027-02-03T08:00:00+08:00",
+      "finish": "2027-02-09T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg02-a05",
+      "start": "2027-02-02T08:00:00+08:00",
+      "finish": "2027-02-09T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg03-a01",
+      "start": "2027-01-26T13:00:00+08:00",
+      "finish": "2027-01-29T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg03-a02",
+      "start": "2027-01-29T13:00:00+08:00",
+      "finish": "2027-02-04T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg03-a03",
+      "start": "2027-02-01T13:00:00+08:00",
+      "finish": "2027-02-08T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg03-a04",
+      "start": "2027-02-05T13:00:00+08:00",
+      "finish": "2027-02-15T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg03-a05",
+      "start": "2027-02-11T13:00:00+08:00",
+      "finish": "2027-02-15T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg04-a01",
+      "start": "2027-01-27T08:00:00+08:00",
+      "finish": "2027-02-01T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg04-a02",
+      "start": "2027-02-02T08:00:00+08:00",
+      "finish": "2027-02-08T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg04-a03",
+      "start": "2027-02-03T08:00:00+08:00",
+      "finish": "2027-02-10T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg04-a04",
+      "start": "2027-02-10T08:00:00+08:00",
+      "finish": "2027-02-11T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg04-a05",
+      "start": "2027-02-09T08:00:00+08:00",
+      "finish": "2027-02-11T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg05-a01",
+      "start": "2027-01-27T13:00:00+08:00",
+      "finish": "2027-02-03T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg05-a02",
+      "start": "2027-02-03T13:00:00+08:00",
+      "finish": "2027-02-11T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg05-a03",
+      "start": "2027-02-04T13:00:00+08:00",
+      "finish": "2027-02-08T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg05-a04",
+      "start": "2027-02-05T13:00:00+08:00",
+      "finish": "2027-02-10T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p02-pkg05-a05",
+      "start": "2027-02-02T13:00:00+08:00",
+      "finish": "2027-02-08T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-gate",
+      "start": "2027-03-05T17:00:00+08:00",
+      "finish": "2027-03-05T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg01-a01",
+      "start": "2027-02-15T13:00:00+08:00",
+      "finish": "2027-02-17T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg01-a02",
+      "start": "2027-02-17T13:00:00+08:00",
+      "finish": "2027-02-22T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg01-a03",
+      "start": "2027-02-18T13:00:00+08:00",
+      "finish": "2027-02-24T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg01-a04",
+      "start": "2027-02-23T13:00:00+08:00",
+      "finish": "2027-03-02T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg01-a05",
+      "start": "2027-02-22T13:00:00+08:00",
+      "finish": "2027-03-02T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg02-a01",
+      "start": "2027-02-16T08:00:00+08:00",
+      "finish": "2027-02-18T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg02-a02",
+      "start": "2027-02-19T08:00:00+08:00",
+      "finish": "2027-02-24T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg02-a03",
+      "start": "2027-02-22T08:00:00+08:00",
+      "finish": "2027-02-26T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg02-a04",
+      "start": "2027-02-26T08:00:00+08:00",
+      "finish": "2027-03-05T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg02-a05",
+      "start": "2027-03-04T08:00:00+08:00",
+      "finish": "2027-03-05T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg03-a01",
+      "start": "2027-02-16T13:00:00+08:00",
+      "finish": "2027-02-22T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg03-a02",
+      "start": "2027-02-22T13:00:00+08:00",
+      "finish": "2027-03-01T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg03-a03",
+      "start": "2027-02-23T13:00:00+08:00",
+      "finish": "2027-03-03T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg03-a04",
+      "start": "2027-03-02T13:00:00+08:00",
+      "finish": "2027-03-04T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg03-a05",
+      "start": "2027-03-01T13:00:00+08:00",
+      "finish": "2027-03-04T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg04-a01",
+      "start": "2027-02-17T08:00:00+08:00",
+      "finish": "2027-02-23T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg04-a02",
+      "start": "2027-02-24T08:00:00+08:00",
+      "finish": "2027-03-03T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg04-a03",
+      "start": "2027-02-25T08:00:00+08:00",
+      "finish": "2027-02-26T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg04-a04",
+      "start": "2027-02-26T08:00:00+08:00",
+      "finish": "2027-03-02T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg04-a05",
+      "start": "2027-02-25T08:00:00+08:00",
+      "finish": "2027-03-02T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg05-a01",
+      "start": "2027-02-17T13:00:00+08:00",
+      "finish": "2027-02-25T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg05-a02",
+      "start": "2027-02-25T13:00:00+08:00",
+      "finish": "2027-03-01T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg05-a03",
+      "start": "2027-02-26T13:00:00+08:00",
+      "finish": "2027-03-03T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg05-a04",
+      "start": "2027-03-02T13:00:00+08:00",
+      "finish": "2027-03-08T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p03-pkg05-a05",
+      "start": "2027-02-24T13:00:00+08:00",
+      "finish": "2027-03-03T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-gate",
+      "start": "2027-03-26T12:00:00+08:00",
+      "finish": "2027-03-26T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg01-a01",
+      "start": "2027-03-08T08:00:00+08:00",
+      "finish": "2027-03-10T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg01-a02",
+      "start": "2027-03-11T08:00:00+08:00",
+      "finish": "2027-03-16T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg01-a03",
+      "start": "2027-03-12T08:00:00+08:00",
+      "finish": "2027-03-18T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg01-a04",
+      "start": "2027-03-18T08:00:00+08:00",
+      "finish": "2027-03-25T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg01-a05",
+      "start": "2027-03-24T08:00:00+08:00",
+      "finish": "2027-03-25T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg02-a01",
+      "start": "2027-03-08T13:00:00+08:00",
+      "finish": "2027-03-12T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg02-a02",
+      "start": "2027-03-12T13:00:00+08:00",
+      "finish": "2027-03-19T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg02-a03",
+      "start": "2027-03-15T13:00:00+08:00",
+      "finish": "2027-03-23T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg02-a04",
+      "start": "2027-03-22T13:00:00+08:00",
+      "finish": "2027-03-24T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg02-a05",
+      "start": "2027-03-19T13:00:00+08:00",
+      "finish": "2027-03-24T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg03-a01",
+      "start": "2027-03-09T08:00:00+08:00",
+      "finish": "2027-03-15T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg03-a02",
+      "start": "2027-03-16T08:00:00+08:00",
+      "finish": "2027-03-23T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg03-a03",
+      "start": "2027-03-17T08:00:00+08:00",
+      "finish": "2027-03-18T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg03-a04",
+      "start": "2027-03-18T08:00:00+08:00",
+      "finish": "2027-03-22T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg03-a05",
+      "start": "2027-03-17T08:00:00+08:00",
+      "finish": "2027-03-22T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg04-a01",
+      "start": "2027-03-09T13:00:00+08:00",
+      "finish": "2027-03-17T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg04-a02",
+      "start": "2027-03-17T13:00:00+08:00",
+      "finish": "2027-03-19T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg04-a03",
+      "start": "2027-03-18T13:00:00+08:00",
+      "finish": "2027-03-23T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg04-a04",
+      "start": "2027-03-22T13:00:00+08:00",
+      "finish": "2027-03-26T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg04-a05",
+      "start": "2027-03-19T13:00:00+08:00",
+      "finish": "2027-03-26T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg05-a01",
+      "start": "2027-03-10T08:00:00+08:00",
+      "finish": "2027-03-11T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg05-a02",
+      "start": "2027-03-12T08:00:00+08:00",
+      "finish": "2027-03-16T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg05-a03",
+      "start": "2027-03-15T08:00:00+08:00",
+      "finish": "2027-03-18T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg05-a04",
+      "start": "2027-03-18T08:00:00+08:00",
+      "finish": "2027-03-24T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p04-pkg05-a05",
+      "start": "2027-03-11T08:00:00+08:00",
+      "finish": "2027-03-18T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-gate",
+      "start": "2027-04-15T12:00:00+08:00",
+      "finish": "2027-04-15T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg01-a01",
+      "start": "2027-03-26T13:00:00+08:00",
+      "finish": "2027-04-01T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg01-a02",
+      "start": "2027-04-01T13:00:00+08:00",
+      "finish": "2027-04-08T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg01-a03",
+      "start": "2027-04-02T13:00:00+08:00",
+      "finish": "2027-04-12T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg01-a04",
+      "start": "2027-04-09T13:00:00+08:00",
+      "finish": "2027-04-13T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg01-a05",
+      "start": "2027-04-08T13:00:00+08:00",
+      "finish": "2027-04-13T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg02-a01",
+      "start": "2027-03-29T08:00:00+08:00",
+      "finish": "2027-04-02T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg02-a02",
+      "start": "2027-04-05T08:00:00+08:00",
+      "finish": "2027-04-12T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg02-a03",
+      "start": "2027-04-06T08:00:00+08:00",
+      "finish": "2027-04-07T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg02-a04",
+      "start": "2027-04-07T08:00:00+08:00",
+      "finish": "2027-04-09T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg02-a05",
+      "start": "2027-04-06T08:00:00+08:00",
+      "finish": "2027-04-09T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg03-a01",
+      "start": "2027-03-29T13:00:00+08:00",
+      "finish": "2027-04-06T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg03-a02",
+      "start": "2027-04-06T13:00:00+08:00",
+      "finish": "2027-04-08T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg03-a03",
+      "start": "2027-04-07T13:00:00+08:00",
+      "finish": "2027-04-12T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg03-a04",
+      "start": "2027-04-09T13:00:00+08:00",
+      "finish": "2027-04-15T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg03-a05",
+      "start": "2027-04-08T13:00:00+08:00",
+      "finish": "2027-04-15T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg04-a01",
+      "start": "2027-03-30T08:00:00+08:00",
+      "finish": "2027-03-31T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg04-a02",
+      "start": "2027-04-01T08:00:00+08:00",
+      "finish": "2027-04-05T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg04-a03",
+      "start": "2027-04-02T08:00:00+08:00",
+      "finish": "2027-04-07T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg04-a04",
+      "start": "2027-04-07T08:00:00+08:00",
+      "finish": "2027-04-13T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg04-a05",
+      "start": "2027-04-06T08:00:00+08:00",
+      "finish": "2027-04-13T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg05-a01",
+      "start": "2027-03-30T13:00:00+08:00",
+      "finish": "2027-04-02T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg05-a02",
+      "start": "2027-04-02T13:00:00+08:00",
+      "finish": "2027-04-08T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg05-a03",
+      "start": "2027-04-05T13:00:00+08:00",
+      "finish": "2027-04-12T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg05-a04",
+      "start": "2027-04-09T13:00:00+08:00",
+      "finish": "2027-04-19T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p05-pkg05-a05",
+      "start": "2027-04-08T13:00:00+08:00",
+      "finish": "2027-04-12T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-gate",
+      "start": "2027-05-06T17:00:00+08:00",
+      "finish": "2027-05-06T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg01-a01",
+      "start": "2027-04-15T13:00:00+08:00",
+      "finish": "2027-04-22T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg01-a02",
+      "start": "2027-04-22T13:00:00+08:00",
+      "finish": "2027-04-30T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg01-a03",
+      "start": "2027-04-23T13:00:00+08:00",
+      "finish": "2027-04-27T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg01-a04",
+      "start": "2027-04-26T13:00:00+08:00",
+      "finish": "2027-04-29T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg01-a05",
+      "start": "2027-04-23T13:00:00+08:00",
+      "finish": "2027-04-29T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg02-a01",
+      "start": "2027-04-16T08:00:00+08:00",
+      "finish": "2027-04-23T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg02-a02",
+      "start": "2027-04-26T08:00:00+08:00",
+      "finish": "2027-04-27T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg02-a03",
+      "start": "2027-04-27T08:00:00+08:00",
+      "finish": "2027-04-29T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg02-a04",
+      "start": "2027-04-29T08:00:00+08:00",
+      "finish": "2027-05-04T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg02-a05",
+      "start": "2027-04-28T08:00:00+08:00",
+      "finish": "2027-05-04T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg03-a01",
+      "start": "2027-04-16T13:00:00+08:00",
+      "finish": "2027-04-20T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg03-a02",
+      "start": "2027-04-20T13:00:00+08:00",
+      "finish": "2027-04-23T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg03-a03",
+      "start": "2027-04-21T13:00:00+08:00",
+      "finish": "2027-04-27T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg03-a04",
+      "start": "2027-04-26T13:00:00+08:00",
+      "finish": "2027-05-03T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg03-a05",
+      "start": "2027-04-23T13:00:00+08:00",
+      "finish": "2027-05-03T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg04-a01",
+      "start": "2027-04-19T08:00:00+08:00",
+      "finish": "2027-04-21T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg04-a02",
+      "start": "2027-04-22T08:00:00+08:00",
+      "finish": "2027-04-27T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg04-a03",
+      "start": "2027-04-23T08:00:00+08:00",
+      "finish": "2027-04-29T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg04-a04",
+      "start": "2027-04-29T08:00:00+08:00",
+      "finish": "2027-05-06T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg04-a05",
+      "start": "2027-05-05T08:00:00+08:00",
+      "finish": "2027-05-06T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg05-a01",
+      "start": "2027-04-19T13:00:00+08:00",
+      "finish": "2027-04-23T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg05-a02",
+      "start": "2027-04-23T13:00:00+08:00",
+      "finish": "2027-04-30T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg05-a03",
+      "start": "2027-04-26T13:00:00+08:00",
+      "finish": "2027-05-04T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg05-a04",
+      "start": "2027-05-03T13:00:00+08:00",
+      "finish": "2027-05-05T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:p06-pkg05-a05",
+      "start": "2027-04-29T13:00:00+08:00",
+      "finish": "2027-05-04T12:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:project-finish",
+      "start": "2027-05-06T17:00:00+08:00",
+      "finish": "2027-05-06T17:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    },
+    {
+      "task_id": "task:project-start",
+      "start": "2027-01-04T08:00:00+08:00",
+      "finish": "2027-01-04T08:00:00+08:00",
+      "calendar_id": "calendar:standard"
+    }
+  ],
+  "summary_dates": [
+    {
+      "task_id": "task:p01",
+      "start": "2027-01-04T08:00:00+08:00",
+      "finish": "2027-01-25T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p01-pkg01",
+      "start": "2027-01-04T08:00:00+08:00",
+      "finish": "2027-01-18T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:p01-pkg02",
+      "start": "2027-01-04T13:00:00+08:00",
+      "finish": "2027-01-21T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p01-pkg03",
+      "start": "2027-01-05T08:00:00+08:00",
+      "finish": "2027-01-19T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:p01-pkg04",
+      "start": "2027-01-05T13:00:00+08:00",
+      "finish": "2027-01-25T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p01-pkg05",
+      "start": "2027-01-06T08:00:00+08:00",
+      "finish": "2027-01-21T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:p02",
+      "start": "2027-01-25T13:00:00+08:00",
+      "finish": "2027-02-15T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p02-pkg01",
+      "start": "2027-01-25T13:00:00+08:00",
+      "finish": "2027-02-11T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p02-pkg02",
+      "start": "2027-01-26T08:00:00+08:00",
+      "finish": "2027-02-09T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:p02-pkg03",
+      "start": "2027-01-26T13:00:00+08:00",
+      "finish": "2027-02-15T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p02-pkg04",
+      "start": "2027-01-27T08:00:00+08:00",
+      "finish": "2027-02-11T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:p02-pkg05",
+      "start": "2027-01-27T13:00:00+08:00",
+      "finish": "2027-02-11T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p03",
+      "start": "2027-02-15T13:00:00+08:00",
+      "finish": "2027-03-08T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p03-pkg01",
+      "start": "2027-02-15T13:00:00+08:00",
+      "finish": "2027-03-02T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p03-pkg02",
+      "start": "2027-02-16T08:00:00+08:00",
+      "finish": "2027-03-05T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:p03-pkg03",
+      "start": "2027-02-16T13:00:00+08:00",
+      "finish": "2027-03-04T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p03-pkg04",
+      "start": "2027-02-17T08:00:00+08:00",
+      "finish": "2027-03-03T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:p03-pkg05",
+      "start": "2027-02-17T13:00:00+08:00",
+      "finish": "2027-03-08T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p04",
+      "start": "2027-03-08T08:00:00+08:00",
+      "finish": "2027-03-26T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p04-pkg01",
+      "start": "2027-03-08T08:00:00+08:00",
+      "finish": "2027-03-25T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:p04-pkg02",
+      "start": "2027-03-08T13:00:00+08:00",
+      "finish": "2027-03-24T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p04-pkg03",
+      "start": "2027-03-09T08:00:00+08:00",
+      "finish": "2027-03-23T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:p04-pkg04",
+      "start": "2027-03-09T13:00:00+08:00",
+      "finish": "2027-03-26T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p04-pkg05",
+      "start": "2027-03-10T08:00:00+08:00",
+      "finish": "2027-03-24T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:p05",
+      "start": "2027-03-26T13:00:00+08:00",
+      "finish": "2027-04-19T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p05-pkg01",
+      "start": "2027-03-26T13:00:00+08:00",
+      "finish": "2027-04-13T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p05-pkg02",
+      "start": "2027-03-29T08:00:00+08:00",
+      "finish": "2027-04-12T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:p05-pkg03",
+      "start": "2027-03-29T13:00:00+08:00",
+      "finish": "2027-04-15T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p05-pkg04",
+      "start": "2027-03-30T08:00:00+08:00",
+      "finish": "2027-04-13T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:p05-pkg05",
+      "start": "2027-03-30T13:00:00+08:00",
+      "finish": "2027-04-19T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p06",
+      "start": "2027-04-15T13:00:00+08:00",
+      "finish": "2027-05-06T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:p06-pkg01",
+      "start": "2027-04-15T13:00:00+08:00",
+      "finish": "2027-04-30T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p06-pkg02",
+      "start": "2027-04-16T08:00:00+08:00",
+      "finish": "2027-05-04T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:p06-pkg03",
+      "start": "2027-04-16T13:00:00+08:00",
+      "finish": "2027-05-03T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:p06-pkg04",
+      "start": "2027-04-19T08:00:00+08:00",
+      "finish": "2027-05-06T17:00:00+08:00"
+    },
+    {
+      "task_id": "task:p06-pkg05",
+      "start": "2027-04-19T13:00:00+08:00",
+      "finish": "2027-05-05T12:00:00+08:00"
+    },
+    {
+      "task_id": "task:root",
+      "start": "2027-01-04T08:00:00+08:00",
+      "finish": "2027-05-06T17:00:00+08:00"
+    }
+  ],
+  "issues": [
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r05",
+      "task_ids": [
+        "task:p02-pkg03-a05",
+        "task:p02-pkg04-a04"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r05",
+      "task_ids": [
+        "task:p03-pkg01-a04",
+        "task:p03-pkg02-a03"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r05",
+      "task_ids": [
+        "task:p03-pkg01-a04",
+        "task:p03-pkg03-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r05",
+      "task_ids": [
+        "task:p03-pkg01-a04",
+        "task:p03-pkg04-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r05",
+      "task_ids": [
+        "task:p03-pkg02-a03",
+        "task:p03-pkg03-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r05",
+      "task_ids": [
+        "task:p03-pkg02-a03",
+        "task:p03-pkg04-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r05",
+      "task_ids": [
+        "task:p03-pkg03-a02",
+        "task:p03-pkg04-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r05",
+      "task_ids": [
+        "task:p05-pkg04-a05",
+        "task:p05-pkg05-a04"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r05",
+      "task_ids": [
+        "task:p06-pkg01-a05",
+        "task:p06-pkg02-a04"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r05",
+      "task_ids": [
+        "task:p06-pkg01-a05",
+        "task:p06-pkg03-a03"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r05",
+      "task_ids": [
+        "task:p06-pkg01-a05",
+        "task:p06-pkg04-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r05",
+      "task_ids": [
+        "task:p06-pkg03-a03",
+        "task:p06-pkg04-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r05",
+      "task_ids": [
+        "task:p06-pkg03-a03",
+        "task:p06-pkg05-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r05",
+      "task_ids": [
+        "task:p06-pkg04-a02",
+        "task:p06-pkg05-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p02-pkg04-a05",
+        "task:p02-pkg05-a04"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg01-a05",
+        "task:p03-pkg02-a04"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg01-a05",
+        "task:p03-pkg03-a03"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg01-a05",
+        "task:p03-pkg04-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg01-a05",
+        "task:p03-pkg05-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg02-a04",
+        "task:p03-pkg03-a03"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg02-a04",
+        "task:p03-pkg04-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg03-a03",
+        "task:p03-pkg04-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg03-a03",
+        "task:p03-pkg05-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg04-a02",
+        "task:p03-pkg05-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p04-pkg01-a02",
+        "task:p04-pkg02-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p06-pkg02-a05",
+        "task:p06-pkg03-a04"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p06-pkg02-a05",
+        "task:p06-pkg04-a03"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p06-pkg02-a05",
+        "task:p06-pkg05-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p06-pkg03-a04",
+        "task:p06-pkg04-a03"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p06-pkg03-a04",
+        "task:p06-pkg05-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r06",
+      "task_ids": [
+        "task:p06-pkg04-a03",
+        "task:p06-pkg05-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r07",
+      "task_ids": [
+        "task:p01-pkg01-a02",
+        "task:p01-pkg02-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r07",
+      "task_ids": [
+        "task:p03-pkg02-a05",
+        "task:p03-pkg03-a04"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r07",
+      "task_ids": [
+        "task:p03-pkg04-a03",
+        "task:p03-pkg05-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r07",
+      "task_ids": [
+        "task:p04-pkg01-a03",
+        "task:p04-pkg02-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r07",
+      "task_ids": [
+        "task:p04-pkg01-a03",
+        "task:p04-pkg03-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r07",
+      "task_ids": [
+        "task:p04-pkg02-a02",
+        "task:p04-pkg03-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r07",
+      "task_ids": [
+        "task:p06-pkg03-a05",
+        "task:p06-pkg04-a04"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r07",
+      "task_ids": [
+        "task:p06-pkg03-a05",
+        "task:p06-pkg05-a03"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r07",
+      "task_ids": [
+        "task:p06-pkg04-a04",
+        "task:p06-pkg05-a03"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r08",
+      "task_ids": [
+        "task:p01-pkg01-a03",
+        "task:p01-pkg02-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r08",
+      "task_ids": [
+        "task:p03-pkg03-a05",
+        "task:p03-pkg04-a04"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r08",
+      "task_ids": [
+        "task:p03-pkg03-a05",
+        "task:p03-pkg05-a03"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r08",
+      "task_ids": [
+        "task:p03-pkg04-a04",
+        "task:p03-pkg05-a03"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r08",
+      "task_ids": [
+        "task:p04-pkg01-a04",
+        "task:p04-pkg02-a03"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r08",
+      "task_ids": [
+        "task:p04-pkg01-a04",
+        "task:p04-pkg03-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r08",
+      "task_ids": [
+        "task:p04-pkg02-a03",
+        "task:p04-pkg03-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r08",
+      "task_ids": [
+        "task:p04-pkg02-a03",
+        "task:p04-pkg04-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r08",
+      "task_ids": [
+        "task:p04-pkg03-a02",
+        "task:p04-pkg04-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r08",
+      "task_ids": [
+        "task:p06-pkg04-a05",
+        "task:p06-pkg05-a04"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r09",
+      "task_ids": [
+        "task:p01-pkg01-a04",
+        "task:p01-pkg02-a03"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r09",
+      "task_ids": [
+        "task:p01-pkg03-a02",
+        "task:p01-pkg04-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r09",
+      "task_ids": [
+        "task:p03-pkg04-a05",
+        "task:p03-pkg05-a04"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r09",
+      "task_ids": [
+        "task:p04-pkg01-a05",
+        "task:p04-pkg02-a04"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r09",
+      "task_ids": [
+        "task:p04-pkg03-a03",
+        "task:p04-pkg04-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r09",
+      "task_ids": [
+        "task:p05-pkg01-a02",
+        "task:p05-pkg02-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r10",
+      "task_ids": [
+        "task:p01-pkg01-a05",
+        "task:p01-pkg02-a04"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r10",
+      "task_ids": [
+        "task:p01-pkg01-a05",
+        "task:p01-pkg03-a03"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r10",
+      "task_ids": [
+        "task:p01-pkg01-a05",
+        "task:p01-pkg04-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r10",
+      "task_ids": [
+        "task:p01-pkg03-a03",
+        "task:p01-pkg04-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r10",
+      "task_ids": [
+        "task:p01-pkg03-a03",
+        "task:p01-pkg05-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r10",
+      "task_ids": [
+        "task:p01-pkg04-a02",
+        "task:p01-pkg05-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r10",
+      "task_ids": [
+        "task:p04-pkg02-a05",
+        "task:p04-pkg03-a04"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r10",
+      "task_ids": [
+        "task:p04-pkg02-a05",
+        "task:p04-pkg04-a03"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r10",
+      "task_ids": [
+        "task:p04-pkg03-a04",
+        "task:p04-pkg04-a03"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r10",
+      "task_ids": [
+        "task:p05-pkg01-a03",
+        "task:p05-pkg02-a02"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r10",
+      "task_ids": [
+        "task:p05-pkg01-a03",
+        "task:p05-pkg03-a01"
+      ]
+    },
+    {
+      "severity": "WARNING",
+      "code": "RESOURCE_OVERALLOCATION",
+      "object_ref": "resource:r10",
+      "task_ids": [
+        "task:p05-pkg02-a02",
+        "task:p05-pkg03-a01"
+      ]
+    }
+  ],
+  "resource_conflicts": [
+    {
+      "resource_id": "resource:r05",
+      "task_ids": [
+        "task:p02-pkg03-a05",
+        "task:p02-pkg04-a04"
+      ],
+      "overlap_start": "2027-02-11T13:00:00+08:00",
+      "overlap_finish": "2027-02-11T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r05",
+      "task_ids": [
+        "task:p03-pkg01-a04",
+        "task:p03-pkg02-a03"
+      ],
+      "overlap_start": "2027-02-23T13:00:00+08:00",
+      "overlap_finish": "2027-02-26T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r05",
+      "task_ids": [
+        "task:p03-pkg01-a04",
+        "task:p03-pkg03-a02"
+      ],
+      "overlap_start": "2027-02-23T13:00:00+08:00",
+      "overlap_finish": "2027-03-01T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r05",
+      "task_ids": [
+        "task:p03-pkg01-a04",
+        "task:p03-pkg04-a01"
+      ],
+      "overlap_start": "2027-02-23T13:00:00+08:00",
+      "overlap_finish": "2027-02-23T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r05",
+      "task_ids": [
+        "task:p03-pkg02-a03",
+        "task:p03-pkg03-a02"
+      ],
+      "overlap_start": "2027-02-22T13:00:00+08:00",
+      "overlap_finish": "2027-02-26T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r05",
+      "task_ids": [
+        "task:p03-pkg02-a03",
+        "task:p03-pkg04-a01"
+      ],
+      "overlap_start": "2027-02-22T08:00:00+08:00",
+      "overlap_finish": "2027-02-23T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r05",
+      "task_ids": [
+        "task:p03-pkg03-a02",
+        "task:p03-pkg04-a01"
+      ],
+      "overlap_start": "2027-02-22T13:00:00+08:00",
+      "overlap_finish": "2027-02-23T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r05",
+      "task_ids": [
+        "task:p05-pkg04-a05",
+        "task:p05-pkg05-a04"
+      ],
+      "overlap_start": "2027-04-09T13:00:00+08:00",
+      "overlap_finish": "2027-04-13T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r05",
+      "task_ids": [
+        "task:p06-pkg01-a05",
+        "task:p06-pkg02-a04"
+      ],
+      "overlap_start": "2027-04-29T08:00:00+08:00",
+      "overlap_finish": "2027-04-29T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r05",
+      "task_ids": [
+        "task:p06-pkg01-a05",
+        "task:p06-pkg03-a03"
+      ],
+      "overlap_start": "2027-04-23T13:00:00+08:00",
+      "overlap_finish": "2027-04-27T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r05",
+      "task_ids": [
+        "task:p06-pkg01-a05",
+        "task:p06-pkg04-a02"
+      ],
+      "overlap_start": "2027-04-23T13:00:00+08:00",
+      "overlap_finish": "2027-04-27T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r05",
+      "task_ids": [
+        "task:p06-pkg03-a03",
+        "task:p06-pkg04-a02"
+      ],
+      "overlap_start": "2027-04-22T08:00:00+08:00",
+      "overlap_finish": "2027-04-27T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r05",
+      "task_ids": [
+        "task:p06-pkg03-a03",
+        "task:p06-pkg05-a01"
+      ],
+      "overlap_start": "2027-04-21T13:00:00+08:00",
+      "overlap_finish": "2027-04-23T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r05",
+      "task_ids": [
+        "task:p06-pkg04-a02",
+        "task:p06-pkg05-a01"
+      ],
+      "overlap_start": "2027-04-22T08:00:00+08:00",
+      "overlap_finish": "2027-04-23T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p02-pkg04-a05",
+        "task:p02-pkg05-a04"
+      ],
+      "overlap_start": "2027-02-09T08:00:00+08:00",
+      "overlap_finish": "2027-02-10T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg01-a05",
+        "task:p03-pkg02-a04"
+      ],
+      "overlap_start": "2027-02-26T08:00:00+08:00",
+      "overlap_finish": "2027-03-02T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg01-a05",
+        "task:p03-pkg03-a03"
+      ],
+      "overlap_start": "2027-02-23T13:00:00+08:00",
+      "overlap_finish": "2027-03-02T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg01-a05",
+        "task:p03-pkg04-a02"
+      ],
+      "overlap_start": "2027-02-24T08:00:00+08:00",
+      "overlap_finish": "2027-03-02T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg01-a05",
+        "task:p03-pkg05-a01"
+      ],
+      "overlap_start": "2027-02-22T13:00:00+08:00",
+      "overlap_finish": "2027-02-25T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg02-a04",
+        "task:p03-pkg03-a03"
+      ],
+      "overlap_start": "2027-02-26T08:00:00+08:00",
+      "overlap_finish": "2027-03-03T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg02-a04",
+        "task:p03-pkg04-a02"
+      ],
+      "overlap_start": "2027-02-26T08:00:00+08:00",
+      "overlap_finish": "2027-03-03T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg03-a03",
+        "task:p03-pkg04-a02"
+      ],
+      "overlap_start": "2027-02-24T08:00:00+08:00",
+      "overlap_finish": "2027-03-03T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg03-a03",
+        "task:p03-pkg05-a01"
+      ],
+      "overlap_start": "2027-02-23T13:00:00+08:00",
+      "overlap_finish": "2027-02-25T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p03-pkg04-a02",
+        "task:p03-pkg05-a01"
+      ],
+      "overlap_start": "2027-02-24T08:00:00+08:00",
+      "overlap_finish": "2027-02-25T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p04-pkg01-a02",
+        "task:p04-pkg02-a01"
+      ],
+      "overlap_start": "2027-03-11T08:00:00+08:00",
+      "overlap_finish": "2027-03-12T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p06-pkg02-a05",
+        "task:p06-pkg03-a04"
+      ],
+      "overlap_start": "2027-04-28T08:00:00+08:00",
+      "overlap_finish": "2027-05-03T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p06-pkg02-a05",
+        "task:p06-pkg04-a03"
+      ],
+      "overlap_start": "2027-04-28T08:00:00+08:00",
+      "overlap_finish": "2027-04-29T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p06-pkg02-a05",
+        "task:p06-pkg05-a02"
+      ],
+      "overlap_start": "2027-04-28T08:00:00+08:00",
+      "overlap_finish": "2027-04-30T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p06-pkg03-a04",
+        "task:p06-pkg04-a03"
+      ],
+      "overlap_start": "2027-04-26T13:00:00+08:00",
+      "overlap_finish": "2027-04-29T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p06-pkg03-a04",
+        "task:p06-pkg05-a02"
+      ],
+      "overlap_start": "2027-04-26T13:00:00+08:00",
+      "overlap_finish": "2027-04-30T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r06",
+      "task_ids": [
+        "task:p06-pkg04-a03",
+        "task:p06-pkg05-a02"
+      ],
+      "overlap_start": "2027-04-23T13:00:00+08:00",
+      "overlap_finish": "2027-04-29T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r07",
+      "task_ids": [
+        "task:p01-pkg01-a02",
+        "task:p01-pkg02-a01"
+      ],
+      "overlap_start": "2027-01-11T08:00:00+08:00",
+      "overlap_finish": "2027-01-12T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r07",
+      "task_ids": [
+        "task:p03-pkg02-a05",
+        "task:p03-pkg03-a04"
+      ],
+      "overlap_start": "2027-03-04T08:00:00+08:00",
+      "overlap_finish": "2027-03-04T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r07",
+      "task_ids": [
+        "task:p03-pkg04-a03",
+        "task:p03-pkg05-a02"
+      ],
+      "overlap_start": "2027-02-25T13:00:00+08:00",
+      "overlap_finish": "2027-02-26T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r07",
+      "task_ids": [
+        "task:p04-pkg01-a03",
+        "task:p04-pkg02-a02"
+      ],
+      "overlap_start": "2027-03-12T13:00:00+08:00",
+      "overlap_finish": "2027-03-18T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r07",
+      "task_ids": [
+        "task:p04-pkg01-a03",
+        "task:p04-pkg03-a01"
+      ],
+      "overlap_start": "2027-03-12T08:00:00+08:00",
+      "overlap_finish": "2027-03-15T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r07",
+      "task_ids": [
+        "task:p04-pkg02-a02",
+        "task:p04-pkg03-a01"
+      ],
+      "overlap_start": "2027-03-12T13:00:00+08:00",
+      "overlap_finish": "2027-03-15T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r07",
+      "task_ids": [
+        "task:p06-pkg03-a05",
+        "task:p06-pkg04-a04"
+      ],
+      "overlap_start": "2027-04-29T08:00:00+08:00",
+      "overlap_finish": "2027-05-03T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r07",
+      "task_ids": [
+        "task:p06-pkg03-a05",
+        "task:p06-pkg05-a03"
+      ],
+      "overlap_start": "2027-04-26T13:00:00+08:00",
+      "overlap_finish": "2027-05-03T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r07",
+      "task_ids": [
+        "task:p06-pkg04-a04",
+        "task:p06-pkg05-a03"
+      ],
+      "overlap_start": "2027-04-29T08:00:00+08:00",
+      "overlap_finish": "2027-05-04T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r08",
+      "task_ids": [
+        "task:p01-pkg01-a03",
+        "task:p01-pkg02-a02"
+      ],
+      "overlap_start": "2027-01-12T13:00:00+08:00",
+      "overlap_finish": "2027-01-13T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r08",
+      "task_ids": [
+        "task:p03-pkg03-a05",
+        "task:p03-pkg04-a04"
+      ],
+      "overlap_start": "2027-03-01T13:00:00+08:00",
+      "overlap_finish": "2027-03-02T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r08",
+      "task_ids": [
+        "task:p03-pkg03-a05",
+        "task:p03-pkg05-a03"
+      ],
+      "overlap_start": "2027-03-01T13:00:00+08:00",
+      "overlap_finish": "2027-03-03T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r08",
+      "task_ids": [
+        "task:p03-pkg04-a04",
+        "task:p03-pkg05-a03"
+      ],
+      "overlap_start": "2027-02-26T13:00:00+08:00",
+      "overlap_finish": "2027-03-02T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r08",
+      "task_ids": [
+        "task:p04-pkg01-a04",
+        "task:p04-pkg02-a03"
+      ],
+      "overlap_start": "2027-03-18T08:00:00+08:00",
+      "overlap_finish": "2027-03-23T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r08",
+      "task_ids": [
+        "task:p04-pkg01-a04",
+        "task:p04-pkg03-a02"
+      ],
+      "overlap_start": "2027-03-18T08:00:00+08:00",
+      "overlap_finish": "2027-03-23T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r08",
+      "task_ids": [
+        "task:p04-pkg02-a03",
+        "task:p04-pkg03-a02"
+      ],
+      "overlap_start": "2027-03-16T08:00:00+08:00",
+      "overlap_finish": "2027-03-23T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r08",
+      "task_ids": [
+        "task:p04-pkg02-a03",
+        "task:p04-pkg04-a01"
+      ],
+      "overlap_start": "2027-03-15T13:00:00+08:00",
+      "overlap_finish": "2027-03-17T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r08",
+      "task_ids": [
+        "task:p04-pkg03-a02",
+        "task:p04-pkg04-a01"
+      ],
+      "overlap_start": "2027-03-16T08:00:00+08:00",
+      "overlap_finish": "2027-03-17T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r08",
+      "task_ids": [
+        "task:p06-pkg04-a05",
+        "task:p06-pkg05-a04"
+      ],
+      "overlap_start": "2027-05-05T08:00:00+08:00",
+      "overlap_finish": "2027-05-05T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r09",
+      "task_ids": [
+        "task:p01-pkg01-a04",
+        "task:p01-pkg02-a03"
+      ],
+      "overlap_start": "2027-01-13T13:00:00+08:00",
+      "overlap_finish": "2027-01-15T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r09",
+      "task_ids": [
+        "task:p01-pkg03-a02",
+        "task:p01-pkg04-a01"
+      ],
+      "overlap_start": "2027-01-07T08:00:00+08:00",
+      "overlap_finish": "2027-01-08T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r09",
+      "task_ids": [
+        "task:p03-pkg04-a05",
+        "task:p03-pkg05-a04"
+      ],
+      "overlap_start": "2027-03-02T13:00:00+08:00",
+      "overlap_finish": "2027-03-02T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r09",
+      "task_ids": [
+        "task:p04-pkg01-a05",
+        "task:p04-pkg02-a04"
+      ],
+      "overlap_start": "2027-03-24T08:00:00+08:00",
+      "overlap_finish": "2027-03-24T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r09",
+      "task_ids": [
+        "task:p04-pkg03-a03",
+        "task:p04-pkg04-a02"
+      ],
+      "overlap_start": "2027-03-17T13:00:00+08:00",
+      "overlap_finish": "2027-03-18T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r09",
+      "task_ids": [
+        "task:p05-pkg01-a02",
+        "task:p05-pkg02-a01"
+      ],
+      "overlap_start": "2027-04-01T13:00:00+08:00",
+      "overlap_finish": "2027-04-02T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r10",
+      "task_ids": [
+        "task:p01-pkg01-a05",
+        "task:p01-pkg02-a04"
+      ],
+      "overlap_start": "2027-01-15T13:00:00+08:00",
+      "overlap_finish": "2027-01-15T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r10",
+      "task_ids": [
+        "task:p01-pkg01-a05",
+        "task:p01-pkg03-a03"
+      ],
+      "overlap_start": "2027-01-12T08:00:00+08:00",
+      "overlap_finish": "2027-01-13T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r10",
+      "task_ids": [
+        "task:p01-pkg01-a05",
+        "task:p01-pkg04-a02"
+      ],
+      "overlap_start": "2027-01-12T08:00:00+08:00",
+      "overlap_finish": "2027-01-14T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r10",
+      "task_ids": [
+        "task:p01-pkg03-a03",
+        "task:p01-pkg04-a02"
+      ],
+      "overlap_start": "2027-01-08T13:00:00+08:00",
+      "overlap_finish": "2027-01-13T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r10",
+      "task_ids": [
+        "task:p01-pkg03-a03",
+        "task:p01-pkg05-a01"
+      ],
+      "overlap_start": "2027-01-08T08:00:00+08:00",
+      "overlap_finish": "2027-01-11T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r10",
+      "task_ids": [
+        "task:p01-pkg04-a02",
+        "task:p01-pkg05-a01"
+      ],
+      "overlap_start": "2027-01-08T13:00:00+08:00",
+      "overlap_finish": "2027-01-11T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r10",
+      "task_ids": [
+        "task:p04-pkg02-a05",
+        "task:p04-pkg03-a04"
+      ],
+      "overlap_start": "2027-03-19T13:00:00+08:00",
+      "overlap_finish": "2027-03-22T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r10",
+      "task_ids": [
+        "task:p04-pkg02-a05",
+        "task:p04-pkg04-a03"
+      ],
+      "overlap_start": "2027-03-19T13:00:00+08:00",
+      "overlap_finish": "2027-03-23T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r10",
+      "task_ids": [
+        "task:p04-pkg03-a04",
+        "task:p04-pkg04-a03"
+      ],
+      "overlap_start": "2027-03-18T13:00:00+08:00",
+      "overlap_finish": "2027-03-22T17:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r10",
+      "task_ids": [
+        "task:p05-pkg01-a03",
+        "task:p05-pkg02-a02"
+      ],
+      "overlap_start": "2027-04-05T08:00:00+08:00",
+      "overlap_finish": "2027-04-12T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r10",
+      "task_ids": [
+        "task:p05-pkg01-a03",
+        "task:p05-pkg03-a01"
+      ],
+      "overlap_start": "2027-04-02T13:00:00+08:00",
+      "overlap_finish": "2027-04-06T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    },
+    {
+      "resource_id": "resource:r10",
+      "task_ids": [
+        "task:p05-pkg02-a02",
+        "task:p05-pkg03-a01"
+      ],
+      "overlap_start": "2027-04-05T08:00:00+08:00",
+      "overlap_finish": "2027-04-06T12:00:00+08:00",
+      "combined_units": 2.0,
+      "max_units": 1.0
+    }
+  ],
+  "assignment_costs": [
+    {
+      "assignment_id": "assign:p01-pkg01-a01:primary",
+      "work_minutes": 2400,
+      "cost": 4800.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg01-a01:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg01-a02:primary",
+      "work_minutes": 2880,
+      "cost": 6480.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg01-a02:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg01-a03:primary",
+      "work_minutes": 960,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg01-a03:support",
+      "work_minutes": 480,
+      "cost": 3040.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg01-a04:primary",
+      "work_minutes": 1440,
+      "cost": 3360.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg01-a04:support",
+      "work_minutes": 720,
+      "cost": 4560.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg01-a05:primary",
+      "work_minutes": 1920,
+      "cost": 5440.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg01-a05:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg02-a01:primary",
+      "work_minutes": 2880,
+      "cost": 6480.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg02-a01:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg02-a02:primary",
+      "work_minutes": 960,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg02-a02:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg02-a03:primary",
+      "work_minutes": 1440,
+      "cost": 3360.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg02-a03:support",
+      "work_minutes": 720,
+      "cost": 4560.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg02-a04:primary",
+      "work_minutes": 1920,
+      "cost": 5440.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg02-a04:support",
+      "work_minutes": 960,
+      "cost": 6080.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg02-a05:primary",
+      "work_minutes": 2400,
+      "cost": 7200.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg02-a05:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg03-a01:primary",
+      "work_minutes": 960,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg03-a01:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg03-a02:primary",
+      "work_minutes": 1440,
+      "cost": 3360.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg03-a02:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg03-a03:primary",
+      "work_minutes": 1920,
+      "cost": 5440.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg03-a03:support",
+      "work_minutes": 960,
+      "cost": 6080.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg03-a04:primary",
+      "work_minutes": 2400,
+      "cost": 7200.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg03-a04:support",
+      "work_minutes": 1200,
+      "cost": 7600.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg03-a05:primary",
+      "work_minutes": 2880,
+      "cost": 7680.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg03-a05:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg04-a01:primary",
+      "work_minutes": 1440,
+      "cost": 3360.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg04-a01:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg04-a02:primary",
+      "work_minutes": 1920,
+      "cost": 5440.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg04-a02:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg04-a03:primary",
+      "work_minutes": 2400,
+      "cost": 7200.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg04-a03:support",
+      "work_minutes": 1200,
+      "cost": 7600.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg04-a04:primary",
+      "work_minutes": 2880,
+      "cost": 7680.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg04-a04:support",
+      "work_minutes": 1440,
+      "cost": 9120.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg04-a05:primary",
+      "work_minutes": 960,
+      "cost": 2560.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg04-a05:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg05-a01:primary",
+      "work_minutes": 1920,
+      "cost": 5440.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg05-a01:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg05-a02:primary",
+      "work_minutes": 2400,
+      "cost": 7200.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg05-a02:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg05-a03:primary",
+      "work_minutes": 2880,
+      "cost": 7680.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg05-a03:support",
+      "work_minutes": 1440,
+      "cost": 9120.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg05-a04:primary",
+      "work_minutes": 960,
+      "cost": 2560.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg05-a04:support",
+      "work_minutes": 480,
+      "cost": 3040.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg05-a05:primary",
+      "work_minutes": 1440,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p01-pkg05-a05:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg01-a01:primary",
+      "work_minutes": 2880,
+      "cost": 6720.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg01-a01:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg01-a02:primary",
+      "work_minutes": 960,
+      "cost": 2720.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg01-a02:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg01-a03:primary",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg01-a03:support",
+      "work_minutes": 720,
+      "cost": 4560.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg01-a04:primary",
+      "work_minutes": 1920,
+      "cost": 5120.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg01-a04:support",
+      "work_minutes": 960,
+      "cost": 6080.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg01-a05:primary",
+      "work_minutes": 2400,
+      "cost": 6400.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg01-a05:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg02-a01:primary",
+      "work_minutes": 960,
+      "cost": 2720.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg02-a01:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg02-a02:primary",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg02-a02:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg02-a03:primary",
+      "work_minutes": 1920,
+      "cost": 5120.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg02-a03:support",
+      "work_minutes": 960,
+      "cost": 6080.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg02-a04:primary",
+      "work_minutes": 2400,
+      "cost": 6400.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg02-a04:support",
+      "work_minutes": 1200,
+      "cost": 7600.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg02-a05:primary",
+      "work_minutes": 2880,
+      "cost": 7200.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg02-a05:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg03-a01:primary",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg03-a01:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg03-a02:primary",
+      "work_minutes": 1920,
+      "cost": 5120.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg03-a02:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg03-a03:primary",
+      "work_minutes": 2400,
+      "cost": 6400.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg03-a03:support",
+      "work_minutes": 1200,
+      "cost": 7600.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg03-a04:primary",
+      "work_minutes": 2880,
+      "cost": 7200.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg03-a04:support",
+      "work_minutes": 1440,
+      "cost": 9120.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg03-a05:primary",
+      "work_minutes": 960,
+      "cost": 1920.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg03-a05:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg04-a01:primary",
+      "work_minutes": 1920,
+      "cost": 5120.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg04-a01:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg04-a02:primary",
+      "work_minutes": 2400,
+      "cost": 6400.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg04-a02:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg04-a03:primary",
+      "work_minutes": 2880,
+      "cost": 7200.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg04-a03:support",
+      "work_minutes": 1440,
+      "cost": 9120.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg04-a04:primary",
+      "work_minutes": 960,
+      "cost": 1920.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg04-a04:support",
+      "work_minutes": 480,
+      "cost": 3040.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg04-a05:primary",
+      "work_minutes": 1440,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg04-a05:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg05-a01:primary",
+      "work_minutes": 2400,
+      "cost": 6400.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg05-a01:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg05-a02:primary",
+      "work_minutes": 2880,
+      "cost": 7200.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg05-a02:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg05-a03:primary",
+      "work_minutes": 960,
+      "cost": 1920.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg05-a03:support",
+      "work_minutes": 480,
+      "cost": 3040.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg05-a04:primary",
+      "work_minutes": 1440,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg05-a04:support",
+      "work_minutes": 720,
+      "cost": 4560.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg05-a05:primary",
+      "work_minutes": 1920,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p02-pkg05-a05:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg01-a01:primary",
+      "work_minutes": 960,
+      "cost": 2560.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg01-a01:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg01-a02:primary",
+      "work_minutes": 1440,
+      "cost": 3840.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg01-a02:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg01-a03:primary",
+      "work_minutes": 1920,
+      "cost": 4800.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg01-a03:support",
+      "work_minutes": 960,
+      "cost": 6080.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg01-a04:primary",
+      "work_minutes": 2400,
+      "cost": 4800.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg01-a04:support",
+      "work_minutes": 1200,
+      "cost": 7600.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg01-a05:primary",
+      "work_minutes": 2880,
+      "cost": 5760.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg01-a05:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg02-a01:primary",
+      "work_minutes": 1440,
+      "cost": 3840.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg02-a01:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg02-a02:primary",
+      "work_minutes": 1920,
+      "cost": 4800.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg02-a02:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg02-a03:primary",
+      "work_minutes": 2400,
+      "cost": 4800.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg02-a03:support",
+      "work_minutes": 1200,
+      "cost": 7600.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg02-a04:primary",
+      "work_minutes": 2880,
+      "cost": 5760.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg02-a04:support",
+      "work_minutes": 1440,
+      "cost": 9120.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg02-a05:primary",
+      "work_minutes": 960,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg02-a05:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg03-a01:primary",
+      "work_minutes": 1920,
+      "cost": 4800.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg03-a01:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg03-a02:primary",
+      "work_minutes": 2400,
+      "cost": 4800.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg03-a02:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg03-a03:primary",
+      "work_minutes": 2880,
+      "cost": 5760.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg03-a03:support",
+      "work_minutes": 1440,
+      "cost": 9120.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg03-a04:primary",
+      "work_minutes": 960,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg03-a04:support",
+      "work_minutes": 480,
+      "cost": 3040.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg03-a05:primary",
+      "work_minutes": 1440,
+      "cost": 3240.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg03-a05:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg04-a01:primary",
+      "work_minutes": 2400,
+      "cost": 4800.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg04-a01:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg04-a02:primary",
+      "work_minutes": 2880,
+      "cost": 5760.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg04-a02:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg04-a03:primary",
+      "work_minutes": 960,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg04-a03:support",
+      "work_minutes": 480,
+      "cost": 3040.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg04-a04:primary",
+      "work_minutes": 1440,
+      "cost": 3240.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg04-a04:support",
+      "work_minutes": 720,
+      "cost": 4560.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg04-a05:primary",
+      "work_minutes": 1920,
+      "cost": 4480.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg04-a05:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg05-a01:primary",
+      "work_minutes": 2880,
+      "cost": 5760.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg05-a01:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg05-a02:primary",
+      "work_minutes": 960,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg05-a02:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg05-a03:primary",
+      "work_minutes": 1440,
+      "cost": 3240.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg05-a03:support",
+      "work_minutes": 720,
+      "cost": 4560.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg05-a04:primary",
+      "work_minutes": 1920,
+      "cost": 4480.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg05-a04:support",
+      "work_minutes": 960,
+      "cost": 6080.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg05-a05:primary",
+      "work_minutes": 2400,
+      "cost": 6800.0
+    },
+    {
+      "assignment_id": "assign:p03-pkg05-a05:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg01-a01:primary",
+      "work_minutes": 1440,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg01-a01:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg01-a02:primary",
+      "work_minutes": 1920,
+      "cost": 3840.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg01-a02:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg01-a03:primary",
+      "work_minutes": 2400,
+      "cost": 5400.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg01-a03:support",
+      "work_minutes": 1200,
+      "cost": 7600.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg01-a04:primary",
+      "work_minutes": 2880,
+      "cost": 6480.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg01-a04:support",
+      "work_minutes": 1440,
+      "cost": 9120.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg01-a05:primary",
+      "work_minutes": 960,
+      "cost": 2240.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg01-a05:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg02-a01:primary",
+      "work_minutes": 1920,
+      "cost": 3840.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg02-a01:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg02-a02:primary",
+      "work_minutes": 2400,
+      "cost": 5400.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg02-a02:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg02-a03:primary",
+      "work_minutes": 2880,
+      "cost": 6480.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg02-a03:support",
+      "work_minutes": 1440,
+      "cost": 9120.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg02-a04:primary",
+      "work_minutes": 960,
+      "cost": 2240.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg02-a04:support",
+      "work_minutes": 480,
+      "cost": 3040.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg02-a05:primary",
+      "work_minutes": 1440,
+      "cost": 4080.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg02-a05:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg03-a01:primary",
+      "work_minutes": 2400,
+      "cost": 5400.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg03-a01:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg03-a02:primary",
+      "work_minutes": 2880,
+      "cost": 6480.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg03-a02:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg03-a03:primary",
+      "work_minutes": 960,
+      "cost": 2240.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg03-a03:support",
+      "work_minutes": 480,
+      "cost": 3040.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg03-a04:primary",
+      "work_minutes": 1440,
+      "cost": 4080.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg03-a04:support",
+      "work_minutes": 720,
+      "cost": 4560.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg03-a05:primary",
+      "work_minutes": 1920,
+      "cost": 5760.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg03-a05:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg04-a01:primary",
+      "work_minutes": 2880,
+      "cost": 6480.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg04-a01:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg04-a02:primary",
+      "work_minutes": 960,
+      "cost": 2240.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg04-a02:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg04-a03:primary",
+      "work_minutes": 1440,
+      "cost": 4080.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg04-a03:support",
+      "work_minutes": 720,
+      "cost": 4560.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg04-a04:primary",
+      "work_minutes": 1920,
+      "cost": 5760.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg04-a04:support",
+      "work_minutes": 960,
+      "cost": 6080.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg04-a05:primary",
+      "work_minutes": 2400,
+      "cost": 6400.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg04-a05:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg05-a01:primary",
+      "work_minutes": 960,
+      "cost": 2240.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg05-a01:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg05-a02:primary",
+      "work_minutes": 1440,
+      "cost": 4080.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg05-a02:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg05-a03:primary",
+      "work_minutes": 1920,
+      "cost": 5760.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg05-a03:support",
+      "work_minutes": 960,
+      "cost": 6080.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg05-a04:primary",
+      "work_minutes": 2400,
+      "cost": 6400.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg05-a04:support",
+      "work_minutes": 1200,
+      "cost": 7600.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg05-a05:primary",
+      "work_minutes": 2880,
+      "cost": 7680.0
+    },
+    {
+      "assignment_id": "assign:p04-pkg05-a05:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg01-a01:primary",
+      "work_minutes": 1920,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg01-a01:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg01-a02:primary",
+      "work_minutes": 2400,
+      "cost": 5600.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg01-a02:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg01-a03:primary",
+      "work_minutes": 2880,
+      "cost": 8160.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg01-a03:support",
+      "work_minutes": 1440,
+      "cost": 9120.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg01-a04:primary",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg01-a04:support",
+      "work_minutes": 480,
+      "cost": 3040.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg01-a05:primary",
+      "work_minutes": 1440,
+      "cost": 3840.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg01-a05:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg02-a01:primary",
+      "work_minutes": 2400,
+      "cost": 5600.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg02-a01:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg02-a02:primary",
+      "work_minutes": 2880,
+      "cost": 8160.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg02-a02:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg02-a03:primary",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg02-a03:support",
+      "work_minutes": 480,
+      "cost": 3040.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg02-a04:primary",
+      "work_minutes": 1440,
+      "cost": 3840.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg02-a04:support",
+      "work_minutes": 720,
+      "cost": 4560.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg02-a05:primary",
+      "work_minutes": 1920,
+      "cost": 5120.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg02-a05:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg03-a01:primary",
+      "work_minutes": 2880,
+      "cost": 8160.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg03-a01:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg03-a02:primary",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg03-a02:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg03-a03:primary",
+      "work_minutes": 1440,
+      "cost": 3840.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg03-a03:support",
+      "work_minutes": 720,
+      "cost": 4560.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg03-a04:primary",
+      "work_minutes": 1920,
+      "cost": 5120.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg03-a04:support",
+      "work_minutes": 960,
+      "cost": 6080.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg03-a05:primary",
+      "work_minutes": 2400,
+      "cost": 6000.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg03-a05:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg04-a01:primary",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg04-a01:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg04-a02:primary",
+      "work_minutes": 1440,
+      "cost": 3840.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg04-a02:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg04-a03:primary",
+      "work_minutes": 1920,
+      "cost": 5120.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg04-a03:support",
+      "work_minutes": 960,
+      "cost": 6080.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg04-a04:primary",
+      "work_minutes": 2400,
+      "cost": 6000.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg04-a04:support",
+      "work_minutes": 1200,
+      "cost": 7600.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg04-a05:primary",
+      "work_minutes": 2880,
+      "cost": 5760.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg04-a05:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg05-a01:primary",
+      "work_minutes": 1440,
+      "cost": 3840.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg05-a01:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg05-a02:primary",
+      "work_minutes": 1920,
+      "cost": 5120.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg05-a02:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg05-a03:primary",
+      "work_minutes": 2400,
+      "cost": 6000.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg05-a03:support",
+      "work_minutes": 1200,
+      "cost": 7600.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg05-a04:primary",
+      "work_minutes": 2880,
+      "cost": 5760.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg05-a04:support",
+      "work_minutes": 1440,
+      "cost": 9120.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg05-a05:primary",
+      "work_minutes": 960,
+      "cost": 1920.0
+    },
+    {
+      "assignment_id": "assign:p05-pkg05-a05:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg01-a01:primary",
+      "work_minutes": 2400,
+      "cost": 7200.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg01-a01:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg01-a02:primary",
+      "work_minutes": 2880,
+      "cost": 7680.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg01-a02:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg01-a03:primary",
+      "work_minutes": 960,
+      "cost": 2560.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg01-a03:support",
+      "work_minutes": 480,
+      "cost": 3040.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg01-a04:primary",
+      "work_minutes": 1440,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg01-a04:support",
+      "work_minutes": 720,
+      "cost": 4560.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg01-a05:primary",
+      "work_minutes": 1920,
+      "cost": 3840.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg01-a05:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg02-a01:primary",
+      "work_minutes": 2880,
+      "cost": 7680.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg02-a01:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg02-a02:primary",
+      "work_minutes": 960,
+      "cost": 2560.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg02-a02:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg02-a03:primary",
+      "work_minutes": 1440,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg02-a03:support",
+      "work_minutes": 720,
+      "cost": 4560.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg02-a04:primary",
+      "work_minutes": 1920,
+      "cost": 3840.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg02-a04:support",
+      "work_minutes": 960,
+      "cost": 6080.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg02-a05:primary",
+      "work_minutes": 2400,
+      "cost": 4800.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg02-a05:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg03-a01:primary",
+      "work_minutes": 960,
+      "cost": 2560.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg03-a01:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg03-a02:primary",
+      "work_minutes": 1440,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg03-a02:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg03-a03:primary",
+      "work_minutes": 1920,
+      "cost": 3840.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg03-a03:support",
+      "work_minutes": 960,
+      "cost": 6080.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg03-a04:primary",
+      "work_minutes": 2400,
+      "cost": 4800.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg03-a04:support",
+      "work_minutes": 1200,
+      "cost": 7600.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg03-a05:primary",
+      "work_minutes": 2880,
+      "cost": 6480.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg03-a05:support",
+      "work_minutes": 1440,
+      "cost": 4320.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg04-a01:primary",
+      "work_minutes": 1440,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg04-a01:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg04-a02:primary",
+      "work_minutes": 1920,
+      "cost": 3840.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg04-a02:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg04-a03:primary",
+      "work_minutes": 2400,
+      "cost": 4800.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg04-a03:support",
+      "work_minutes": 1200,
+      "cost": 7600.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg04-a04:primary",
+      "work_minutes": 2880,
+      "cost": 6480.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg04-a04:support",
+      "work_minutes": 1440,
+      "cost": 9120.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg04-a05:primary",
+      "work_minutes": 960,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg04-a05:support",
+      "work_minutes": 480,
+      "cost": 1440.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg05-a01:primary",
+      "work_minutes": 1920,
+      "cost": 3840.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg05-a01:support",
+      "work_minutes": 960,
+      "cost": 2880.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg05-a02:primary",
+      "work_minutes": 2400,
+      "cost": 4800.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg05-a02:support",
+      "work_minutes": 1200,
+      "cost": 3600.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg05-a03:primary",
+      "work_minutes": 2880,
+      "cost": 6480.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg05-a03:support",
+      "work_minutes": 1440,
+      "cost": 9120.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg05-a04:primary",
+      "work_minutes": 960,
+      "cost": 2160.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg05-a04:support",
+      "work_minutes": 480,
+      "cost": 3040.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg05-a05:primary",
+      "work_minutes": 1440,
+      "cost": 3360.0
+    },
+    {
+      "assignment_id": "assign:p06-pkg05-a05:support",
+      "work_minutes": 720,
+      "cost": 2160.0
+    }
+  ],
+  "baseline_variances": [
+    {
+      "task_id": "task:p01-gate",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg01-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg01-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg01-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg01-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg01-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg02-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg02-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg02-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg02-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg02-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg03-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg03-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg03-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg03-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg03-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg04-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg04-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg04-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg04-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg04-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg05-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg05-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg05-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg05-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p01-pkg05-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-gate",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg01-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg01-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg01-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg01-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg01-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg02-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg02-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg02-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg02-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg02-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg03-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg03-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg03-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg03-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg03-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg04-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg04-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg04-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg04-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg04-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg05-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg05-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg05-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg05-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p02-pkg05-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-gate",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg01-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg01-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg01-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg01-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg01-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg02-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg02-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg02-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg02-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg02-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg03-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg03-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg03-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg03-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg03-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg04-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg04-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg04-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg04-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg04-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg05-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg05-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg05-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg05-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p03-pkg05-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-gate",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg01-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg01-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg01-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg01-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg01-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg02-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg02-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg02-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg02-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg02-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg03-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg03-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg03-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg03-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg03-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg04-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg04-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg04-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg04-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg04-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg05-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg05-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg05-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg05-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p04-pkg05-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-gate",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg01-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg01-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg01-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg01-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg01-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg02-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg02-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg02-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg02-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg02-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg03-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg03-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg03-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg03-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg03-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg04-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg04-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg04-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg04-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg04-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg05-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg05-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg05-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg05-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p05-pkg05-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-gate",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg01-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg01-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg01-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg01-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg01-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg02-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg02-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg02-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg02-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg02-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg03-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg03-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg03-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg03-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg03-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg04-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg04-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg04-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg04-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg04-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg05-a01",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg05-a02",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg05-a03",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg05-a04",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:p06-pkg05-a05",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:project-finish",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    },
+    {
+      "task_id": "task:project-start",
+      "start_variance_minutes": 0,
+      "finish_variance_minutes": 0
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yuxi.local/schemas/mpp_bridge_yuxi_projection_report_v1.schema.json",
+  "title": "MPP Bridge Yuxi Projection Report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "source_snapshot_semantic_sha256",
+    "interchange_artifact_sha256",
+    "preserved_fields",
+    "derived_fields",
+    "omitted_fields",
+    "unsupported_semantics"
+  ],
+  "properties": {
+    "schema_version": { "const": "mpp_bridge_yuxi_projection_report_v1" },
+    "status": { "const": "PASS" },
+    "source_snapshot_semantic_sha256": { "$ref": "#/$defs/sha256" },
+    "interchange_artifact_sha256": { "$ref": "#/$defs/sha256" },
+    "preserved_fields": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/preservedField" }
+    },
+    "derived_fields": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/disposition" }
+    },
+    "omitted_fields": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/omission" }
+    },
+    "unsupported_semantics": {
+      "type": "array",
+      "maxItems": 0
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "preservedField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_path", "target_path"],
+      "properties": {
+        "source_path": { "type": "string", "minLength": 1 },
+        "target_path": { "type": "string", "minLength": 1 }
+      }
+    },
+    "disposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_path", "reason_code"],
+      "properties": {
+        "target_path": { "type": "string", "minLength": 1 },
+        "reason_code": { "type": "string", "minLength": 1 }
+      }
+    },
+    "omission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_path", "reason_code"],
+      "properties": {
+        "source_path": { "type": "string", "minLength": 1 },
+        "reason_code": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

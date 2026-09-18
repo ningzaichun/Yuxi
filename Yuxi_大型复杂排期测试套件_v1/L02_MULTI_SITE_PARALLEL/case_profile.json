@@ -1,0 +1,43 @@
+{
+  "case_id": "L02_MULTI_SITE_PARALLEL",
+  "title": "八标段多作业面并行施工计划",
+  "test_profile": {
+    "purpose": "验证多标段并行、跨标段协调、共享资源和多日历",
+    "scale_target": "约 230 项",
+    "coverage": [
+      "8标段",
+      "24作业面",
+      "并行DAG",
+      "跨标段FF",
+      "共享资源",
+      "资源冲突",
+      "双日历"
+    ],
+    "oracle_scope": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+    "microsoft_project_observation": false
+  },
+  "metrics": {
+    "tasks": 235,
+    "summary_tasks": 33,
+    "leaf_tasks": 202,
+    "milestones": 10,
+    "dependencies": 231,
+    "dependency_types": {
+      "FS": 176,
+      "SS": 48,
+      "FF": 7,
+      "SF": 0
+    },
+    "nonzero_lags": 103,
+    "calendars": 2,
+    "resources": 10,
+    "assignments": 192,
+    "baseline_tasks": 0,
+    "completed_tasks": 0,
+    "in_progress_tasks": 0,
+    "expected_status": "SUCCEEDED_WITH_ISSUES",
+    "expected_issues": 325,
+    "expected_resource_conflicts": 325,
+    "expected_baseline_variances": 0
+  }
+}

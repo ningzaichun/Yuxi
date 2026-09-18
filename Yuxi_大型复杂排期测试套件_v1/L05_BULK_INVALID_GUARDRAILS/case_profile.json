@@ -1,0 +1,42 @@
+{
+  "case_id": "L05_BULK_INVALID_GUARDRAILS",
+  "title": "大规模错误输入与防御性校验",
+  "test_profile": {
+    "purpose": "验证大量错误同时存在时引擎必须拒绝排程并完整报告",
+    "scale_target": "127 项",
+    "coverage": [
+      "6组循环",
+      "12个错误里程碑",
+      "12个无效日历",
+      "12个孤儿父级",
+      "6条悬空依赖",
+      "12条无效Assignment"
+    ],
+    "oracle_scope": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+    "microsoft_project_observation": false
+  },
+  "metrics": {
+    "tasks": 127,
+    "summary_tasks": 7,
+    "leaf_tasks": 120,
+    "milestones": 12,
+    "dependencies": 126,
+    "dependency_types": {
+      "FS": 126,
+      "SS": 0,
+      "FF": 0,
+      "SF": 0
+    },
+    "nonzero_lags": 0,
+    "calendars": 1,
+    "resources": 0,
+    "assignments": 12,
+    "baseline_tasks": 0,
+    "completed_tasks": 0,
+    "in_progress_tasks": 0,
+    "expected_status": "VALIDATION_FAILED",
+    "expected_issues": 55,
+    "expected_resource_conflicts": 0,
+    "expected_baseline_variances": 0
+  }
+}

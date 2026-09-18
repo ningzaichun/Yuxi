@@ -1,0 +1,4263 @@
+{
+  "schema_version": "schedule_engine_test_input_v1",
+  "case_id": "L05_BULK_INVALID_GUARDRAILS",
+  "title": "大规模错误输入与防御性校验",
+  "data_classification": "SYNTHETIC_TEST_DATA",
+  "oracle": {
+    "type": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+    "is_microsoft_project_observation": false,
+    "date_precision": "minute",
+    "tolerance_minutes": 0
+  },
+  "semantics": {
+    "timezone": "Asia/Shanghai",
+    "duration_unit": "working_minute",
+    "lag_unit": "working_minute",
+    "default_lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR",
+    "summary_rollup": "BOTTOM_UP_DIRECT_CHILD_MIN_START_MAX_FINISH",
+    "date_boundary": "START_INCLUSIVE_FINISH_EXCLUSIVE_WORK_INTERVALS"
+  },
+  "project": {
+    "project_id": "project:l05_bulk_invalid_guardrails",
+    "name": "大规模错误输入与防御性校验",
+    "planned_start": "2026-09-07T08:00:00+08:00",
+    "required_finish": null,
+    "status_date": null,
+    "default_calendar_id": "calendar:standard"
+  },
+  "calendars": [
+    {
+      "calendar_id": "calendar:standard",
+      "name": "标准工作日历",
+      "weekly_pattern": {
+        "MONDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "TUESDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "WEDNESDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "THURSDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "FRIDAY": {
+          "day_type": "WORKING",
+          "intervals": [
+            {
+              "start": "08:00",
+              "finish": "12:00"
+            },
+            {
+              "start": "13:00",
+              "finish": "17:00"
+            }
+          ]
+        },
+        "SATURDAY": {
+          "day_type": "NON_WORKING",
+          "intervals": []
+        },
+        "SUNDAY": {
+          "day_type": "NON_WORKING",
+          "intervals": []
+        }
+      },
+      "exceptions": []
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "task:root",
+      "parent_task_id": null,
+      "name": "大规模错误输入与防御性校验",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1",
+      "outline_level": 1
+    },
+    {
+      "task_id": "task:g01",
+      "parent_task_id": "task:root",
+      "name": "错误数据组1",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1",
+      "outline_level": 2
+    },
+    {
+      "task_id": "task:g01-a01",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-1",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.1",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a02",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-2",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.2",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a03",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-3",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.3",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a04",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-4",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.4",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a05",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-5",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": "calendar:missing",
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.5",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a06",
+      "parent_task_id": "task:missing-parent",
+      "name": "错误任务1-6",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.6",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a07",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-7",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.7",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a08",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-8",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.8",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a09",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-9",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.9",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a10",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-10",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.10",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a11",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-11",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.11",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a12",
+      "parent_task_id": "task:missing-parent",
+      "name": "错误任务1-12",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.12",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a13",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-13",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.13",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a14",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-14",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.14",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a15",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-15",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": "calendar:missing",
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.15",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a16",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-16",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.16",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a17",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-17",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.17",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a18",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-18",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.18",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a19",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-19",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.19",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g01-a20",
+      "parent_task_id": "task:g01",
+      "name": "错误任务1-20",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.1.20",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02",
+      "parent_task_id": "task:root",
+      "name": "错误数据组2",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2",
+      "outline_level": 2
+    },
+    {
+      "task_id": "task:g02-a01",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-1",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.1",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a02",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-2",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.2",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a03",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-3",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.3",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a04",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-4",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.4",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a05",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-5",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": "calendar:missing",
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.5",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a06",
+      "parent_task_id": "task:missing-parent",
+      "name": "错误任务2-6",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.6",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a07",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-7",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.7",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a08",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-8",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.8",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a09",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-9",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.9",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a10",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-10",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.10",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a11",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-11",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.11",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a12",
+      "parent_task_id": "task:missing-parent",
+      "name": "错误任务2-12",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.12",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a13",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-13",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.13",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a14",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-14",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.14",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a15",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-15",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": "calendar:missing",
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.15",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a16",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-16",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.16",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a17",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-17",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.17",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a18",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-18",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.18",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a19",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-19",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.19",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g02-a20",
+      "parent_task_id": "task:g02",
+      "name": "错误任务2-20",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.2.20",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03",
+      "parent_task_id": "task:root",
+      "name": "错误数据组3",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3",
+      "outline_level": 2
+    },
+    {
+      "task_id": "task:g03-a01",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-1",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.1",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a02",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-2",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.2",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a03",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-3",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.3",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a04",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-4",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.4",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a05",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-5",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": "calendar:missing",
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.5",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a06",
+      "parent_task_id": "task:missing-parent",
+      "name": "错误任务3-6",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.6",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a07",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-7",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.7",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a08",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-8",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.8",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a09",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-9",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.9",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a10",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-10",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.10",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a11",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-11",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.11",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a12",
+      "parent_task_id": "task:missing-parent",
+      "name": "错误任务3-12",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.12",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a13",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-13",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.13",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a14",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-14",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.14",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a15",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-15",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": "calendar:missing",
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.15",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a16",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-16",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.16",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a17",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-17",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.17",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a18",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-18",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.18",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a19",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-19",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.19",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g03-a20",
+      "parent_task_id": "task:g03",
+      "name": "错误任务3-20",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.3.20",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04",
+      "parent_task_id": "task:root",
+      "name": "错误数据组4",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4",
+      "outline_level": 2
+    },
+    {
+      "task_id": "task:g04-a01",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-1",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.1",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a02",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-2",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.2",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a03",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-3",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.3",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a04",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-4",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.4",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a05",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-5",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": "calendar:missing",
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.5",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a06",
+      "parent_task_id": "task:missing-parent",
+      "name": "错误任务4-6",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.6",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a07",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-7",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.7",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a08",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-8",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.8",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a09",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-9",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.9",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a10",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-10",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.10",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a11",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-11",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.11",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a12",
+      "parent_task_id": "task:missing-parent",
+      "name": "错误任务4-12",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.12",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a13",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-13",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.13",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a14",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-14",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.14",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a15",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-15",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": "calendar:missing",
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.15",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a16",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-16",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.16",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a17",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-17",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.17",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a18",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-18",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.18",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a19",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-19",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.19",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g04-a20",
+      "parent_task_id": "task:g04",
+      "name": "错误任务4-20",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.4.20",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05",
+      "parent_task_id": "task:root",
+      "name": "错误数据组5",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5",
+      "outline_level": 2
+    },
+    {
+      "task_id": "task:g05-a01",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-1",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.1",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a02",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-2",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.2",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a03",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-3",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.3",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a04",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-4",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.4",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a05",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-5",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": "calendar:missing",
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.5",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a06",
+      "parent_task_id": "task:missing-parent",
+      "name": "错误任务5-6",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.6",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a07",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-7",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.7",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a08",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-8",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.8",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a09",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-9",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.9",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a10",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-10",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.10",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a11",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-11",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.11",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a12",
+      "parent_task_id": "task:missing-parent",
+      "name": "错误任务5-12",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.12",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a13",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-13",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.13",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a14",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-14",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.14",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a15",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-15",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": "calendar:missing",
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.15",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a16",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-16",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.16",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a17",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-17",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.17",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a18",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-18",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.18",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a19",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-19",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.19",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g05-a20",
+      "parent_task_id": "task:g05",
+      "name": "错误任务5-20",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.5.20",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06",
+      "parent_task_id": "task:root",
+      "name": "错误数据组6",
+      "task_type": "SUMMARY",
+      "summary": true,
+      "milestone": false,
+      "duration_minutes": null,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6",
+      "outline_level": 2
+    },
+    {
+      "task_id": "task:g06-a01",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-1",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.1",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a02",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-2",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.2",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a03",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-3",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.3",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a04",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-4",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.4",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a05",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-5",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": "calendar:missing",
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.5",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a06",
+      "parent_task_id": "task:missing-parent",
+      "name": "错误任务6-6",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.6",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a07",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-7",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.7",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a08",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-8",
+      "task_type": "MILESTONE",
+      "summary": false,
+      "milestone": true,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.8",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a09",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-9",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.9",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a10",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-10",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.10",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a11",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-11",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.11",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a12",
+      "parent_task_id": "task:missing-parent",
+      "name": "错误任务6-12",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.12",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a13",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-13",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.13",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a14",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-14",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.14",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a15",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-15",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": "calendar:missing",
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.15",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a16",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-16",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.16",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a17",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-17",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 960,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.17",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a18",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-18",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1440,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.18",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a19",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-19",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 1920,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.19",
+      "outline_level": 3
+    },
+    {
+      "task_id": "task:g06-a20",
+      "parent_task_id": "task:g06",
+      "name": "错误任务6-20",
+      "task_type": "TASK",
+      "summary": false,
+      "milestone": false,
+      "duration_minutes": 480,
+      "calendar_id": null,
+      "boundary_role": null,
+      "status": "NOT_STARTED",
+      "constraint": {
+        "type": "AS_SOON_AS_POSSIBLE",
+        "date": null
+      },
+      "deadline": null,
+      "baseline_0": {
+        "exists": false,
+        "start": null,
+        "finish": null
+      },
+      "wbs": "1.6.20",
+      "outline_level": 3
+    }
+  ],
+  "dependencies": [
+    {
+      "dependency_id": "dep:g01-a01:g01-a02:FS:0",
+      "predecessor_task_id": "task:g01-a01",
+      "successor_task_id": "task:g01-a02",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a02:g01-a03:FS:0",
+      "predecessor_task_id": "task:g01-a02",
+      "successor_task_id": "task:g01-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a03:g01-a04:FS:0",
+      "predecessor_task_id": "task:g01-a03",
+      "successor_task_id": "task:g01-a04",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a04:g01-a05:FS:0",
+      "predecessor_task_id": "task:g01-a04",
+      "successor_task_id": "task:g01-a05",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a05:g01-a06:FS:0",
+      "predecessor_task_id": "task:g01-a05",
+      "successor_task_id": "task:g01-a06",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a06:g01-a07:FS:0",
+      "predecessor_task_id": "task:g01-a06",
+      "successor_task_id": "task:g01-a07",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a07:g01-a08:FS:0",
+      "predecessor_task_id": "task:g01-a07",
+      "successor_task_id": "task:g01-a08",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a08:g01-a09:FS:0",
+      "predecessor_task_id": "task:g01-a08",
+      "successor_task_id": "task:g01-a09",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a09:g01-a10:FS:0",
+      "predecessor_task_id": "task:g01-a09",
+      "successor_task_id": "task:g01-a10",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a10:g01-a11:FS:0",
+      "predecessor_task_id": "task:g01-a10",
+      "successor_task_id": "task:g01-a11",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a11:g01-a12:FS:0",
+      "predecessor_task_id": "task:g01-a11",
+      "successor_task_id": "task:g01-a12",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a12:g01-a13:FS:0",
+      "predecessor_task_id": "task:g01-a12",
+      "successor_task_id": "task:g01-a13",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a13:g01-a14:FS:0",
+      "predecessor_task_id": "task:g01-a13",
+      "successor_task_id": "task:g01-a14",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a14:g01-a15:FS:0",
+      "predecessor_task_id": "task:g01-a14",
+      "successor_task_id": "task:g01-a15",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a15:g01-a16:FS:0",
+      "predecessor_task_id": "task:g01-a15",
+      "successor_task_id": "task:g01-a16",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a16:g01-a17:FS:0",
+      "predecessor_task_id": "task:g01-a16",
+      "successor_task_id": "task:g01-a17",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a17:g01-a18:FS:0",
+      "predecessor_task_id": "task:g01-a17",
+      "successor_task_id": "task:g01-a18",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a18:g01-a19:FS:0",
+      "predecessor_task_id": "task:g01-a18",
+      "successor_task_id": "task:g01-a19",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a19:g01-a20:FS:0",
+      "predecessor_task_id": "task:g01-a19",
+      "successor_task_id": "task:g01-a20",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a20:g01-a03:FS:0",
+      "predecessor_task_id": "task:g01-a20",
+      "successor_task_id": "task:g01-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g01-a10:not-found-1:FS:0",
+      "predecessor_task_id": "task:g01-a10",
+      "successor_task_id": "task:not-found-1",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a01:g02-a02:FS:0",
+      "predecessor_task_id": "task:g02-a01",
+      "successor_task_id": "task:g02-a02",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a02:g02-a03:FS:0",
+      "predecessor_task_id": "task:g02-a02",
+      "successor_task_id": "task:g02-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a03:g02-a04:FS:0",
+      "predecessor_task_id": "task:g02-a03",
+      "successor_task_id": "task:g02-a04",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a04:g02-a05:FS:0",
+      "predecessor_task_id": "task:g02-a04",
+      "successor_task_id": "task:g02-a05",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a05:g02-a06:FS:0",
+      "predecessor_task_id": "task:g02-a05",
+      "successor_task_id": "task:g02-a06",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a06:g02-a07:FS:0",
+      "predecessor_task_id": "task:g02-a06",
+      "successor_task_id": "task:g02-a07",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a07:g02-a08:FS:0",
+      "predecessor_task_id": "task:g02-a07",
+      "successor_task_id": "task:g02-a08",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a08:g02-a09:FS:0",
+      "predecessor_task_id": "task:g02-a08",
+      "successor_task_id": "task:g02-a09",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a09:g02-a10:FS:0",
+      "predecessor_task_id": "task:g02-a09",
+      "successor_task_id": "task:g02-a10",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a10:g02-a11:FS:0",
+      "predecessor_task_id": "task:g02-a10",
+      "successor_task_id": "task:g02-a11",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a11:g02-a12:FS:0",
+      "predecessor_task_id": "task:g02-a11",
+      "successor_task_id": "task:g02-a12",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a12:g02-a13:FS:0",
+      "predecessor_task_id": "task:g02-a12",
+      "successor_task_id": "task:g02-a13",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a13:g02-a14:FS:0",
+      "predecessor_task_id": "task:g02-a13",
+      "successor_task_id": "task:g02-a14",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a14:g02-a15:FS:0",
+      "predecessor_task_id": "task:g02-a14",
+      "successor_task_id": "task:g02-a15",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a15:g02-a16:FS:0",
+      "predecessor_task_id": "task:g02-a15",
+      "successor_task_id": "task:g02-a16",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a16:g02-a17:FS:0",
+      "predecessor_task_id": "task:g02-a16",
+      "successor_task_id": "task:g02-a17",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a17:g02-a18:FS:0",
+      "predecessor_task_id": "task:g02-a17",
+      "successor_task_id": "task:g02-a18",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a18:g02-a19:FS:0",
+      "predecessor_task_id": "task:g02-a18",
+      "successor_task_id": "task:g02-a19",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a19:g02-a20:FS:0",
+      "predecessor_task_id": "task:g02-a19",
+      "successor_task_id": "task:g02-a20",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a20:g02-a03:FS:0",
+      "predecessor_task_id": "task:g02-a20",
+      "successor_task_id": "task:g02-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g02-a10:not-found-2:FS:0",
+      "predecessor_task_id": "task:g02-a10",
+      "successor_task_id": "task:not-found-2",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a01:g03-a02:FS:0",
+      "predecessor_task_id": "task:g03-a01",
+      "successor_task_id": "task:g03-a02",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a02:g03-a03:FS:0",
+      "predecessor_task_id": "task:g03-a02",
+      "successor_task_id": "task:g03-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a03:g03-a04:FS:0",
+      "predecessor_task_id": "task:g03-a03",
+      "successor_task_id": "task:g03-a04",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a04:g03-a05:FS:0",
+      "predecessor_task_id": "task:g03-a04",
+      "successor_task_id": "task:g03-a05",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a05:g03-a06:FS:0",
+      "predecessor_task_id": "task:g03-a05",
+      "successor_task_id": "task:g03-a06",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a06:g03-a07:FS:0",
+      "predecessor_task_id": "task:g03-a06",
+      "successor_task_id": "task:g03-a07",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a07:g03-a08:FS:0",
+      "predecessor_task_id": "task:g03-a07",
+      "successor_task_id": "task:g03-a08",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a08:g03-a09:FS:0",
+      "predecessor_task_id": "task:g03-a08",
+      "successor_task_id": "task:g03-a09",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a09:g03-a10:FS:0",
+      "predecessor_task_id": "task:g03-a09",
+      "successor_task_id": "task:g03-a10",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a10:g03-a11:FS:0",
+      "predecessor_task_id": "task:g03-a10",
+      "successor_task_id": "task:g03-a11",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a11:g03-a12:FS:0",
+      "predecessor_task_id": "task:g03-a11",
+      "successor_task_id": "task:g03-a12",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a12:g03-a13:FS:0",
+      "predecessor_task_id": "task:g03-a12",
+      "successor_task_id": "task:g03-a13",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a13:g03-a14:FS:0",
+      "predecessor_task_id": "task:g03-a13",
+      "successor_task_id": "task:g03-a14",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a14:g03-a15:FS:0",
+      "predecessor_task_id": "task:g03-a14",
+      "successor_task_id": "task:g03-a15",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a15:g03-a16:FS:0",
+      "predecessor_task_id": "task:g03-a15",
+      "successor_task_id": "task:g03-a16",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a16:g03-a17:FS:0",
+      "predecessor_task_id": "task:g03-a16",
+      "successor_task_id": "task:g03-a17",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a17:g03-a18:FS:0",
+      "predecessor_task_id": "task:g03-a17",
+      "successor_task_id": "task:g03-a18",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a18:g03-a19:FS:0",
+      "predecessor_task_id": "task:g03-a18",
+      "successor_task_id": "task:g03-a19",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a19:g03-a20:FS:0",
+      "predecessor_task_id": "task:g03-a19",
+      "successor_task_id": "task:g03-a20",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a20:g03-a03:FS:0",
+      "predecessor_task_id": "task:g03-a20",
+      "successor_task_id": "task:g03-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g03-a10:not-found-3:FS:0",
+      "predecessor_task_id": "task:g03-a10",
+      "successor_task_id": "task:not-found-3",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a01:g04-a02:FS:0",
+      "predecessor_task_id": "task:g04-a01",
+      "successor_task_id": "task:g04-a02",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a02:g04-a03:FS:0",
+      "predecessor_task_id": "task:g04-a02",
+      "successor_task_id": "task:g04-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a03:g04-a04:FS:0",
+      "predecessor_task_id": "task:g04-a03",
+      "successor_task_id": "task:g04-a04",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a04:g04-a05:FS:0",
+      "predecessor_task_id": "task:g04-a04",
+      "successor_task_id": "task:g04-a05",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a05:g04-a06:FS:0",
+      "predecessor_task_id": "task:g04-a05",
+      "successor_task_id": "task:g04-a06",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a06:g04-a07:FS:0",
+      "predecessor_task_id": "task:g04-a06",
+      "successor_task_id": "task:g04-a07",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a07:g04-a08:FS:0",
+      "predecessor_task_id": "task:g04-a07",
+      "successor_task_id": "task:g04-a08",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a08:g04-a09:FS:0",
+      "predecessor_task_id": "task:g04-a08",
+      "successor_task_id": "task:g04-a09",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a09:g04-a10:FS:0",
+      "predecessor_task_id": "task:g04-a09",
+      "successor_task_id": "task:g04-a10",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a10:g04-a11:FS:0",
+      "predecessor_task_id": "task:g04-a10",
+      "successor_task_id": "task:g04-a11",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a11:g04-a12:FS:0",
+      "predecessor_task_id": "task:g04-a11",
+      "successor_task_id": "task:g04-a12",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a12:g04-a13:FS:0",
+      "predecessor_task_id": "task:g04-a12",
+      "successor_task_id": "task:g04-a13",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a13:g04-a14:FS:0",
+      "predecessor_task_id": "task:g04-a13",
+      "successor_task_id": "task:g04-a14",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a14:g04-a15:FS:0",
+      "predecessor_task_id": "task:g04-a14",
+      "successor_task_id": "task:g04-a15",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a15:g04-a16:FS:0",
+      "predecessor_task_id": "task:g04-a15",
+      "successor_task_id": "task:g04-a16",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a16:g04-a17:FS:0",
+      "predecessor_task_id": "task:g04-a16",
+      "successor_task_id": "task:g04-a17",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a17:g04-a18:FS:0",
+      "predecessor_task_id": "task:g04-a17",
+      "successor_task_id": "task:g04-a18",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a18:g04-a19:FS:0",
+      "predecessor_task_id": "task:g04-a18",
+      "successor_task_id": "task:g04-a19",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a19:g04-a20:FS:0",
+      "predecessor_task_id": "task:g04-a19",
+      "successor_task_id": "task:g04-a20",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a20:g04-a03:FS:0",
+      "predecessor_task_id": "task:g04-a20",
+      "successor_task_id": "task:g04-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g04-a10:not-found-4:FS:0",
+      "predecessor_task_id": "task:g04-a10",
+      "successor_task_id": "task:not-found-4",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a01:g05-a02:FS:0",
+      "predecessor_task_id": "task:g05-a01",
+      "successor_task_id": "task:g05-a02",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a02:g05-a03:FS:0",
+      "predecessor_task_id": "task:g05-a02",
+      "successor_task_id": "task:g05-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a03:g05-a04:FS:0",
+      "predecessor_task_id": "task:g05-a03",
+      "successor_task_id": "task:g05-a04",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a04:g05-a05:FS:0",
+      "predecessor_task_id": "task:g05-a04",
+      "successor_task_id": "task:g05-a05",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a05:g05-a06:FS:0",
+      "predecessor_task_id": "task:g05-a05",
+      "successor_task_id": "task:g05-a06",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a06:g05-a07:FS:0",
+      "predecessor_task_id": "task:g05-a06",
+      "successor_task_id": "task:g05-a07",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a07:g05-a08:FS:0",
+      "predecessor_task_id": "task:g05-a07",
+      "successor_task_id": "task:g05-a08",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a08:g05-a09:FS:0",
+      "predecessor_task_id": "task:g05-a08",
+      "successor_task_id": "task:g05-a09",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a09:g05-a10:FS:0",
+      "predecessor_task_id": "task:g05-a09",
+      "successor_task_id": "task:g05-a10",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a10:g05-a11:FS:0",
+      "predecessor_task_id": "task:g05-a10",
+      "successor_task_id": "task:g05-a11",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a11:g05-a12:FS:0",
+      "predecessor_task_id": "task:g05-a11",
+      "successor_task_id": "task:g05-a12",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a12:g05-a13:FS:0",
+      "predecessor_task_id": "task:g05-a12",
+      "successor_task_id": "task:g05-a13",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a13:g05-a14:FS:0",
+      "predecessor_task_id": "task:g05-a13",
+      "successor_task_id": "task:g05-a14",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a14:g05-a15:FS:0",
+      "predecessor_task_id": "task:g05-a14",
+      "successor_task_id": "task:g05-a15",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a15:g05-a16:FS:0",
+      "predecessor_task_id": "task:g05-a15",
+      "successor_task_id": "task:g05-a16",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a16:g05-a17:FS:0",
+      "predecessor_task_id": "task:g05-a16",
+      "successor_task_id": "task:g05-a17",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a17:g05-a18:FS:0",
+      "predecessor_task_id": "task:g05-a17",
+      "successor_task_id": "task:g05-a18",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a18:g05-a19:FS:0",
+      "predecessor_task_id": "task:g05-a18",
+      "successor_task_id": "task:g05-a19",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a19:g05-a20:FS:0",
+      "predecessor_task_id": "task:g05-a19",
+      "successor_task_id": "task:g05-a20",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a20:g05-a03:FS:0",
+      "predecessor_task_id": "task:g05-a20",
+      "successor_task_id": "task:g05-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g05-a10:not-found-5:FS:0",
+      "predecessor_task_id": "task:g05-a10",
+      "successor_task_id": "task:not-found-5",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a01:g06-a02:FS:0",
+      "predecessor_task_id": "task:g06-a01",
+      "successor_task_id": "task:g06-a02",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a02:g06-a03:FS:0",
+      "predecessor_task_id": "task:g06-a02",
+      "successor_task_id": "task:g06-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a03:g06-a04:FS:0",
+      "predecessor_task_id": "task:g06-a03",
+      "successor_task_id": "task:g06-a04",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a04:g06-a05:FS:0",
+      "predecessor_task_id": "task:g06-a04",
+      "successor_task_id": "task:g06-a05",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a05:g06-a06:FS:0",
+      "predecessor_task_id": "task:g06-a05",
+      "successor_task_id": "task:g06-a06",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a06:g06-a07:FS:0",
+      "predecessor_task_id": "task:g06-a06",
+      "successor_task_id": "task:g06-a07",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a07:g06-a08:FS:0",
+      "predecessor_task_id": "task:g06-a07",
+      "successor_task_id": "task:g06-a08",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a08:g06-a09:FS:0",
+      "predecessor_task_id": "task:g06-a08",
+      "successor_task_id": "task:g06-a09",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a09:g06-a10:FS:0",
+      "predecessor_task_id": "task:g06-a09",
+      "successor_task_id": "task:g06-a10",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a10:g06-a11:FS:0",
+      "predecessor_task_id": "task:g06-a10",
+      "successor_task_id": "task:g06-a11",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a11:g06-a12:FS:0",
+      "predecessor_task_id": "task:g06-a11",
+      "successor_task_id": "task:g06-a12",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a12:g06-a13:FS:0",
+      "predecessor_task_id": "task:g06-a12",
+      "successor_task_id": "task:g06-a13",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a13:g06-a14:FS:0",
+      "predecessor_task_id": "task:g06-a13",
+      "successor_task_id": "task:g06-a14",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a14:g06-a15:FS:0",
+      "predecessor_task_id": "task:g06-a14",
+      "successor_task_id": "task:g06-a15",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a15:g06-a16:FS:0",
+      "predecessor_task_id": "task:g06-a15",
+      "successor_task_id": "task:g06-a16",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a16:g06-a17:FS:0",
+      "predecessor_task_id": "task:g06-a16",
+      "successor_task_id": "task:g06-a17",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a17:g06-a18:FS:0",
+      "predecessor_task_id": "task:g06-a17",
+      "successor_task_id": "task:g06-a18",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a18:g06-a19:FS:0",
+      "predecessor_task_id": "task:g06-a18",
+      "successor_task_id": "task:g06-a19",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a19:g06-a20:FS:0",
+      "predecessor_task_id": "task:g06-a19",
+      "successor_task_id": "task:g06-a20",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a20:g06-a03:FS:0",
+      "predecessor_task_id": "task:g06-a20",
+      "successor_task_id": "task:g06-a03",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    },
+    {
+      "dependency_id": "dep:g06-a10:not-found-6:FS:0",
+      "predecessor_task_id": "task:g06-a10",
+      "successor_task_id": "task:not-found-6",
+      "type": "FS",
+      "lag_minutes": 0,
+      "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR"
+    }
+  ],
+  "resources": [],
+  "assignments": [
+    {
+      "assignment_id": "assign:bad:1",
+      "task_id": "task:g01-a01",
+      "resource_id": "resource:missing-1",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:bad:2",
+      "task_id": "task:g02-a01",
+      "resource_id": "resource:missing-2",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:bad:3",
+      "task_id": "task:g03-a01",
+      "resource_id": "resource:missing-3",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:bad:4",
+      "task_id": "task:g04-a01",
+      "resource_id": "resource:missing-4",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:bad:5",
+      "task_id": "task:g05-a01",
+      "resource_id": "resource:missing-5",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:bad:6",
+      "task_id": "task:g06-a01",
+      "resource_id": "resource:missing-6",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:bad:7",
+      "task_id": "task:g01-a01",
+      "resource_id": "resource:missing-7",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:bad:8",
+      "task_id": "task:g02-a01",
+      "resource_id": "resource:missing-8",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:bad:9",
+      "task_id": "task:g03-a01",
+      "resource_id": "resource:missing-9",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:bad:10",
+      "task_id": "task:g04-a01",
+      "resource_id": "resource:missing-10",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:bad:11",
+      "task_id": "task:g05-a01",
+      "resource_id": "resource:missing-11",
+      "units": 1.0
+    },
+    {
+      "assignment_id": "assign:bad:12",
+      "task_id": "task:g06-a01",
+      "resource_id": "resource:missing-12",
+      "units": 1.0
+    }
+  ],
+  "boundary_whitelist": {
+    "open_start_task_ids": [],
+    "open_finish_task_ids": []
+  },
+  "test_profile": {
+    "purpose": "验证大量错误同时存在时引擎必须拒绝排程并完整报告",
+    "scale_target": "127 项",
+    "coverage": [
+      "6组循环",
+      "12个错误里程碑",
+      "12个无效日历",
+      "12个孤儿父级",
+      "6条悬空依赖",
+      "12条无效Assignment"
+    ],
+    "oracle_scope": "DETERMINISTIC_REFERENCE_IMPLEMENTATION",
+    "microsoft_project_observation": false
+  }
+}
