@@ -258,6 +258,8 @@ async def test_mcp_server(
 
         try:
             tools = await get_all_mcp_tools(slug)
+            if not tools:
+                raise ValueError("未发现可用工具，请检查 MCP 服务连接和启用状态")
             return {
                 "success": True,
                 "message": f"连接成功，共发现 {len(tools)} 个工具",

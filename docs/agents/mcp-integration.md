@@ -39,6 +39,24 @@ MCP（Model Context Protocol）是扩展智能体能力的重要方式。系统�
 }
 ```
 
+## 本机 Blender（第三方插件）
+
+Blender 中安装并启用第三方 `MCP for Blender` 插件，点击连接按钮，默认监听本机 `9876` 端口。
+保持 Blender 打开。在项目根目录的 PowerShell 中启动独立 HTTP 服务：
+
+```powershell
+uvx --python 3.11 --from mcp-for-blender==2.0.0 python scripts/blender-mcp/serve.py
+```
+
+启动脚本复用第三方 MCP 的工具与连接逻辑，仅将其通过 `127.0.0.1:9191/mcp` 提供给 Yuxi。
+在“扩展管理 → MCP”新增服务，标识填 `blender-local`，传输类型选择 `streamable_http`，
+URL 填 `http://127.0.0.1:9191/mcp`。此地址适用于 API、Worker 与 Blender 同机运行的宿主机开发环境。
+官方 Blender Lab 插件是另一套实现，不与这里的第三方插件混用。
+
+在智能体配置中选择该 MCP 和支持工具调用的模型。先发送“读取当前场景对象，不修改场景”验证链路，
+确认对话中出现实际工具结果，再测试建模。MCP 连接测试发现零个工具时会报告失败。
+此 MCP 操作的是本机 Blender，保存路径属于本机，不能直接当作 Yuxi Sandbox 附件路径使用。
+
 ## 服务器管理
 
 管理界面使用“添加 / 移除”语义管理 MCP 服务器：
