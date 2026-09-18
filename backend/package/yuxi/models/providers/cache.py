@@ -35,6 +35,7 @@ class ModelInfo:
     provider_type: str  # openai / anthropic / gemini / openrouter
 
     # 可选配置
+    protocol_override: str | None = None
     headers: dict[str, str] = field(default_factory=dict)
     extra: dict[str, Any] = field(default_factory=dict)
 
@@ -55,6 +56,7 @@ class ModelInfo:
             "api_key": self.api_key,
             "base_url": self.base_url,
             "provider_type": self.provider_type,
+            "protocol_override": self.protocol_override,
             "headers": self.headers,
             "extra": self.extra,
             "dimension": self.dimension,
@@ -71,6 +73,7 @@ class ModelInfo:
             api_key=data["api_key"],
             base_url=data["base_url"],
             provider_type=data["provider_type"],
+            protocol_override=data.get("protocol_override"),
             headers=data.get("headers", {}),
             extra=data.get("extra", {}),
             dimension=data.get("dimension"),
@@ -154,6 +157,7 @@ class ModelCache:
                     api_key=api_key or "",
                     base_url=base_url,
                     provider_type=provider.provider_type,
+                    protocol_override=model.get("protocol_override"),
                     headers=dict(provider.headers_json or {}),
                     extra=dict(provider.extra_json or {}),
                     dimension=model.get("dimension"),

@@ -4,6 +4,24 @@ from typing import Any
 
 BUILTIN_PROVIDERS: list[dict[str, Any]] = [
     {
+        "provider_id": "closeai",
+        "display_name": "CloseAI",
+        "provider_type": "openai",
+        "base_url": "https://api.openai-proxy.org/v1",
+        "api_key_env": "CLOSEAI_API_KEY",
+        "models_endpoint": "/models",
+        "capabilities": ["chat"],
+        "enabled_models": [
+            {
+                "id": "gpt-6-astra",
+                "display_name": "GPT-6 Astra",
+                "type": "chat",
+                "source": "manual",
+                "protocol_override": "openai_responses",
+            }
+        ],
+    },
+    {
         "provider_id": "openai",
         "display_name": "OpenAI",
         "base_url": "https://api.openai.com/v1",

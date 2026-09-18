@@ -21,6 +21,7 @@ from yuxi.storage.postgres.models_business import ModelProvider
 VALID_MODEL_TYPES = {"chat", "embedding", "rerank"}
 VALID_MODEL_SOURCES = {"manual", "remote"}
 VALID_PROVIDER_TYPES = {"openai", "anthropic", "gemini", "openrouter"}
+VALID_MODEL_PROTOCOLS = {"openai_compatible", "openai_responses"}
 _PROVIDER_ID_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_-]{1,99}$")
 
 
@@ -58,6 +59,14 @@ def _normalize_model_item(model: dict[str, Any]) -> dict[str, Any]:
     normalized["source"] = source
     normalized["display_name"] = str(model.get("display_name") or model.get("name") or model_id)
     normalized["extra"] = _normalize_dict(model.get("extra"))
+
+    protocol = model.get("protocol_override") or None
+    if protocol is not None:
+        if protocol not in VALID_MODEL_PROTOCOLS:
+            raise ValueError("协议覆盖必须是 openai_compatible 或 openai_responses")
+        if model_type != "chat":
+            raise ValueError("协议覆盖仅支持 chat 模型")
+    normalized["protocol_override"] = protocol
 
     if model_type == "embedding":
         dimension = model.get("dimension")

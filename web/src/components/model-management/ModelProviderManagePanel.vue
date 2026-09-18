@@ -32,7 +32,7 @@ const modelTestLoadingBySpec = ref({})
 const modelTestResultBySpec = ref({})
 
 const PROVIDER_TYPE_OPTIONS = [
-  { value: 'openai', label: 'OpenAI Completions API' },
+  { value: 'openai', label: 'OpenAI API' },
   { value: 'anthropic', label: 'Anthropic Messages API' }
 ]
 
@@ -1124,9 +1124,18 @@ defineExpose({
         </div>
 
         <div class="form-row">
-          <label class="form-label">
+          <label
+            v-if="
+              editingModel.type === 'chat' &&
+              ['openai', 'openrouter'].includes(currentProviderForModels?.provider_type)
+            "
+            class="form-label"
+          >
             <span>协议覆盖</span>
-            <a-input v-model:value="editingModel.protocol_override" placeholder="可选" />
+            <a-select v-model:value="editingModel.protocol_override" placeholder="默认" allow-clear>
+              <a-select-option value="openai_compatible">OpenAI Chat Completions</a-select-option>
+              <a-select-option value="openai_responses">OpenAI Responses</a-select-option>
+            </a-select>
           </label>
           <label class="form-label">
             <span>Base URL 覆盖</span>

@@ -44,6 +44,9 @@ def load_chat_model(fully_specified_name: str | None, **kwargs) -> BaseChatModel
 
     logger.debug(f"Loading model {fully_specified_name} with provider_type={info.provider_type}")
 
+    if info.protocol_override and info.provider_type not in {"openai", "openrouter"}:
+        raise ValueError("OpenAI 协议覆盖仅适用于 OpenAI 兼容供应商")
+
     if info.provider_type == "anthropic":
         from langchain_anthropic import ChatAnthropic
 
@@ -61,6 +64,17 @@ def load_chat_model(fully_specified_name: str | None, **kwargs) -> BaseChatModel
             google_api_key=SecretStr(api_key),
             **kwargs,
         )
+
+    if info.protocol_override == "openai_responses":
+        # 中转供应商不能依赖上游会话存储；随历史回传加密推理内容以保留工具调用上下文。
+        kwargs.update(
+            use_responses_api=True,
+            use_previous_response_id=False,
+            store=False,
+            include=["reasoning.encrypted_content"],
+        )
+    elif info.protocol_override == "openai_compatible":
+        kwargs["use_responses_api"] = False
 
     return _ToolCallChunkFixChatOpenAI(
         model=info.model_id,
