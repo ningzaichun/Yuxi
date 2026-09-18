@@ -59,6 +59,7 @@ class AgentRunCreate(BaseModel):
     thread_id: str = Field(..., description="会话线程 ID")
     meta: dict = Field(default_factory=dict, description="可选，请求追踪信息，例如 request_id")
     image_content: str | None = Field(None, description="可选，base64 图片内容")
+    image_urls: list[str] = Field(default_factory=list, description="可选，多张图片的 data URL 或图片 URL，按顺序传入")
     model_spec: str | None = Field(None, description="可选，对话级模型覆盖，优先级高于智能体配置")
     resume: Any | None = Field(None, description="可选，恢复时传给 LangGraph 的输入载荷，非布尔值")
     created_by_run_id: str | None = Field(None, description="可选，创建本 run 的父 run ID；resume 时为被恢复的 run ID")
@@ -259,8 +260,13 @@ async def create_agent_run(
     db: AsyncSession = Depends(get_db),
 ):
     input_message = None
-    if payload.resume is None and payload.query:
-        input_message = build_chat_input_message(payload.query, payload.image_content)
+    if payload.resume is None and (payload.query or payload.image_content or payload.image_urls):
+        try:
+            input_message = build_chat_input_message(
+                payload.query or "", payload.image_content, image_urls=payload.image_urls
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
     return await create_agent_run_view(
         input_message=input_message,
         agent_slug=payload.agent_slug,

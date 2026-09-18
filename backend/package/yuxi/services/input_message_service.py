@@ -29,7 +29,14 @@ class AgentRunInputMessage:
         return replace(self, extra_metadata=dict(metadata))
 
 
-def build_chat_input_message(query: str, image_content: str | None = None) -> AgentRunInputMessage:
+def build_chat_input_message(
+    query: str, image_content: str | None = None, *, image_urls: list[str] | None = None
+) -> AgentRunInputMessage:
+    if image_urls:
+        urls = ([f"data:image/jpeg;base64,{image_content}"] if image_content else []) + image_urls
+        return build_chat_input_message_from_openai_content(
+            [{"type": "text", "text": query}, *({"type": "image_url", "image_url": {"url": url}} for url in urls)]
+        )
     if image_content:
         langchain_message = HumanMessage(
             content=[

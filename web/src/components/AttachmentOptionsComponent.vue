@@ -10,7 +10,7 @@
     </div>
 
     <div class="option-item" @click="handleImageUpload">
-      <a-tooltip title="支持 jpg/jpeg/png/gif， ≤ 5 MB" placement="right">
+      <a-tooltip title="支持多选图片，每张小于 10 MB" placement="right">
         <div class="option-content">
           <Image :size="14" class="option-icon" />
           <span class="option-text">上传图片</span>
@@ -32,7 +32,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['upload', 'upload-image', 'upload-image-success'])
+const emit = defineEmits(['upload', 'upload-image', 'upload-image-success', 'image-uploading'])
 
 const handleAttachmentClick = () => {
   if (props.disabled) return
@@ -47,15 +47,19 @@ const handleImageUpload = () => {
   const input = document.createElement('input')
   input.type = 'file'
   input.accept = 'image/*'
-  input.multiple = false
+  input.multiple = true
   input.style.display = 'none'
 
   input.onchange = async (event) => {
-    const file = event.target.files[0]
-    if (file) {
-      await processImageUpload(file)
+    emit('image-uploading', true)
+    try {
+      for (const file of Array.from(event.target.files || [])) {
+        await processImageUpload(file)
+      }
+    } finally {
+      emit('image-uploading', false)
+      input.remove()
     }
-    document.body.removeChild(input)
   }
 
   document.body.appendChild(input)

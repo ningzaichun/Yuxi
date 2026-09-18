@@ -85,6 +85,10 @@
 
 使用 multipart 字段 `file` 上传图片。入口拒绝超过 10 MB 的文件，支持 JPEG、PNG、WebP、GIF 和 BMP，响应提供处理后的 `image_content`、`thumbnail_content` 和 `mime_type`。调用方将其组装成 data URL 后放入 `messages[].content[].image_url.url`。
 
+聊天页面的“上传图片”支持一次多选，也可以连续粘贴追加图片；发送前可逐张移除。普通文件仍通过“添加附件”批量上传。接收图片的模型需要支持视觉输入。
+
+聊天页面使用 `POST /api/agent/runs`，可将多张处理后的图片按顺序放入 `image_urls`（例如 `{"query":"比较两张图片","agent_slug":"...","thread_id":"...","image_urls":["data:image/png;base64,...","data:image/jpeg;base64,..."]}`）。每张图片使用上传响应中的 `mime_type`，不可统一写为 JPEG；有图片时 `query` 可以为空。旧的单图 `image_content` 仍兼容；若与 `image_urls` 同时提供，旧单图排列在数组图片之前。历史消息的完整图片列表保存在 `extra_metadata.raw_message.content`，`image_content` 仅保留首张 Base64 以兼容旧调用方。
+
 ### `GET /api/chat/thread/{thread_id}/history`
 
 返回线程内部消息历史，包含消息内容、`run_id`、`request_id`、图片 Base64、工具调用和扩展元数据。一次性规则校验的正常业务流程不调用该接口；它只用于管理员排障或审计。

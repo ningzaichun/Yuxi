@@ -1,14 +1,11 @@
 <template>
-  <div v-if="message.type === 'human' && message.image_content" class="message-image">
+  <div v-if="message.type === 'human' && messageImageUrls.length" class="message-image">
     <img
-      :src="`data:${messageImageMimeType};base64,${message.image_content}`"
-      alt="用户上传的图片"
-      @click="
-        openImagePreview(
-          `data:${messageImageMimeType};base64,${message.image_content}`,
-          '用户上传的图片'
-        )
-      "
+      v-for="(url, index) in messageImageUrls"
+      :key="index"
+      :src="url"
+      :alt="`用户上传的图片 ${index + 1}`"
+      @click="openImagePreview(url, `用户上传的图片 ${index + 1}`)"
     />
   </div>
   <div
@@ -158,7 +155,7 @@ import { useAgentStore } from '@/stores/agent'
 import { useInfoStore } from '@/stores/info'
 import { storeToRefs } from 'pinia'
 import { MessageProcessor } from '@/utils/messageProcessor'
-import { inferImageMimeTypeFromBase64, normalizeAttachmentPreviews } from '@/utils/file_utils'
+import { getMessageImageUrls, normalizeAttachmentPreviews } from '@/utils/file_utils'
 import { buildMentionDisplayLabels } from '@/utils/mention_utils'
 import FileTypeIcon from '@/components/common/FileTypeIcon.vue'
 import { enrichTaskToolCalls } from '@/components/ToolCallingResult/toolRegistry'
@@ -302,9 +299,7 @@ const infoStore = useInfoStore()
 const messageAttachments = computed(() =>
   normalizeAttachmentPreviews(props.message.extra_metadata?.attachments)
 )
-const messageImageMimeType = computed(
-  () => inferImageMimeTypeFromBase64(props.message.image_content) || 'image/jpeg'
-)
+const messageImageUrls = computed(() => getMessageImageUrls(props.message))
 
 const mentionDisplayLabels = computed(() => buildMentionDisplayLabels(props.mention || {}))
 
@@ -637,6 +632,10 @@ const parsedData = computed(() => {
 
 // 多模态消息样式
 .message-image {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
   border-radius: 12px;
   overflow: hidden;
   margin-left: auto;

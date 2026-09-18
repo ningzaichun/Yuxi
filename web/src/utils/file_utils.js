@@ -57,6 +57,21 @@ export const inferImageMimeTypeFromBase64 = (base64Content) => {
   return null
 }
 
+export const getMessageImageUrls = (message) => {
+  const content = message?.extra_metadata?.raw_message?.content
+  if (Array.isArray(content)) {
+    const urls = content
+      .filter((part) => part.type === 'image_url')
+      .map((part) => part.image_url?.url)
+      .filter(Boolean)
+    if (urls.length) return urls
+  }
+  if (message?.image_urls?.length) return message.image_urls
+  if (!message?.image_content) return []
+  const mime = inferImageMimeTypeFromBase64(message.image_content) || 'image/jpeg'
+  return [`data:${mime};base64,${message.image_content}`]
+}
+
 export const normalizeAttachmentPreview = (attachment) => {
   const name = getDisplayFileName(
     attachment?.file_name || attachment?.name || attachment?.path,

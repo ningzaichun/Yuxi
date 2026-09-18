@@ -8,6 +8,8 @@
 
 - 清理已被统一计划取代的早期排期讨论稿和旧项目分析快照，保留历史验收证据及未完成门禁；文档站排除内部 `vibe` 计划，开发入口与测试指南统一为宿主机源码进程、远程基础设施和本机 Docker Sandbox。
 
+- 智能体对话支持多选及连续粘贴多张图片、逐张预览/移除，并在发送和历史消息中显示全部图片；聊天 Run 接口新增 `image_urls`，复用完整多模态消息传递至 CloseAI 等兼容模型，保留每张图片的 MIME 类型，兼容旧 `image_content`，支持仅图片消息。普通文件继续使用已有多附件上传。
+
 - 新增 CloseAI 供应商和 GPT-6 Astra 模型预置；模型配置支持选择 OpenAI Responses，协议经 Redis 缓存同步到 API/Worker。Responses 使用本地历史与加密推理内容续接对话，不依赖供应商保存上一轮响应；在供应商页面填写 CloseAI API Key 并启用后即可选择模型测试。
 
 - 推进 Y4 生产试点门禁：新增正式 Interchange 只读性能工具，完整测量 `Adapter Normalize → Canonical → Audit → CPM` 并以 Engine `calculated` 和端到端 p95 作为门禁；A/B 正式 Projector 产物各经 2 次预热、50 次测量，端到端 p95 分别为 25.382 ms 和 31.785 ms，均通过 100 ms 阈值。复核现有 owner 隔离、幂等、并发所有权、失败/取消/租约恢复、双对象双哈希和清理覆盖，并新增写入、正式 Import、读取三条 API 的敏感信息回归，确保底层异常中的私有对象路径、bucket 和 token 不进入响应。恢复 Sandbox Provisioner 和 ARQ Worker 后，带自清理的真实 Schedule Agent E2E 为 `1 passed`；已登录新浏览器页面完成生产门禁提示、Bridge 导入边界、MPP 来源标签、三段状态、双哈希、字段脱敏及表格/Gantt 验收，且无应用控制台错误。2026-08-25 再次执行 A/B 自清理真实 API 门禁，201/200、4 个对象、2 条 Snapshot 和双哈希全部通过并完成清理。新增逐项生产评审矩阵，冻结原 MPP/Interchange Hash、版本、允许操作、排除项、停止回退和双负责人批准规则；项目负责人随后以技术与业务双重角色明确批准 A/B 进入受控测试/UAT，状态更新为 `APPROVED_FOR_CONTROLLED_AB_TESTING`。该批准不覆盖每轮启动前检查，也不等于生产放行；真实业务代表性大型 UI、4 个 Unsupported 案例、Candidate→MPP 回写及全量生产批准仍未关闭，生产结论保持 `PRODUCTION_NO_GO`。

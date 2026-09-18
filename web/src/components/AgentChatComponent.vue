@@ -601,6 +601,7 @@ import { useChatUIStore } from '@/stores/chatUI'
 import { useConfigStore } from '@/stores/config'
 import { storeToRefs } from 'pinia'
 import { MessageProcessor } from '@/utils/messageProcessor'
+import { getMessageImageUrls } from '@/utils/file_utils'
 import { agentApi, threadApi } from '@/apis'
 import HumanApprovalModal from '@/components/HumanApprovalModal.vue'
 import { useApproval } from '@/composables/useApproval'
@@ -1625,11 +1626,12 @@ function getMessageRunId(message) {
 }
 
 function mergeLocalImageFields(message, localMessage) {
-  if (!localMessage?.image_content || message?.image_content) return message
+  const imageUrls = getMessageImageUrls(localMessage)
+  if (!imageUrls.length || getMessageImageUrls(message).length) return message
   return {
     ...message,
     message_type: localMessage.message_type || message.message_type,
-    image_content: localMessage.image_content,
+    image_urls: imageUrls,
     extra_metadata: message.extra_metadata || {}
   }
 }
@@ -1804,26 +1806,21 @@ const createClientRequestId = () => {
   return `req-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
 }
 
-const buildOptimisticHumanMessage = ({
-  requestId,
-  text,
-  imageContent = null,
-  attachments = []
-}) => {
+const buildOptimisticHumanMessage = ({ requestId, text, imageUrls = [], attachments = [] }) => {
   const message = {
     id: requestId,
     role: 'user',
     type: 'human',
     content: text,
-    message_type: imageContent ? 'multimodal_image' : 'text',
+    message_type: imageUrls.length ? 'multimodal_image' : 'text',
     extra_metadata: {
       request_id: requestId,
       attachments
     }
   }
 
-  if (imageContent) {
-    message.image_content = imageContent
+  if (imageUrls.length) {
+    message.image_urls = imageUrls
   }
 
   return message
@@ -1832,13 +1829,13 @@ const buildOptimisticHumanMessage = ({
 // 发送 runs 前先在前端插入一条用户消息，避免等待 worker 轮询后消息才出现。
 const insertOptimisticHumanMessage = (
   threadState,
-  { requestId, text, imageContent = null, attachments = [] }
+  { requestId, text, imageUrls = [], attachments = [] }
 ) => {
   if (!threadState || !requestId) return
   threadState.pendingRequestId = requestId
   threadState.replyLoadingVisible = false
   threadState.onGoingConv.msgChunks[requestId] = [
-    buildOptimisticHumanMessage({ requestId, text, imageContent, attachments })
+    buildOptimisticHumanMessage({ requestId, text, imageUrls, attachments })
   ]
 }
 
@@ -2441,11 +2438,11 @@ const selectThreadFromRoute = async (threadId) => {
   return true
 }
 
-const handleSendMessage = async ({ image } = {}) => {
+const handleSendMessage = async ({ images = [] } = {}) => {
   const text = userInput.value.trim()
-  const imageContent = image?.imageContent || null
+  const imageUrls = images.map((image) => `data:${image.mimeType};base64,${image.imageContent}`)
   if (
-    (!text && !image) ||
+    (!text && !images.length) ||
     !currentAgent.value ||
     isProcessing.value ||
     sendCooldownActive.value ||
@@ -2521,7 +2518,7 @@ const handleSendMessage = async ({ image } = {}) => {
   insertOptimisticHumanMessage(threadState, {
     requestId,
     text,
-    imageContent,
+    imageUrls,
     attachments: pendingAttachments.map((attachment) => ({
       ...attachment,
       request_id: requestId
@@ -2538,7 +2535,7 @@ const handleSendMessage = async ({ image } = {}) => {
         request_id: requestId,
         attachment_file_ids: pendingAttachmentFileIds
       },
-      image_content: imageContent,
+      image_urls: imageUrls,
       model_spec: modelSpec
     })
     const runId = runResp?.run_id

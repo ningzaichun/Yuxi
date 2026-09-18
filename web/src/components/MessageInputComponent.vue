@@ -1036,16 +1036,15 @@ const hasTransferFiles = (dataTransfer) =>
 
 const canAcceptUploadFiles = () => props.fileUploadEnabled && !props.disabled && !props.isLoading
 
-const getImageFileFromClipboard = (clipboardData) => {
+const getImageFilesFromClipboard = (clipboardData) => {
   const items = Array.from(clipboardData?.items || [])
-  for (const item of items) {
-    if (item.kind === 'file' && item.type?.startsWith('image/')) {
-      const file = item.getAsFile()
-      if (file) return file
-    }
-  }
+  const images = items
+    .filter((item) => item.kind === 'file' && item.type?.startsWith('image/'))
+    .map((item) => item.getAsFile())
+    .filter(Boolean)
+  if (images.length) return images
 
-  return Array.from(clipboardData?.files || []).find((file) => file.type?.startsWith('image/'))
+  return Array.from(clipboardData?.files || []).filter((file) => file.type?.startsWith('image/'))
 }
 
 const handleMentionDeletion = (e) => {
@@ -1132,10 +1131,10 @@ const handleInput = () => {
 const handlePaste = (e) => {
   if (props.disabled) return
 
-  const imageFile = canAcceptUploadFiles() ? getImageFileFromClipboard(e.clipboardData) : null
-  if (imageFile) {
+  const imageFiles = canAcceptUploadFiles() ? getImageFilesFromClipboard(e.clipboardData) : []
+  if (imageFiles.length) {
     e.preventDefault()
-    emit('paste-image', imageFile)
+    emit('paste-image', imageFiles)
     return
   }
 

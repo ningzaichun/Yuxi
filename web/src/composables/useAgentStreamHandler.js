@@ -1,6 +1,7 @@
 import { message } from 'ant-design-vue'
 import { handleChatError } from '@/utils/errorHandler'
 import { unref } from 'vue'
+import { getMessageImageUrls } from '@/utils/file_utils'
 import { extractPendingInterrupt } from '@/composables/useApproval'
 
 const serializeToolArgs = (args) => {
@@ -116,9 +117,10 @@ export function useAgentStreamHandler({
                 request_id: resolvedRequestId
               }
             }
-            if (localHumanMessage?.image_content && !initMessage.image_content) {
+            const localImageUrls = getMessageImageUrls(localHumanMessage)
+            if (localImageUrls.length && !getMessageImageUrls(initMessage).length) {
               initMessage.message_type = localHumanMessage.message_type || initMessage.message_type
-              initMessage.image_content = localHumanMessage.image_content
+              initMessage.image_urls = localImageUrls
             }
             threadState.onGoingConv.msgChunks[resolvedRequestId] = [initMessage]
           }

@@ -5,7 +5,7 @@
     @update:modelValue="updateValue"
     :is-loading="isLoading"
     :disabled="disabled"
-    :send-button-disabled="sendButtonDisabled"
+    :send-button-disabled="sendButtonDisabled || imageUploadCount > 0"
     :placeholder="placeholder"
     :mention="mention"
     :thread-id="threadId"
@@ -16,13 +16,16 @@
     @drop-files="handleDroppedFiles"
   >
     <template #top>
-      <div v-if="currentImage || previewAttachments.length" class="input-top-stack">
-        <ImagePreviewComponent
-          v-if="currentImage"
-          :image-data="currentImage"
-          @remove="handleImageRemoved"
-          class="image-preview-wrapper"
-        />
+      <div v-if="currentImages.length || previewAttachments.length" class="input-top-stack">
+        <div v-if="currentImages.length" class="attachment-preview-list">
+          <ImagePreviewComponent
+            v-for="(image, index) in currentImages"
+            :key="index"
+            :image-data="image"
+            @remove="handleImageRemoved(index)"
+            class="image-preview-wrapper"
+          />
+        </div>
 
         <div v-if="previewAttachments.length" class="attachment-preview-list">
           <div
@@ -56,6 +59,7 @@
         @upload="handleAttachmentUpload"
         @upload-image="handleImageUpload"
         @upload-image-success="handleImageUploadSuccess"
+        @image-uploading="imageUploadCount += $event ? 1 : -1"
       />
     </template>
     <template #actions-left>
@@ -104,7 +108,8 @@ const emit = defineEmits([
 ])
 
 const inputRef = ref(null)
-const currentImage = ref(null)
+const currentImages = ref([])
+const imageUploadCount = ref(0)
 const placeholder = '问点什么？使用 @ 可以提及哦~'
 
 const previewAttachments = computed(() => normalizeAttachmentPreviews(props.attachments))
@@ -119,18 +124,23 @@ const handleAttachmentUpload = (files = []) => {
 
 const handleImageUpload = (imageData) => {
   if (imageData && imageData.success) {
-    currentImage.value = imageData
+    currentImages.value.push(imageData)
   }
 }
 
-const handlePastedImage = async (file) => {
+const handlePastedImage = async (files) => {
   if (props.disabled || !props.supportsFileUpload) return
 
+  imageUploadCount.value += 1
   try {
-    const imageData = await uploadMultimodalImage(file)
-    handleImageUpload(imageData)
+    for (const file of files) {
+      const imageData = await uploadMultimodalImage(file)
+      handleImageUpload(imageData)
+    }
   } catch (error) {
     console.error('图片上传失败:', error)
+  } finally {
+    imageUploadCount.value -= 1
   }
 }
 
@@ -145,8 +155,8 @@ const handleImageUploadSuccess = () => {
   }
 }
 
-const handleImageRemoved = () => {
-  currentImage.value = null
+const handleImageRemoved = (index) => {
+  currentImages.value.splice(index, 1)
 }
 
 const handleAttachmentRemoved = (attachment) => {
@@ -154,8 +164,9 @@ const handleAttachmentRemoved = (attachment) => {
 }
 
 const handleSend = () => {
-  emit('send', { image: currentImage.value })
-  currentImage.value = null
+  if (props.sendButtonDisabled || imageUploadCount.value > 0) return
+  emit('send', { images: [...currentImages.value] })
+  if (!props.isLoading) currentImages.value = []
 }
 
 const handleKeyDown = (e) => {
