@@ -15,6 +15,10 @@ from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validato
 MAX_TASKS = 5_000
 MAX_DEPENDENCIES = 25_000
 
+# Lag 日历策略的已冻结取值：正 Lag 按统一项目日历的工作分钟累加
+# （与 S4 黄金样例 `UNIFIED_PROJECT_CALENDAR_WORKING_MINUTES` 语义一致）。
+LAG_CALENDAR_POLICY_FROZEN = "UNIFIED_PROJECT_CALENDAR_WORKING_MINUTES"
+
 
 class ContractModel(BaseModel):
     """Reject unknown fields at the external contract boundary."""
@@ -36,7 +40,7 @@ class ScheduleSemantics(ContractModel):
     time_zone_source: str
     duration_storage_unit: Literal["working_minute"]
     lag_storage_unit: Literal["working_minute"]
-    lag_calendar_policy: Literal["UNSPECIFIED_REQUIRES_ENGINE_PROFILE"]
+    lag_calendar_policy: Literal["UNSPECIFIED_REQUIRES_ENGINE_PROFILE", "UNIFIED_PROJECT_CALENDAR_WORKING_MINUTES"]
     task_calendar_resolution: str
     source_dates_preserved: bool
 
@@ -214,7 +218,7 @@ class CanonicalDependency(ContractModel):
     type: Literal["FS", "SS", "FF", "SF"]
     source_type_code: int
     lag_minutes: int
-    lag_calendar_policy: Literal["UNSPECIFIED_REQUIRES_ENGINE_PROFILE"]
+    lag_calendar_policy: Literal["UNSPECIFIED_REQUIRES_ENGINE_PROFILE", "UNIFIED_PROJECT_CALENDAR_WORKING_MINUTES"]
 
 
 class SourceValidationSummary(ContractModel):

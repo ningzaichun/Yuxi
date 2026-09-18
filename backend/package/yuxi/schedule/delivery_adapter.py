@@ -10,15 +10,25 @@ from datetime import datetime
 from typing import Any
 
 from yuxi.schedule.audit.engine import audit_schedule
-from yuxi.schedule.contracts.canonical_v2_2 import CanonicalScheduleV22
-from yuxi.schedule.importers.canonical_v2_2 import import_canonical_schedule_v2_2
+from yuxi.schedule.contracts.canonical import CanonicalSchedule, parse_canonical_schedule
+from yuxi.schedule.importers import import_canonical_schedule
 
 DELIVERY_SCHEMA_VERSION = "schedule_delivery_draft_v0"
 DEPENDENCY_NORMALIZATION_KIND = "dependency_normalization"
+SUPPORTED_CANONICAL_SCHEMA_VERSION = "canonical_schedule_v2.2"
 
 
 class ScheduleDeliveryApplicationError(ValueError):
     pass
+
+
+def delivery_application_blocking_reasons(delivery: dict[str, Any]) -> list[str]:
+    if (
+        delivery.get("candidate_kind") != DEPENDENCY_NORMALIZATION_KIND
+        or delivery.get("canonical_schema_version") != SUPPORTED_CANONICAL_SCHEMA_VERSION
+    ):
+        return ["DELIVERY_ADAPTER_UNAVAILABLE"]
+    return []
 
 
 def apply_delivery_to_source_copy(
@@ -30,11 +40,12 @@ def apply_delivery_to_source_copy(
 ) -> dict[str, Any]:
     """Return a validated source copy after the caller's external approval."""
 
-    source_contract = CanonicalScheduleV22.model_validate(source)
+    source_contract = parse_canonical_schedule(source)
     if delivery.get("delivery_schema_version") != DELIVERY_SCHEMA_VERSION:
         raise ScheduleDeliveryApplicationError("unsupported delivery schema version")
-    if delivery.get("candidate_kind") != DEPENDENCY_NORMALIZATION_KIND:
-        raise ScheduleDeliveryApplicationError("unsupported candidate kind")
+    compatibility_reasons = delivery_application_blocking_reasons(delivery)
+    if compatibility_reasons:
+        raise ScheduleDeliveryApplicationError(compatibility_reasons[0])
     if delivery.get("candidate_status") != "valid" or not delivery.get("application_allowed"):
         raise ScheduleDeliveryApplicationError("candidate is not eligible for application")
     if delivery.get("application_blocking_reasons"):
@@ -67,9 +78,9 @@ def apply_delivery_to_source_copy(
     result["source"]["extraction_application_version"] = DELIVERY_SCHEMA_VERSION
     result["source"]["opened_read_only"] = False
 
-    projected = CanonicalScheduleV22.model_validate(result)
+    projected = parse_canonical_schedule(result)
     execution = audit_schedule(
-        import_canonical_schedule_v2_2(projected),
+        import_canonical_schedule(projected),
         schedule_snapshot_id=new_source_snapshot_id,
         audit_run_id=f"adapter:{delivery['candidate_snapshot_id']}",
     )
@@ -78,10 +89,10 @@ def apply_delivery_to_source_copy(
         name: capability.model_dump(mode="json") for name, capability in execution.result.capabilities.items()
     }
     _update_source_validation(result, delivery, execution.result.capabilities)
-    return CanonicalScheduleV22.model_validate(result).model_dump(mode="json", exclude_none=False)
+    return parse_canonical_schedule(result).model_dump(mode="json", exclude_none=False)
 
 
-def _content_sha256(source: CanonicalScheduleV22) -> str:
+def _content_sha256(source: CanonicalSchedule) -> str:
     canonical_bytes = json.dumps(
         source.model_dump(mode="json", exclude_none=False),
         ensure_ascii=False,
@@ -92,7 +103,7 @@ def _content_sha256(source: CanonicalScheduleV22) -> str:
 
 
 def _source_copy_sha256(
-    source: CanonicalScheduleV22,
+    source: CanonicalSchedule,
     delivery: dict[str, Any],
     new_source_snapshot_id: str,
 ) -> str:

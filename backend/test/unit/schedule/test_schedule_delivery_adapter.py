@@ -54,6 +54,9 @@ def _delivery(source: dict) -> dict:
         "delivery_schema_version": "schedule_delivery_draft_v0",
         "candidate_snapshot_id": "candidate-test",
         "candidate_kind": "dependency_normalization",
+        "canonical_schema_version": "canonical_schedule_v2.2",
+        "adapter_id": None,
+        "adapter_version": None,
         "candidate_status": "valid",
         "user_attitude": "accepted",
         "base_snapshot_content_sha256": _content_sha256(source),
@@ -101,6 +104,7 @@ def test_adapter_applies_delivery_to_independent_consistent_source_copy(
         ("candidate_status", "invalid"),
         ("application_allowed", False),
         ("base_snapshot_content_sha256", "sha256:" + "0" * 64),
+        ("canonical_schema_version", "canonical_schedule_v2.3"),
     ],
 )
 def test_adapter_rejects_delivery_that_is_not_safe_to_apply(

@@ -101,6 +101,15 @@ class FakeReviewStore:
                         "scheduling_mode": "manual",
                         "duration_minutes": 240,
                     },
+                    {
+                        "task_id": "task-3",
+                        "wbs": "1.3",
+                        "name": "inactive 任务",
+                        "task_type": "activity",
+                        "active": False,
+                        "scheduling_mode": "automatic",
+                        "duration_minutes": 240,
+                    },
                 ]
             }
         ).encode()

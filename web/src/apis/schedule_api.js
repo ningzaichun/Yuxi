@@ -49,6 +49,8 @@ export const scheduleApi = {
     ),
   getCandidate: (candidateId) =>
     apiGet(`/api/schedule/candidates/${encodeURIComponent(candidateId)}`),
+  listCandidates: (snapshotId) =>
+    apiGet(`/api/schedule/snapshots/${encodeURIComponent(snapshotId)}/candidates`),
   recordCandidateDecision: (candidateId, payload) =>
     apiPost(`/api/schedule/candidates/${encodeURIComponent(candidateId)}/decisions`, payload),
   getCandidateDelivery: (candidateId) =>

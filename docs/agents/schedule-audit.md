@@ -1,6 +1,6 @@
 # 排期审查模块操作与维护手册
 
-排期审查模块既可以接收带 `schema_version` 的外部来源 JSON 并适配为严格 `canonical_schedule_v2.2`，也兼容调用方直接提交完整 Canonical。Yuxi 保存不可变来源证据并独立执行确定性审查，不会修改来源计划，也不会把来源转换器的 Validation 当作 Yuxi 审查结论。
+排期审查模块既可以接收带 `schema_version` 的外部来源 JSON 并适配为严格的版本化 Canonical，也兼容调用方直接提交完整 Canonical v2.2 至 v2.7。Yuxi 保存不可变来源证据并独立执行确定性审查，不会修改来源计划，也不会把来源转换器的 Validation 当作 Yuxi 审查结论。
 
 外部系统接入请先阅读[排期外部 JSON 导入指南](./schedule-import-guide.md)；业务用户、测试人员和试点组织者请阅读[排期审查与 CPM 重算用户及测试手册](./schedule-cpm-user-guide.md)。本文侧重接口、契约、门禁和运维维护。
 
@@ -10,20 +10,20 @@
 
 - 幂等提交、查询和隔离排期快照；
 - 对已注册来源版本执行边界校验、Adapter 规范化、双对象存储和双哈希追溯；
-- 任务层级、依赖网络、零 Lag 日期关系和管理完整性审查；
+- 任务层级、依赖网络、零/正/负 Lag 日期关系和管理完整性审查；
 - Statistics、Capability、Issue、证据和直接上下游查看；
-- 对单一统一项目日历、FS/SS/FF/SF 零/正 Lag、ASAP/SNET/FNET、手工/locked 活动任务执行正向和反向计算，自底向上滚动汇总任务日期，输出总浮时、自由浮时和关键标识，并生成只读 Candidate；
+- 对 v2.6 及更早版本的多/任务日历与父子日历继承（含结构化停工日、连续停工和补班例外）、FS/SS/FF/SF 零/正/负 Lag、ASAP/SNET/FNET/MSO/FNLT、Deadline、required finish、手工/locked 活动任务和零工期里程碑执行正向和反向计算；v2.6 额外支持固定 COMPLETED 实际日期、IN_PROGRESS actual start、status date 之后的 remaining work、NOT_STARTED 后续计算和 Baseline 0 开始/完成偏差；
+- 对直接提交的 Canonical v2.7 Resource/Assignment 执行来源日期超配审查，并在重算 Candidate 中输出 CPM 日期上的资源冲突和 Assignment 成本数值；
 - 通过具备 Schedule 工具的智能体解释已有 Issue。
 
 当前版本不支持：
 
-- 计算负 Lag 日期关系；
-- 负 Lag、多日历、日历例外、非法约束组合或实际进度的重算；
+- 未通过 v2.4 明确有效日历与 `SUCCESSOR_TASK_CALENDAR` 的多/任务日历，或包含未知父日历、继承环、无工作时间、冲突/时区不一致例外、非法约束组合；v2.6 若缺少 status date、actual facts 或显式 remaining duration，由契约拒绝；
 - 自动修改任务日期、依赖、日历或约束；
-- 在 Yuxi 内直接解析 MPP/XML，或执行资源均衡、成本优化和 MPP 回写；
+- 在 Yuxi 内直接解析 MPP/XML，或执行自动资源均衡、资源成本优化和 MPP 回写；
 - 把 Candidate 直接应用为生效计划。
 
-因此，审查结果中的“已检查”和“未检查”必须分别陈述。例如水泵站 Import 案例为 16 条 checked、3 条 skipped，不能表述成“19 条依赖全部验证通过”。
+因此，审查结果中的“已检查”和“未检查”必须分别陈述。单日历 Lag 可冻结为统一项目日历工作分钟；v2.4 多/任务日历必须冻结为 `SUCCESSOR_TASK_CALENDAR`，正负 Lag 均按后续任务有效日历检查。策略未冻结的旧快照或日历解析失败时仍按 skipped 陈述，不能表述成“全部依赖验证通过”。
 
 ## 角色与数据归属
 
@@ -39,10 +39,12 @@
 
 推荐新调用方把已从 MPP 或其他系统提取完成、带 `schema_version` 的来源 JSON 提交到 `/api/schedule/imports`。Yuxi 根据版本选择 Adapter，保存来源 JSON 数据语义副本，并生成严格 Canonical。保存的来源对象不是原始 HTTP 请求字节，空白、缩进和对象字段顺序不会保留。
 
-已经能够稳定生成完整 `canonical_schedule_v2.2` 的调用方，可以继续使用 `/api/schedule/snapshots`。Canonical 结构契约以 Pydantic 模型和随代码导出的 JSON Schema 为准：
+已经能够稳定生成完整 `canonical_schedule_v2.2` 或 `canonical_schedule_v2.3` 的调用方，可以使用 `/api/schedule/snapshots`。v2.3 只新增独立 milestone 类型和生产 `boundary_role`；v2.2 语义保持不变。Canonical 结构契约以 Pydantic 模型和随代码导出的 JSON Schema 为准：
 
 - 模型：`backend/package/yuxi/schedule/contracts/canonical_v2_2.py`
 - Schema：`backend/package/yuxi/schedule/contracts/schemas/canonical_schedule_v2_2.schema.json`
+- v2.3 模型：`backend/package/yuxi/schedule/contracts/canonical_v2_3.py`
+- v2.3 Schema：`backend/package/yuxi/schedule/contracts/schemas/canonical_schedule_v2_3.schema.json`
 
 两种入口都要求日期时间包含时区偏移，Task、Dependency、Calendar 等对象主 ID 唯一，引用存在且父子层级不成环。单次最多 5,000 个任务和 25,000 条依赖，请求正文最大 10 MiB。来源 JSON 可以包含未定义字段，内部 Canonical 仍严格禁止未知字段。
 
@@ -61,12 +63,12 @@ Content-Type: application/json
   "external_snapshot_id": "project-001-v1.1",
   "external_revision": "v1.1",
   "document": {
-    "schema_version": "microsoft_project_interchange_mock_v1.1"
+    "schema_version": "microsoft_project_interchange_v1.1"
   }
 }
 ```
 
-`document` 必须是完整来源文档。当前只注册水泵站协议回归使用的 `microsoft_project_interchange_mock_v1.1`；它不是任意 Microsoft Project 文件的通用格式。详细契约、固定结果和测试命令见[排期外部 JSON 导入指南](./schedule-import-guide.md)。
+`document` 必须是完整来源文档。新增接入使用正式 `microsoft_project_interchange_v1.1` 与 Adapter 1.6；旧 `microsoft_project_interchange_mock_v1.1` 仅保留水泵站协议回归兼容。两者都不是任意 MPP 的通用读取能力。详细责任边界、重试和清理策略见[排期外部 JSON 导入指南](./schedule-import-guide.md)。
 
 Import 幂等同时检查来源哈希和 Canonical 哈希。同一 `request_id` 的来源 JSON 数据语义发生变化会返回 `409`，即使变化字段没有进入 Canonical；仅改变空白、缩进或对象字段顺序不会改变来源哈希。首次成功为 `201`，相同来源重放为 `200`。
 
@@ -130,16 +132,17 @@ Capability 决定某项 Yuxi 能力是否允许，normalization report 只描述
 
 ### 4. 生成受限 CPM 重算 Candidate
 
-页面中的“生成重算 Candidate”使用 Profile
-`yuxi-forward-unified-calendar-fs-ss-ff-sf-positive-lag-snet-fnet-manual-summary-rollup-reverse-float-critical-v7`。当前计算单一无继承项目日历下
-FS/SS/FF/SF 零/正 Lag、ASAP/SNET/FNET、手工/locked 活动任务的最早和最晚开始/完成、总浮时、自由浮时与关键标识，并按直接子任务自底向上滚动汇总任务结果；正 Lag 与浮时按统一项目日历的工作
+页面中的“生成重算 Candidate”按 Canonical 能力选择 Profile：v2.2 普通来源使用 v7，v2.3 里程碑来源使用 v8，包含负 Lag 的来源使用 v9，v2.4 结构化单项目日历例外使用 v10，多/任务日历和日历继承使用 v11，v2.5 硬约束和管理目标使用 v12，v2.6 的 COMPLETED + NOT_STARTED 使用 v13，存在 IN_PROGRESS 时使用 v14，v2.7 使用只读资源分析 Profile，v2.8 使用排除 inactive 的 v15。当前计算已解析有效日历下
+FS/SS/FF/SF 零/正/负 Lag、ASAP/SNET/FNET/MSO/FNLT、Deadline、required finish、手工/locked 活动任务的最早和最晚开始/完成、约束偏差、总浮时、自由浮时与关键标识，并按直接子任务自底向上滚动汇总任务结果；v11/v12 的有符号 Lag 按后续任务有效日历工作
 分钟推进，支持多个工作时段、午休、周末
 和非工作时间归位。来源任务日期和 `source_calculation` 不变，Yuxi 日期只保存在 Candidate 的
 `engine_result`，Candidate 生成后即可从 Delivery 的 `simulation_result` 查看同一结果；用户接受、拒绝或未表态只作为态度元数据。
 
-包含多日历或日历例外、负 Lag、汇总依赖、非活动任务、非法层级、SNET/FNET 非法组合或实际进度的
-输入返回结构化 `blocked`，不生成近似 Candidate。S3 零 Lag、S4 正 Lag、SS/FF/SF、SNET/FNET、手工/locked、汇总滚动与反向浮时的
-七套 Microsoft Project 黄金样例均已确认并通过门禁；这只证明当前受限 Profile，不代表生产适用或跨项目通用。
+v2.7 资源分析在上述 CPM 结果之后运行，只读取任务最早日期。`resource_conflicts` 给出资源、任务集合、重叠起止、合计 units 和 max units；`assignment_costs` 按 `duration_minutes × units / 60 × standard_rate_per_hour` 输出成本数值。契约没有币种字段，因此页面不会猜测币种。`resource_leveling` 与 `resource_cost_optimization` Capability 仍为关闭状态。
+
+v2.8 保留 inactive 来源日期，并为任务输出 `calculation_status=excluded_inactive`；inactive 不进入 CPM、关键路径、汇总滚动、Resource Analyzer 或 Goal Optimizer。仅存在 inactive 不阻断 active 网络重算，但依赖触及 inactive 时以 `INACTIVE_TASK_DEPENDENCY_REQUIRES_DECISION` / `INACTIVE_TASK_DEPENDENCIES` 阻断，Dependency Workbench 必须显式移除全部相关来源边并选择 active 叶子关系。
+
+包含日历继承环、未知日历、无可用工作时间、冲突或时区不一致的日历例外、未经确认的汇总依赖或 inactive 依赖、非法层级或约束缺少日期的输入返回结构化 `blocked`，不生成近似 Candidate。进行中任务缺少明确 remaining duration 时由 v2.6 契约拒绝；Goal Optimizer 不允许修改 COMPLETED、IN_PROGRESS 或 inactive。既有 S3/S4/S5 Microsoft Project 黄金样例均已确认；MSO/FNLT Oracle、状态日期/剩余工作 Oracle 和 v2.8 inactive/summary dependency Oracle 也已捕获。v2.8 Oracle 确认 Microsoft Project 会计算穿透 inactive，Yuxi 出于安全边界不静默跨接；该差异和当前证据仍不解除生产门禁。
 
 仓库提供 `backend/test/data/schedule/microsoft_project_s3_golden_case.json` 作为最小人工对照输入。本机
 Microsoft Project 16.0 已通过独立 COM 会话建立案例并计算日期，结果保存在 `external_observation`；
@@ -171,7 +174,7 @@ S4 首个正 Lag 切片的输入保存在
 FS 正 Lag 和 ASAP 自动任务，Lag 按项目日历的工作分钟推进；Microsoft Project 16.0 黄金 expected 覆盖
 `+120m` 跨夜间、`+600m` 跨完整工作日和 `+480m` 跨周末/午休边界。使用同一校验脚本的
 `--case test/data/schedule/microsoft_project_s4_positive_lag_golden_case.json` 参数复核，当前同样应返回
-`PASSED`；负 Lag 继续明确 blocked。
+`PASSED`。负 Lag 的四类关系已由 Microsoft Project 16.0 独立 COM observation 验证并由用户确认，v9 黄金门禁为 `PASSED`。
 
 ### 5. 使用 Agent 审查排期
 
@@ -245,27 +248,34 @@ Agent 只能读取已持久化的 Yuxi Audit 和 Issue。它不能自行计算�
 | `DEPENDENCY_CYCLE` | 依赖图存在环 | blocker |
 | `OPEN_START` / `OPEN_FINISH` | 叶子任务没有前置或后续 | warning |
 | `SUMMARY_TASK_DEPENDENCY` | 依赖涉及汇总任务 | warning |
+| `INACTIVE_TASK_EXCLUDED` | inactive 任务保留来源事实但排除计算 | info |
+| `INACTIVE_TASK_DEPENDENCY` | 依赖触及 inactive，必须显式确认替代关系 | warning |
 | `ZERO_LAG_DATE_VIOLATION` | 零 Lag 关系不满足来源日期锚点 | blocker |
+| `LAG_DATE_VIOLATION` | 冻结策略下的非零正/负 Lag 关系不满足统一项目日历工作分钟锚点 | blocker |
 | `SEVEN_DAY_WORK_CALENDAR` | 日历七天均为工作日 | warning |
 | `BASELINE_MISSING` | 没有 Baseline 0 | warning |
 | `STATUS_DATE_MISSING` | 没有状态日期 | warning |
 | `MILESTONE_MISSING` | 没有里程碑 | warning |
 | `NO_SOURCE_ASSIGNMENTS` | 来源 Assignment 为空 | warning |
 | `RESOURCE_SEMANTICS_UNCLASSIFIED` | 资源业务语义未分类 | warning |
-| `LAG_CALENDAR_POLICY_UNSPECIFIED` | 来源 Audit 缺少非零 Lag 日期检查语义 | blocker |
+| `RESOURCE_OVERALLOCATION` | 同一时段合计 units 超过资源 max units | warning |
+| `LAG_CALENDAR_POLICY_UNSPECIFIED` | 存在未检查的非零 Lag 关系（策略未冻结或日历口径不支持） | blocker |
 
-零 Lag 日期关系使用以下精确定义：
+零 Lag 与冻结策略下的有符号 Lag 日期关系使用以下精确定义（Lag 按统一项目日历的
+工作分钟正向或反向位移，跳过午休与周末）：
 
 | 类型 | 条件 |
 |---|---|
-| FS | `successor.start >= predecessor.finish` |
-| SS | `successor.start >= predecessor.start` |
-| FF | `successor.finish >= predecessor.finish` |
-| SF | `successor.finish >= predecessor.start` |
+| FS | `successor.start >= add_working_minutes(predecessor.finish, lag)` |
+| SS | `successor.start >= add_working_minutes(predecessor.start, lag)` |
+| FF | `successor.finish >= add_working_minutes(predecessor.finish, lag)` |
+| SF | `successor.finish >= add_working_minutes(predecessor.start, lag)` |
 
-第一阶段来源 Audit 对非零 Lag 统一记为 skipped，不执行近似判断或“明显不合理”回退。这与 v2 CPM
-引擎按统一项目日历计算 FS 正 Lag 是两个独立能力边界：引擎可重算受支持输入，不表示来源日期已经通过
-非零 Lag 合规检查。
+Lag 日历策略已冻结为 `UNIFIED_PROJECT_CALENDAR_WORKING_MINUTES`：Adapter 在
+Canonical 语义和依赖级别写入该取值，来源 Audit 对非零正负 Lag 按上表执行确定性检查，
+不执行近似判断或“明显不合理”回退。策略未冻结的旧快照以及默认日历存在
+例外或非法区间等无法给出统一日历口径的场景，仍统一记为 skipped 并上报
+`LAG_CALENDAR_POLICY_UNSPECIFIED` blocker，不声称这些关系已通过合规检查。
 
 ## 查询 API
 
@@ -278,6 +288,7 @@ Agent 只能读取已持久化的 Yuxi Audit 和 Issue。它不能自行计算�
 | GET | `/api/schedule/snapshots/{id}/audit` | 读取 Statistics、Capability 和摘要 |
 | GET | `/api/schedule/snapshots/{id}/issues` | 按分类、等级分页读取 Issue |
 | GET | `/api/schedule/issues/{issue_id}` | 读取 Issue、任务和直接上下游证据 |
+| GET | `/api/schedule/snapshots/{id}/candidates` | 分页读取该快照已生成的候选方案摘要 |
 | POST | `/api/schedule/snapshots/{id}/recalculate-automatic-downstream` | 生成最小正向重算 Candidate 或返回 blocked |
 | GET | `/api/schedule/agents` | 列出具备两个 Schedule 工具的可访问 Agent |
 
@@ -300,6 +311,8 @@ Agent 只能读取已持久化的 Yuxi Audit 和 Issue。它不能自行计算�
 ```
 
 错误路径使用 JSON Pointer，响应和日志不会回显 Notes 或完整计划正文。部分结构错误消息可能包含用于定位的对象 ID；对象 ID 不应承载密码、Token 或其他敏感值。Import 契约错误使用 `/document/...` 路径，并区分 `SCHEDULE_IMPORT_CONTRACT_INVALID`、`SCHEDULE_IMPORT_VERSION_UNSUPPORTED` 和 `SCHEDULE_IMPORT_SEMANTICS_UNSUPPORTED`。
+
+直接提交 Canonical 时，原始 Snapshot 会先执行共享结构预检。可确认的重复 ID、未知父任务/日历/依赖/Assignment 引用、任务或日历继承环，以及非零工期里程碑，会一次性返回 `422 SCHEDULE_PREFLIGHT_FAILED`；`errors[]` 按错误码和对象引用稳定排序，并使用 `object_ref`、`object_refs` 与 `details` 定位对象。字段缺失、类型、枚举和日期格式仍返回 `SCHEDULE_CONTRACT_INVALID` 及 JSON Pointer。两类 422 都发生在 Snapshot 预留、对象存储、Audit、CPM 和 Candidate 之前。
 
 ## 数据存储与恢复
 
@@ -360,7 +373,7 @@ pnpm build
 
 ### 提交返回 422
 
-按 `detail.errors[].path` 定位字段。Import 先检查 `/document/schema_version` 和当前 Adapter 的来源契约；直接 Canonical 提交检查 `/snapshot/...`。重点检查时区、枚举、重复 ID、丢失引用、父子环和数组规模。422 不会创建 Snapshot。
+先检查 `detail.code`。`SCHEDULE_CONTRACT_INVALID` 按 `detail.errors[].path` 修复字段；`SCHEDULE_PREFLIGHT_FAILED` 按 `object_ref`、`object_refs` 和 `details` 一次处理全部结构问题。Import 先检查 `/document/schema_version` 和当前 Adapter 的来源契约。重点检查时区、枚举、重复 ID、丢失引用、父子/依赖/日历继承环和数组规模。422 不会创建 Snapshot 或 Candidate。
 
 ### 相同 request_id 返回 409
 
@@ -374,7 +387,7 @@ pnpm build
 
 ### 第二个及后续真实案例预检
 
-新案例提交前先运行结构预检。预检只校验 `canonical_schedule_v2.2` 并输出内容指纹、数量、树深度、关系类型/Lag 分布、汇总依赖所在端和相对基线的结构差异；不会输出项目名、任务名或对象 ID，也不会提交 Snapshot、生成 Candidate 或应用 Delivery。
+新案例提交前先运行结构预检。预检按声明版本校验 `canonical_schedule_v2.2` / `canonical_schedule_v2.3`，并输出内容指纹、数量、树深度、关系类型/Lag 分布、汇总依赖所在端和相对基线的结构差异；不会输出项目名、任务名或对象 ID，也不会提交 Snapshot、生成 Candidate 或应用 Delivery。
 
 ```powershell
 cd backend
@@ -423,7 +436,7 @@ cd backend
 
 ### 为什么 blocker 仍可查看 Snapshot
 
-`blocker` 阻断具体计算能力，不等于整个 Snapshot 无法保存。Import 接入成功、来源审查允许和 CPM 允许是三个独立状态；水泵站案例可以成功接入并允许来源审查，同时因里程碑返回 `MILESTONE_UNSUPPORTED`。
+`blocker` 阻断具体计算能力，不等于整个 Snapshot 无法保存。Import 接入成功、来源审查允许和 CPM 允许是三个独立状态；Adapter 1.6 对来源真实包含 `active: false` 的任务输出 v2.8 并使用 Profile v15，对可追溯硬约束或管理目标输出 v2.5 并使用 Profile v12，对结构化日历例外或多/任务日历输出 v2.4：单项目日历例外使用 v10，多/任务日历及继承使用 v11；仅含里程碑时输出 v2.3 并使用 v8。无法解析的日历结构和未经确认的 inactive/汇总依赖仍被能力门禁阻断。
 
 ## 后续候选方案约束
 
@@ -435,7 +448,7 @@ CandidateSnapshot 暂不冻结为长期稳定外部契约。后续首个可运�
 - 历史 Candidate 按原 draft 版本读取；
 - 业务端首版只读取、展示和评价 Delivery Package，不依赖 draft 内部字段的长期稳定性。
 
-S3 零 Lag、S4 正 Lag、SS/FF/SF、SNET/FNET 与手工/locked task 已按 v5 受限 Profile 完成；两层嵌套汇总任务日期滚动已按 v6 Profile 完成；反向日期、总浮时、自由浮时和关键标识已按 v7 Profile 完成。案例 B 和完整生产治理仍在 G2 关闭。
+S3 零 Lag、S4 正 Lag、SS/FF/SF、SNET/FNET 与手工/locked task 已按 v5 受限 Profile 完成；两层嵌套汇总任务日期滚动已按 v6 Profile 完成；反向日期、总浮时、自由浮时和关键标识已按 v7 Profile 完成；零工期里程碑按 v8 完成；单日历负 Lag 按 v9 完成并通过独立 Microsoft Project 黄金门禁。案例 B 和完整生产治理仍在 G2 关闭。
 
 ### 如何建立 Microsoft Project expected（SS/FF/SF 示例）
 
@@ -617,3 +630,14 @@ FS 零 Lag 分叉/汇合网络，专门区分关键长分支和“短工作 → 
 投影为结构化表格，并单独统计关键活动任务。原始日期 Patch 收入默认折叠的技术明细，用户无需阅读 JSON 即可
 完成方案审阅。页面只展示后端 `engine_result`，不在浏览器中计算排期；受支持样例的浏览器主链路已确认
 Candidate 可审阅、关键/非关键结果可区分，且重算前后 Source 内容哈希一致。
+
+### 单日历负 Lag 的 v9 观测
+
+负 Lag 夹具位于 `backend/test/data/schedule/microsoft_project_s5_negative_lag_golden_case.json`，覆盖统一项目日历下 FS/SS/FF/SF `-120m`。Microsoft Project 16.0 隐藏 COM 会话返回的关系文本保留负号，任务最早/最晚日期、总/自由浮时和关键标识均与 v9 输出一致。运行：
+
+```powershell
+& '.venv\Scripts\python.exe' scripts\verify_schedule_golden_case.py `
+  --case test\data\schedule\microsoft_project_s5_negative_lag_golden_case.json
+```
+
+当前应返回 `gate_status=PASSED`、`external_observation_status=PASSED` 和空 `errors`。

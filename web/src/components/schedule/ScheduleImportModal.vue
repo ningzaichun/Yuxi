@@ -17,7 +17,7 @@
     >
       <UploadCloud :size="32" class="upload-icon" />
       <p class="ant-upload-text">点击或拖拽处理完成的排期 JSON</p>
-      <p class="ant-upload-hint">支持版本化来源 JSON 和 canonical_schedule_v2.2，最大 10 MiB；不接受 MPP</p>
+      <p class="ant-upload-hint">支持版本化来源 JSON 和 canonical_schedule_v2.2–v2.8，最大 10 MiB；MPP 请先通过 Bridge 转换</p>
     </a-upload-dragger>
 
     <a-alert
@@ -135,7 +135,11 @@ const readFile = async (file) => {
     const result = parseScheduleJsonText(await file.text(), file.name)
     parsed.value = result
     fileList.value = [file]
-    requestId.value = `schedule-${result.kind}-${crypto.randomUUID()}`
+    requestId.value = `schedule-${result.kind}-${
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+    }`
     form.externalProjectId = result.externalProjectId
     form.externalSnapshotId = result.externalSnapshotId
     form.externalRevision = result.externalRevision

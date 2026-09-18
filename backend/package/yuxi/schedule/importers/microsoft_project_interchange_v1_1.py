@@ -1,4 +1,4 @@
-"""Normalize Microsoft Project interchange v1.1 into strict Canonical v2.2."""
+"""Normalize Microsoft Project interchange v1.1 into a versioned Canonical Schedule."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from copy import deepcopy
 from typing import Any
 
 from yuxi.schedule.audit.context import AuditContext
-from yuxi.schedule.contracts.canonical_v2_2 import CanonicalScheduleV22
+from yuxi.schedule.contracts.canonical import CanonicalSchedule, parse_canonical_schedule
 from yuxi.schedule.contracts.import_v1 import (
     FieldDisposition,
     MicrosoftProjectInterchangeV11,
@@ -14,13 +14,16 @@ from yuxi.schedule.contracts.import_v1 import (
     UnsupportedSemantic,
     collect_preserved_field_paths,
 )
-from yuxi.schedule.importers.canonical_v2_2 import import_canonical_schedule_v2_2
+from yuxi.schedule.importers.canonical_v2_2 import _import_canonical_schedule
 from yuxi.schedule.importers.registry import ScheduleImportResult
 
-SCHEMA_VERSION = "microsoft_project_interchange_mock_v1.1"
+SCHEMA_VERSION = "microsoft_project_interchange_v1.1"
+LEGACY_SCHEMA_VERSION = "microsoft_project_interchange_mock_v1.1"
 ADAPTER_ID = "microsoft_project_interchange_v1_1"
-ADAPTER_VERSION = "1.0.0"
-CANONICAL_LAG_POLICY = "UNSPECIFIED_REQUIRES_ENGINE_PROFILE"
+ADAPTER_VERSION = "1.6.0"
+# Lag 日历策略已冻结：单日历旧版本使用统一日历，多/任务日历与 v2.5 约束来源
+# 使用后续任务有效日历。结构化例外与父子日历由 v2.4+ 处理。
+CANONICAL_LAG_POLICY = "UNIFIED_PROJECT_CALENDAR_WORKING_MINUTES"
 
 
 class MicrosoftProjectInterchangeV11Adapter:
@@ -30,8 +33,10 @@ class MicrosoftProjectInterchangeV11Adapter:
 
     def normalize(self, document: dict[str, Any]) -> ScheduleImportResult:
         source = MicrosoftProjectInterchangeV11.model_validate(document)
+        if source.schema_version != self.schema_version:
+            raise ValueError(f"adapter does not accept source schema version: {source.schema_version}")
         if source.resources or source.assignments:
-            raise ValueError("adapter v1.0 only supports interchange documents without resources or assignments")
+            raise ValueError("interchange v1.1 only supports documents without resources or assignments")
 
         canonical = _build_canonical(source)
         report = _build_report(source)
@@ -42,15 +47,48 @@ class MicrosoftProjectInterchangeV11Adapter:
         )
 
 
-def _build_canonical(source: MicrosoftProjectInterchangeV11) -> CanonicalScheduleV22:
+class MicrosoftProjectInterchangeMockV11Adapter(MicrosoftProjectInterchangeV11Adapter):
+    """Backward-compatible route for the legacy mock-tagged source schema."""
+
+    schema_version = LEGACY_SCHEMA_VERSION
+
+
+def _build_canonical(source: MicrosoftProjectInterchangeV11) -> CanonicalSchedule:
     snapshot_id = f"snapshot:mpp:{source.source.mpp_sha256[:24]}"
     root_task = min(source.tasks, key=lambda task: (task.outline_level, task.source_id))
+    has_milestones = any(task.task_type == "MILESTONE" for task in source.tasks)
+    has_inactive_tasks = any(not task.active for task in source.tasks)
+    has_calendar_exceptions = any(calendar.exceptions for calendar in source.calendars)
+    uses_task_calendars = len(source.calendars) > 1 or any(
+        task.calendar_id != source.project.default_calendar_id for task in source.tasks
+    )
+    has_constraint_targets = source.project.required_finish is not None or any(
+        task.constraint_type_code in {2, 7} or task.deadline is not None
+        for task in source.tasks
+    )
+    canonical_lag_policy = (
+        "SUCCESSOR_TASK_CALENDAR"
+        if uses_task_calendars or has_constraint_targets
+        else CANONICAL_LAG_POLICY
+    )
     calendar_payloads = [_calendar_payload(calendar, index) for index, calendar in enumerate(source.calendars)]
     task_payloads = [_task_payload(task, source.project.default_calendar_id) for task in source.tasks]
-    dependency_payloads = [_dependency_payload(dependency) for dependency in source.dependencies]
+    dependency_payloads = [
+        _dependency_payload(dependency, canonical_lag_policy) for dependency in source.dependencies
+    ]
 
     payload = {
-        "schema_version": "canonical_schedule_v2.2",
+        "schema_version": (
+            "canonical_schedule_v2.8"
+            if has_inactive_tasks
+            else "canonical_schedule_v2.5"
+            if has_constraint_targets
+            else "canonical_schedule_v2.4"
+            if has_calendar_exceptions or uses_task_calendars
+            else "canonical_schedule_v2.3"
+            if has_milestones
+            else "canonical_schedule_v2.2"
+        ),
         "snapshot_id": snapshot_id,
         "generated_at": source.source.extracted_at,
         "source": {
@@ -66,7 +104,7 @@ def _build_canonical(source: MicrosoftProjectInterchangeV11) -> CanonicalSchedul
             "time_zone_source": "SOURCE_DOCUMENT_EXPLICIT",
             "duration_storage_unit": "working_minute",
             "lag_storage_unit": "working_minute",
-            "lag_calendar_policy": CANONICAL_LAG_POLICY,
+            "lag_calendar_policy": canonical_lag_policy,
             "task_calendar_resolution": "task.calendar_id ?? project.default_calendar_id",
             "source_dates_preserved": True,
         },
@@ -91,6 +129,11 @@ def _build_canonical(source: MicrosoftProjectInterchangeV11) -> CanonicalSchedul
             "default_calendar_id": source.project.default_calendar_id,
             "default_daily_work_minutes": source.project.default_daily_work_minutes,
             "default_calendar_weekly_work_minutes": source.project.default_weekly_work_minutes,
+            **(
+                {"required_finish": source.project.required_finish}
+                if has_constraint_targets
+                else {}
+            ),
         },
         "statistics": _placeholder_statistics(),
         "capabilities": _placeholder_capabilities(),
@@ -110,8 +153,8 @@ def _build_canonical(source: MicrosoftProjectInterchangeV11) -> CanonicalSchedul
         ),
     }
 
-    provisional = CanonicalScheduleV22.model_validate(payload)
-    schedule = import_canonical_schedule_v2_2(provisional)
+    provisional = parse_canonical_schedule(payload)
+    schedule = _import_canonical_schedule(provisional)
     context = AuditContext.build(schedule)
     capabilities = {name: capability.model_dump(mode="json") for name, capability in context.capabilities.items()}
     network_quality = _network_quality(provisional)
@@ -123,7 +166,7 @@ def _build_canonical(source: MicrosoftProjectInterchangeV11) -> CanonicalSchedul
         capabilities=capabilities,
         **network_quality,
     )
-    return CanonicalScheduleV22.model_validate(payload)
+    return parse_canonical_schedule(payload)
 
 
 def _calendar_payload(calendar, source_index: int) -> dict[str, Any]:
@@ -139,13 +182,19 @@ def _calendar_payload(calendar, source_index: int) -> dict[str, Any]:
             }
             for day in calendar.week_days
         },
-        "exceptions": deepcopy(calendar.exceptions),
+        "exceptions": [exception.model_dump(mode="json") for exception in calendar.exceptions],
     }
 
 
 def _task_payload(task, default_calendar_id: str) -> dict[str, Any]:
     duration_minutes = task.project_rollup_duration_minutes if task.task_type == "SUMMARY" else task.duration_minutes
-    constraint_types = {0: "AS_SOON_AS_POSSIBLE", 4: "START_NO_EARLIER_THAN", 6: "FINISH_NO_EARLIER_THAN"}
+    constraint_types = {
+        0: "AS_SOON_AS_POSSIBLE",
+        2: "MUST_START_ON",
+        4: "START_NO_EARLIER_THAN",
+        6: "FINISH_NO_EARLIER_THAN",
+        7: "FINISH_NO_LATER_THAN",
+    }
     return {
         "task_id": task.task_id,
         "source_id": task.source_id,
@@ -155,8 +204,12 @@ def _task_payload(task, default_calendar_id: str) -> dict[str, Any]:
         "wbs": task.wbs,
         "outline_level": task.outline_level,
         "name": task.name,
-        "task_type": "summary" if task.task_type == "SUMMARY" else "activity",
-        "active": True,
+        "task_type": {
+            "SUMMARY": "summary",
+            "MILESTONE": "milestone",
+            "TASK": "activity",
+        }[task.task_type],
+        "active": task.active,
         "scheduling_mode": "automatic" if task.scheduling_mode == "AUTO" else "manual",
         "project_task_type": "FIXED_DURATION",
         "calendar_id": None if task.calendar_id == default_calendar_id else task.calendar_id,
@@ -191,7 +244,7 @@ def _task_payload(task, default_calendar_id: str) -> dict[str, Any]:
     }
 
 
-def _dependency_payload(dependency) -> dict[str, Any]:
+def _dependency_payload(dependency, lag_calendar_policy: str) -> dict[str, Any]:
     return {
         "dependency_id": dependency.dependency_id,
         "predecessor_task_id": dependency.predecessor_task_id,
@@ -199,11 +252,11 @@ def _dependency_payload(dependency) -> dict[str, Any]:
         "type": dependency.type,
         "source_type_code": dependency.source_type_code,
         "lag_minutes": dependency.lag_minutes,
-        "lag_calendar_policy": CANONICAL_LAG_POLICY,
+        "lag_calendar_policy": lag_calendar_policy,
     }
 
 
-def _network_quality(canonical: CanonicalScheduleV22) -> dict[str, list[Any]]:
+def _network_quality(canonical: CanonicalSchedule) -> dict[str, list[Any]]:
     leaf_task_ids = {task.task_id for task in canonical.tasks if task.task_type != "summary"}
     summary_task_ids = {task.task_id for task in canonical.tasks if task.task_type == "summary"}
     incoming = {task_id: 0 for task_id in leaf_task_ids}
@@ -250,9 +303,6 @@ def _validation_payload(
     summary_task_dependency_ids: list[str],
     source_schedule_violations: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    milestone_ids = sorted(
-        task.task_id for task in source.tasks if task.task_type != "SUMMARY" and task.duration_minutes == 0
-    )
     all_task_ids = sorted(task.task_id for task in source.tasks)
     source_fidelity_valid = source.source.opened_after_save and source.source.project_recalculated_after_reopen
     issues = [
@@ -294,7 +344,7 @@ def _validation_payload(
         )
     engine_decisions = []
     for index, code in enumerate(capabilities["cpm_recalculation"]["reasons"], start=5):
-        object_refs = milestone_ids if code == "MILESTONE_UNSUPPORTED" else []
+        object_refs: list[str] = []
         issues.append(
             _validation_issue(
                 f"IMPORT-V1-{index:03d}",
@@ -427,11 +477,6 @@ def _build_report(source: MicrosoftProjectInterchangeV11) -> ScheduleNormalizati
                 object_refs=[source.project.project_id],
             )
         )
-    milestone_ids = sorted(
-        task.task_id for task in source.tasks if task.task_type != "SUMMARY" and task.duration_minutes == 0
-    )
-    if milestone_ids:
-        unsupported_semantics.append(UnsupportedSemantic(code="MILESTONE_UNSUPPORTED", object_refs=milestone_ids))
     unsupported_semantics.append(UnsupportedSemantic(code="RESOURCE_ASSIGNMENTS_UNAVAILABLE"))
     return ScheduleNormalizationReport(
         schema_version="schedule_normalization_report_v1",

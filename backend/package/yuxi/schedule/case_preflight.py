@@ -7,7 +7,7 @@ import json
 from collections import Counter
 from typing import Any, Literal
 
-from yuxi.schedule.contracts.canonical_v2_2 import CanonicalScheduleV22
+from yuxi.schedule.contracts.canonical import CanonicalSchedule, parse_canonical_schedule
 
 CaseType = Literal["real", "sanitized", "synthetic"]
 MIGRATION_DIFFERENCE_FIELDS = {
@@ -31,10 +31,10 @@ def preflight_schedule_case(
 ) -> dict[str, Any]:
     """Validate a case and return a report without business names or object IDs."""
 
-    contract = CanonicalScheduleV22.model_validate(source)
+    contract = parse_canonical_schedule(source)
     profile = _structural_profile(contract)
     baseline_profile = (
-        _structural_profile(CanonicalScheduleV22.model_validate(baseline)) if baseline is not None else None
+        _structural_profile(parse_canonical_schedule(baseline)) if baseline is not None else None
     )
     differences = _structural_differences(baseline_profile, profile) if baseline_profile else []
     migration_differences = [
@@ -93,7 +93,7 @@ def preflight_schedule_case(
     }
 
 
-def _structural_profile(contract: CanonicalScheduleV22) -> dict[str, Any]:
+def _structural_profile(contract: CanonicalSchedule) -> dict[str, Any]:
     task_types = Counter(task.task_type for task in contract.tasks)
     relation_types = Counter(dependency.type for dependency in contract.dependencies)
     lag_signs = Counter(

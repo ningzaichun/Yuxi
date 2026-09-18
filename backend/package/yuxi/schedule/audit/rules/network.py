@@ -50,11 +50,31 @@ def audit_network(context: AuditContext) -> list[AuditFinding]:
         )
 
     leaf_tasks = sorted(
-        (task for task in context.schedule.tasks if task.task_type != "summary"),
+        (
+            task
+            for task in context.schedule.tasks
+            if task.task_type != "summary"
+            and (task.active or context.schedule.schema_version != "canonical_schedule_v2.8")
+        ),
         key=lambda item: item.task_id,
     )
     for task in leaf_tasks:
-        if not context.network.incoming[task.task_id]:
+        active_incoming = [
+            dependency
+            for dependency in context.network.incoming[task.task_id]
+            if context.schedule.schema_version != "canonical_schedule_v2.8"
+            or context.tasks_by_id[dependency.predecessor_task_id].active
+        ]
+        active_outgoing = [
+            dependency
+            for dependency in context.network.outgoing[task.task_id]
+            if context.schedule.schema_version != "canonical_schedule_v2.8"
+            or context.tasks_by_id[dependency.successor_task_id].active
+        ]
+        if (
+            not active_incoming
+            and task.task_id not in context.allowed_open_start_task_ids
+        ):
             findings.append(
                 _finding(
                     "OPEN_START",
@@ -66,7 +86,10 @@ def audit_network(context: AuditContext) -> list[AuditFinding]:
                     "确认它是否应作为网络起点，否则补充前置关系。",
                 )
             )
-        if not context.network.outgoing[task.task_id]:
+        if (
+            not active_outgoing
+            and task.task_id not in context.allowed_open_finish_task_ids
+        ):
             findings.append(
                 _finding(
                     "OPEN_FINISH",

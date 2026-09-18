@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
 from scripts.generate_synthetic_schedule_case import build_synthetic_schedule_case
+from test.support.schedule_suite import normalize_suite_document
 from yuxi.schedule.audit.engine import audit_schedule
+from yuxi.schedule.contracts.canonical import parse_canonical_schedule
 from yuxi.schedule.contracts.canonical_v2_2 import CanonicalScheduleV22
 from yuxi.schedule.contracts.optimization import (
     CandidateDecisionRequest,
@@ -16,7 +19,15 @@ from yuxi.schedule.contracts.optimization import (
     GoalOptimizationRequest,
 )
 from yuxi.schedule.delivery_adapter import apply_delivery_to_source_copy
-from yuxi.schedule.forward_engine import REVERSE_FLOAT_ENGINE_PROFILE_ID
+from yuxi.schedule.forward_engine import (
+    CALENDAR_EXCEPTIONS_ENGINE_PROFILE_ID,
+    CONSTRAINTS_ENGINE_PROFILE_ID,
+    MILESTONE_ENGINE_PROFILE_ID,
+    MULTI_CALENDAR_ENGINE_PROFILE_ID,
+    NEGATIVE_LAG_ENGINE_PROFILE_ID,
+    REVERSE_FLOAT_ENGINE_PROFILE_ID,
+)
+from yuxi.schedule.importers import import_canonical_schedule
 from yuxi.schedule.importers.canonical_v2_2 import import_canonical_schedule_v2_2
 from yuxi.services.schedule_optimization_service import (
     ScheduleOptimizationConflictError,
@@ -67,6 +78,9 @@ class OptimizationRepository:
             external_snapshot_id="external-snapshot-1",
             external_revision="revision-1",
             source_snapshot_id=source["snapshot_id"],
+            schema_version=source["schema_version"],
+            adapter_id="test-adapter",
+            adapter_version="1.2.3",
             snapshot_content_sha256="sha256:" + "a" * 64,
             minio_object="owner-1/snapshot-1/snapshot.json",
         )
@@ -88,7 +102,7 @@ class OptimizationRepository:
             reason="业务确认替代关系",
         )
         execution = audit_schedule(
-            import_canonical_schedule_v2_2(CanonicalScheduleV22.model_validate(source)),
+            import_canonical_schedule(parse_canonical_schedule(source)),
             schedule_snapshot_id="snapshot-1",
             audit_run_id="audit-1",
         )
@@ -163,6 +177,20 @@ class OptimizationRepository:
         if self.candidate and self.candidate.candidate_snapshot_id == candidate_snapshot_id:
             return self.candidate
         return None
+
+    async def list_candidates(self, owner_uid, base_schedule_snapshot_id):
+        if (
+            owner_uid == "owner-1"
+            and self.candidate
+            and self.candidate.base_schedule_snapshot_id == base_schedule_snapshot_id
+        ):
+            return [self.candidate]
+        return []
+
+    async def list_candidate_decisions(self, owner_uid, candidate_snapshot_ids):
+        return [
+            item for item in self.candidate_decisions if item.candidate_snapshot_id in candidate_snapshot_ids
+        ]
 
     async def get_latest_candidate_decision(self, owner_uid, candidate_snapshot_id):
         return self.candidate_decisions[-1] if self.candidate_decisions else None
@@ -259,6 +287,11 @@ async def test_forward_candidate_keeps_source_immutable_and_delivers_engine_resu
     assert candidate["candidate_kind"] == "automatic_forward_recalculation"
     assert candidate["candidate_snapshot"]["engine_result"]["status"] == "calculated"
     assert candidate["candidate_snapshot"]["engine_profile_id"] == REVERSE_FLOAT_ENGINE_PROFILE_ID
+    assert candidate["canonical_schema_version"] == "canonical_schedule_v2.2"
+    assert candidate["adapter_id"] == "test-adapter"
+    assert candidate["adapter_version"] == "1.2.3"
+    assert candidate["engine_profile_id"] == REVERSE_FLOAT_ENGINE_PROFILE_ID
+    assert candidate["engine_version"] == "7.0.0"
     dates = {item["task_id"]: item for item in candidate["candidate_snapshot"]["engine_result"]["task_dates"]}
     assert dates["synthetic-task:build-a"]["early_start"] == "2026-09-02T10:00:00+08:00"
     assert {
@@ -270,7 +303,8 @@ async def test_forward_candidate_keeps_source_immutable_and_delivers_engine_resu
     } <= dates["synthetic-task:build-a"].keys()
     assert candidate["candidate_snapshot"]["candidate_schedule"] == before
     assert delivery["simulation_result"]["status"] == "calculated"
-    assert delivery["application_allowed"] is True
+    assert delivery["application_allowed"] is False
+    assert delivery["application_blocking_reasons"] == ["DELIVERY_ADAPTER_UNAVAILABLE"]
 
 
 @pytest.mark.asyncio
@@ -293,6 +327,178 @@ async def test_forward_candidate_supports_relation_types_in_main_flow() -> None:
     assert created is True
     assert candidate["candidate_status"] == "valid"
     assert candidate["candidate_snapshot"]["engine_result"]["status"] == "calculated"
+
+
+@pytest.mark.asyncio
+async def test_forward_candidate_routes_v23_milestones_to_engine_v8() -> None:
+    suite_root = Path(__file__).resolve().parents[4] / "Yuxi_复杂排期测试套件_v1"
+    document = json.loads(
+        (suite_root / "C03_NESTED_SUMMARY_BRANCHES" / "input.json").read_text(encoding="utf-8")
+    )
+    canonical, _ = normalize_suite_document(document)
+    source = canonical.model_dump(mode="json", exclude_none=False)
+    service, repository = _service(source)
+    repository.snapshot.snapshot_content_sha256 = _canonical_content_sha256(source)
+
+    candidate, created = await service.create_forward_candidate(
+        "owner-1",
+        "snapshot-1",
+        ForwardRecalculationRequest(
+            request_id="forward-v23-milestone-request",
+            base_snapshot_content_sha256=repository.snapshot.snapshot_content_sha256,
+        ),
+    )
+
+    result = candidate["candidate_snapshot"]["engine_result"]
+    milestone_ids = {task["task_id"] for task in source["tasks"] if task["task_type"] == "milestone"}
+    milestone_dates = [item for item in result["task_dates"] if item["task_id"] in milestone_ids]
+    assert created is True
+    assert candidate["canonical_schema_version"] == "canonical_schedule_v2.3"
+    assert candidate["engine_profile_id"] == MILESTONE_ENGINE_PROFILE_ID
+    assert result["status"] == "calculated"
+    assert milestone_dates
+    assert all(item["early_start"] == item["early_finish"] for item in milestone_dates)
+
+
+@pytest.mark.asyncio
+async def test_forward_candidate_persists_negative_lag_engine_v9() -> None:
+    source = _supported_forward_source()
+    source["dependencies"][0]["lag_minutes"] = -240
+    service, repository = _service(source)
+    repository.snapshot.snapshot_content_sha256 = _canonical_content_sha256(source)
+
+    candidate, created = await service.create_forward_candidate(
+        "owner-1",
+        "snapshot-1",
+        ForwardRecalculationRequest(
+            request_id="forward-negative-lag-request",
+            base_snapshot_content_sha256=repository.snapshot.snapshot_content_sha256,
+        ),
+    )
+
+    result = candidate["candidate_snapshot"]["engine_result"]
+    assert created is True
+    assert candidate["candidate_status"] == "valid"
+    assert candidate["engine_profile_id"] == NEGATIVE_LAG_ENGINE_PROFILE_ID
+    assert candidate["engine_version"] == "9.0.0"
+    assert candidate["candidate_snapshot"]["engine_profile_id"] == NEGATIVE_LAG_ENGINE_PROFILE_ID
+    assert candidate["candidate_snapshot"]["engine_version"] == "9.0.0"
+    assert result["status"] == "calculated"
+
+
+@pytest.mark.asyncio
+async def test_forward_candidate_routes_v24_calendar_exceptions_to_engine_v10() -> None:
+    suite_root = Path(__file__).resolve().parents[4] / "Yuxi_复杂排期测试套件_v1"
+    document = json.loads(
+        (suite_root / "C02_MULTI_CALENDAR_EXCEPTIONS" / "input.json").read_text(encoding="utf-8")
+    )
+    document["case_id"] = "C02_SINGLE_CALENDAR_EXCEPTIONS"
+    document["calendars"] = [
+        calendar
+        for calendar in document["calendars"]
+        if calendar["calendar_id"] == "calendar:standard"
+    ]
+    document["tasks"] = [task for task in document["tasks"] if task["task_id"] != "task:site"]
+    document["dependencies"] = [
+        dependency
+        for dependency in document["dependencies"]
+        if "task:site"
+        not in {dependency["predecessor_task_id"], dependency["successor_task_id"]}
+    ]
+    canonical, _ = normalize_suite_document(document)
+    source = canonical.model_dump(mode="json", exclude_none=False)
+    service, repository = _service(source)
+    repository.snapshot.snapshot_content_sha256 = _canonical_content_sha256(source)
+
+    candidate, created = await service.create_forward_candidate(
+        "owner-1",
+        "snapshot-1",
+        ForwardRecalculationRequest(
+            request_id="forward-v24-calendar-exception-request",
+            base_snapshot_content_sha256=repository.snapshot.snapshot_content_sha256,
+        ),
+    )
+
+    result = candidate["candidate_snapshot"]["engine_result"]
+    assert created is True
+    assert candidate["candidate_status"] == "valid"
+    assert candidate["canonical_schema_version"] == "canonical_schedule_v2.4"
+    assert candidate["engine_profile_id"] == CALENDAR_EXCEPTIONS_ENGINE_PROFILE_ID
+    assert candidate["engine_version"] == "10.0.0"
+    assert result["status"] == "calculated"
+    assert result["finish_after"] == "2026-09-13T17:00:00+08:00"
+
+
+@pytest.mark.asyncio
+async def test_forward_candidate_routes_v24_multi_calendar_to_engine_v11() -> None:
+    suite_root = Path(__file__).resolve().parents[4] / "Yuxi_复杂排期测试套件_v1"
+    document = json.loads(
+        (suite_root / "C02_MULTI_CALENDAR_EXCEPTIONS" / "input.json").read_text(encoding="utf-8")
+    )
+    canonical, _ = normalize_suite_document(document)
+    source = canonical.model_dump(mode="json", exclude_none=False)
+    service, repository = _service(source)
+    repository.snapshot.snapshot_content_sha256 = _canonical_content_sha256(source)
+
+    candidate, created = await service.create_forward_candidate(
+        "owner-1",
+        "snapshot-1",
+        ForwardRecalculationRequest(
+            request_id="forward-v24-multi-calendar-request",
+            base_snapshot_content_sha256=repository.snapshot.snapshot_content_sha256,
+        ),
+    )
+
+    result = candidate["candidate_snapshot"]["engine_result"]
+    assert created is True
+    assert candidate["candidate_status"] == "valid"
+    assert candidate["canonical_schema_version"] == "canonical_schedule_v2.4"
+    assert candidate["engine_profile_id"] == MULTI_CALENDAR_ENGINE_PROFILE_ID
+    assert candidate["engine_version"] == "11.0.0"
+    assert result["status"] == "calculated"
+    assert result["finish_after"] == "2026-09-14T17:00:00+08:00"
+
+
+@pytest.mark.asyncio
+async def test_forward_candidate_keeps_v25_constraint_issues_reviewable() -> None:
+    suite_root = Path(__file__).resolve().parents[4] / "Yuxi_复杂排期测试套件_v1"
+    document = json.loads(
+        (suite_root / "C04_CONSTRAINTS_DEADLINES" / "input.json").read_text(encoding="utf-8")
+    )
+    canonical, _ = normalize_suite_document(document)
+    source = canonical.model_dump(mode="json", exclude_none=False)
+    service, repository = _service(source)
+    repository.snapshot.snapshot_content_sha256 = _canonical_content_sha256(source)
+
+    candidate, created = await service.create_forward_candidate(
+        "owner-1",
+        "snapshot-1",
+        ForwardRecalculationRequest(
+            request_id="forward-v25-constraints-request",
+            base_snapshot_content_sha256=repository.snapshot.snapshot_content_sha256,
+        ),
+    )
+
+    result = candidate["candidate_snapshot"]["engine_result"]
+    assert created is True
+    assert candidate["candidate_status"] == "valid"
+    assert candidate["canonical_schema_version"] == "canonical_schedule_v2.5"
+    assert candidate["engine_profile_id"] == CONSTRAINTS_ENGINE_PROFILE_ID
+    assert candidate["engine_version"] == "12.0.0"
+    assert candidate["candidate_audit"]["issue_summary"] == {
+        "total": 4,
+        "blocker": 0,
+        "warning": 4,
+        "info": 0,
+    }
+    assert [issue["rule_id"] for issue in candidate["candidate_audit"]["issues"]] == [
+        "DEADLINE_MISSED",
+        "FINISH_CONSTRAINT_VIOLATED",
+        "HARD_CONSTRAINT_NETWORK_CONFLICT",
+        "PROJECT_REQUIRED_FINISH_MISSED",
+    ]
+    fixed = next(item for item in result["task_dates"] if item["task_id"] == "task:c")
+    assert fixed["early_start"] == "2026-09-15T08:00:00+08:00"
 
 
 @pytest.mark.asyncio
@@ -330,7 +536,8 @@ async def test_goal_candidate_persists_selected_duration_strategy_and_delivers_b
     assert candidate_tasks["synthetic-task:build-a"]["duration_minutes"] == 240
     assert source == before
     assert delivery["user_attitude"] == "not_reviewed"
-    assert delivery["application_allowed"] is True
+    assert delivery["application_allowed"] is False
+    assert delivery["application_blocking_reasons"] == ["DELIVERY_ADAPTER_UNAVAILABLE"]
 
     with pytest.raises(ScheduleOptimizationConflictError):
         await service.create_goal_candidate(
@@ -344,6 +551,41 @@ async def test_goal_candidate_persists_selected_duration_strategy_and_delivers_b
                 authorization_confirmed=True,
             ),
         )
+
+
+@pytest.mark.asyncio
+async def test_list_candidates_returns_summaries_with_attitude() -> None:
+    source = _supported_forward_source()
+    service, repository = _service(source)
+    repository.snapshot.snapshot_content_sha256 = _canonical_content_sha256(source)
+    request = GoalOptimizationRequest(
+        request_id="goal-request-list",
+        base_snapshot_content_sha256=repository.snapshot.snapshot_content_sha256,
+        objective="MINIMIZE_PROJECT_FINISH",
+        authorized_duration_options=[{"task_id": "synthetic-task:build-a", "duration_minutes": 240}],
+        authorization_confirmed=True,
+    )
+
+    candidate, _ = await service.create_goal_candidate("owner-1", "snapshot-1", request)
+    await service.record_decision(
+        "owner-1",
+        candidate["candidate_snapshot_id"],
+        CandidateDecisionRequest(request_id="decision-list-1", attitude="accepted"),
+    )
+
+    listed = await service.list_candidates("owner-1", "snapshot-1")
+
+    assert len(listed["items"]) == 1
+    item = listed["items"][0]
+    assert item["candidate_snapshot_id"] == candidate["candidate_snapshot_id"]
+    assert item["candidate_kind"] == "goal_duration_optimization"
+    assert item["candidate_status"] == "valid"
+    assert item["canonical_schema_version"] == "canonical_schedule_v2.2"
+    assert item["adapter_id"] == "test-adapter"
+    assert item["engine_profile_id"] == REVERSE_FLOAT_ENGINE_PROFILE_ID
+    assert item["user_attitude"] == "accepted"
+    assert item["comparison"]["finish_after"] < item["comparison"]["finish_before"]
+    assert await service.list_candidates("owner-2", "snapshot-1") == {"items": []}
 
 
 @pytest.mark.asyncio
@@ -401,7 +643,7 @@ async def test_forward_candidate_persists_invalid_locked_conflict_without_allowi
 
 
 @pytest.mark.asyncio
-async def test_forward_candidate_returns_structured_blocked_without_persisting_candidate() -> None:
+async def test_forward_candidate_keeps_summary_dependency_blocked_under_v9() -> None:
     source = build_synthetic_schedule_case()
     source["dependencies"][0]["lag_minutes"] = -120
     service, repository = _service(source)
@@ -419,7 +661,7 @@ async def test_forward_candidate_returns_structured_blocked_without_persisting_c
     assert blocked["candidate_status"] == "blocked"
     assert repository.optimization is None
     assert blocked["engine_result"]["task_dates"] == []
-    assert "NEGATIVE_DEPENDENCY_LAG_UNSUPPORTED" in {
+    assert "SUMMARY_DEPENDENCY_UNSUPPORTED" in {
         item["code"] for item in blocked["engine_result"]["support"]["blockers"]
     }
 
@@ -848,6 +1090,73 @@ def test_patch_rejects_multi_leaf_expansion_above_contract_capacity(
 
     with pytest.raises(ScheduleOptimizationInvalidError):
         _apply_decision(canonical_schedule_payload, issue, decision, "candidate-overflow")
+
+
+def test_inactive_dependency_decision_removes_chain_and_adds_explicit_leaf_relation(
+    canonical_schedule_payload: dict,
+) -> None:
+    source = json.loads(json.dumps(canonical_schedule_payload))
+    activities = [task for task in source["tasks"] if task["task_type"] == "activity"][:3]
+    predecessor, inactive, successor = activities
+    inactive["active"] = False
+    source["dependencies"] = [
+        {
+            "dependency_id": "dependency:inactive-in",
+            "predecessor_task_id": predecessor["task_id"],
+            "successor_task_id": inactive["task_id"],
+            "type": "FS",
+            "source_type_code": 1,
+            "lag_minutes": 0,
+            "lag_calendar_policy": "UNSPECIFIED_REQUIRES_ENGINE_PROFILE",
+        },
+        {
+            "dependency_id": "dependency:inactive-out",
+            "predecessor_task_id": inactive["task_id"],
+            "successor_task_id": successor["task_id"],
+            "type": "FS",
+            "source_type_code": 1,
+            "lag_minutes": 0,
+            "lag_calendar_policy": "UNSPECIFIED_REQUIRES_ENGINE_PROFILE",
+        },
+    ]
+    issue = SimpleNamespace(
+        issue_id="issue-inactive",
+        object_refs=["dependency:inactive-in", "dependency:inactive-out"],
+    )
+    decision = SimpleNamespace(
+        decision_id="decision-inactive",
+        schedule_snapshot_id="snapshot-1",
+        predecessor_task_ids=[predecessor["task_id"]],
+        successor_task_ids=[successor["task_id"]],
+        dependency_type="FS",
+        lag_minutes=0,
+        reason="确认绕过 inactive 任务的活动叶子关系",
+    )
+
+    candidate, requested_patch, effective_patch, added_ids = _apply_decision(
+        source,
+        issue,
+        decision,
+        "candidate-inactive",
+    )
+
+    assert {item["dependency_id"] for item in effective_patch["removed_dependencies"]} == {
+        "dependency:inactive-in",
+        "dependency:inactive-out",
+    }
+    assert len(effective_patch["added_dependencies"]) == 1
+    added = effective_patch["added_dependencies"][0]
+    assert added["predecessor_task_id"] == predecessor["task_id"]
+    assert added["successor_task_id"] == successor["task_id"]
+    assert set(added_ids) == {added["dependency_id"]}
+    assert len(
+        [
+            item
+            for item in requested_patch["operations"]
+            if item["operation"] == "remove_dependency"
+        ]
+    ) == 2
+    assert candidate["dependencies"] == effective_patch["added_dependencies"]
 
 
 def _subtree_ids(tasks: dict[str, dict], root_id: str) -> set[str]:

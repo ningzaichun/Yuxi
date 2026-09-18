@@ -208,3 +208,57 @@ async def test_defer_requires_reason_before_confirmation(canonical_schedule_payl
 
     with pytest.raises(ScheduleDecisionInvalidError):
         await service.confirm_dependency_decision("owner-1", "issue-1")
+
+
+@pytest.mark.asyncio
+async def test_workbench_replaces_both_sides_of_inactive_chain(
+    canonical_schedule_payload: dict,
+) -> None:
+    source = json.loads(json.dumps(canonical_schedule_payload))
+    activities = [task for task in source["tasks"] if task["task_type"] == "activity"][:3]
+    predecessor, inactive, successor = activities
+    inactive["active"] = False
+    source_dependencies = [
+        {
+            "dependency_id": "dependency:inactive-in",
+            "predecessor_task_id": predecessor["task_id"],
+            "successor_task_id": inactive["task_id"],
+            "type": "FS",
+            "source_type_code": 1,
+            "lag_minutes": 0,
+            "lag_calendar_policy": "UNSPECIFIED_REQUIRES_ENGINE_PROFILE",
+        },
+        {
+            "dependency_id": "dependency:inactive-out",
+            "predecessor_task_id": inactive["task_id"],
+            "successor_task_id": successor["task_id"],
+            "type": "FS",
+            "source_type_code": 1,
+            "lag_minutes": 0,
+            "lag_calendar_policy": "UNSPECIFIED_REQUIRES_ENGINE_PROFILE",
+        },
+    ]
+    source["dependencies"] = source_dependencies
+    issue = SimpleNamespace(
+        issue_id="issue-1",
+        issue_key="issue-key-1",
+        audit_run_id="audit-1",
+        schedule_snapshot_id="snapshot-1",
+        rule_id="INACTIVE_TASK_DEPENDENCY",
+        rule_version="1",
+        category="dependency",
+        severity="warning",
+        object_refs=[item["dependency_id"] for item in source_dependencies],
+        evidence={"inactive_task_ids": [inactive["task_id"]]},
+        message="依赖关系涉及 inactive 任务。",
+        recommendation="显式选择活动叶子关系。",
+    )
+    service = ScheduleAuditService(WorkbenchRepository(issue), WorkbenchStore(source))
+
+    workbench = await service.get_dependency_workbench("owner-1", "issue-1")
+
+    assert len(workbench["source_dependencies"]) == 2
+    assert workbench["predecessor"]["candidate_task_ids"] == [predecessor["task_id"]]
+    assert workbench["successor"]["candidate_task_ids"] == [successor["task_id"]]
+    assert inactive["task_id"] not in workbench["predecessor"]["candidate_task_ids"]
+    assert inactive["task_id"] not in workbench["successor"]["candidate_task_ids"]

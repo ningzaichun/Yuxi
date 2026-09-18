@@ -436,6 +436,11 @@ class PostgresManager(metaclass=SingletonMeta):
                 dependency_decision_id VARCHAR(64),
                 base_schedule_snapshot_id VARCHAR(64) NOT NULL,
                 candidate_schema_version VARCHAR(64) NOT NULL,
+                canonical_schema_version VARCHAR(64),
+                adapter_id VARCHAR(128),
+                adapter_version VARCHAR(64),
+                engine_profile_id VARCHAR(256),
+                engine_version VARCHAR(64),
                 candidate_kind VARCHAR(64) NOT NULL,
                 candidate_status VARCHAR(16) NOT NULL,
                 minio_bucket VARCHAR(128) NOT NULL,
@@ -489,6 +494,11 @@ class PostgresManager(metaclass=SingletonMeta):
             ALTER TABLE IF EXISTS schedule_candidates
             ADD COLUMN IF NOT EXISTS candidate_audit JSONB NOT NULL DEFAULT '{}'::jsonb
             """,
+            "ALTER TABLE IF EXISTS schedule_candidates ADD COLUMN IF NOT EXISTS canonical_schema_version VARCHAR(64)",
+            "ALTER TABLE IF EXISTS schedule_candidates ADD COLUMN IF NOT EXISTS adapter_id VARCHAR(128)",
+            "ALTER TABLE IF EXISTS schedule_candidates ADD COLUMN IF NOT EXISTS adapter_version VARCHAR(64)",
+            "ALTER TABLE IF EXISTS schedule_candidates ADD COLUMN IF NOT EXISTS engine_profile_id VARCHAR(256)",
+            "ALTER TABLE IF EXISTS schedule_candidates ADD COLUMN IF NOT EXISTS engine_version VARCHAR(64)",
             """
             ALTER TABLE IF EXISTS schedule_optimization_runs
             ALTER COLUMN dependency_decision_id DROP NOT NULL

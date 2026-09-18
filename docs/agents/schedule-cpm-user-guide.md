@@ -4,6 +4,31 @@
 
 > 当前版本是“受限 CPM 工程能力”：在明确支持的输入范围内提供确定性计算和人工审阅，不是 Microsoft Project 的完整替代品，也不代表已经通过生产通用性验收。
 
+## 0. 一页式操作与测试清单
+
+### 业务人员如何使用
+
+1. 登录后进入左侧“排期审查”，点击“导入排期”。
+2. 选择已经由来源系统处理完成的 JSON；当前不能直接上传 MPP。
+3. 导入成功后选择来源快照，先核对项目、版本、任务数、依赖数和“只读来源快照”。
+4. 分别查看“外部接入”“来源审查”“CPM 重算”，不要把接入成功理解成一定可以重算。
+5. 逐条查看 blocker/warning；汇总任务或 inactive 依赖必须先进入“确认关系”，选择明确的 active 叶子任务。
+6. CPM 允许时点击“生成重算方案”；有明确工期授权时点击“工期目标优化”。
+7. 在 Candidate 中核对完成时间、任务日期、浮时、关键标识、约束/资源问题和方案对比甘特。
+8. 填写有业务依据的审阅意见，再接受或拒绝。接受只记录态度，不会修改来源计划。
+9. 查看 Delivery 时确认 `application_allowed`；出现 `DELIVERY_ADAPTER_UNAVAILABLE` 表示结果可审阅但当前不能自动回写。
+
+### 测试人员如何执行
+
+1. 先完成 API `5050`、Web `5173` 和 Provisioner `8002` 健康检查；需要 AI 审查时还要确认 Worker 正在消费任务。
+2. 使用一个受支持样例、一个明确阻断样例和一个脱敏真实项目，禁止只用合成数据宣布业务通过。
+3. 先跑 Schedule 单元测试，再跑真实 API 集成测试；涉及 Agent 时补跑 E2E。
+4. 跑前端排期测试、ESLint、Web Build 和 Docs Build。
+5. 执行 C01–C08 冻结套件和 v2.8 Oracle，禁止修改 expected 来让失败变绿。
+6. 按 UAT-01 起逐项记录截图、项目版本、实际结果和问题编号，最后填写测试完成报告。
+
+完整命令见[自动化测试执行](#_15-自动化测试执行)，人工验收见[用户验收测试用例](#_11-用户验收测试用例)。
+
 ## 1. 阅读导航
 
 如果你是业务用户，建议依次阅读：
@@ -20,6 +45,7 @@
 2. [用户验收测试用例](#_11-用户验收测试用例)
 3. [反馈记录模板](#_12-反馈记录模板)
 4. [首轮试点建议](#_13-首轮试点建议)
+5. [自动化测试执行](#_15-自动化测试执行)
 
 外部系统如何提交 JSON 见[排期外部 JSON 导入指南](./schedule-import-guide.md)；接口、数据契约、黄金门禁和运维细节见[排期审查模块操作与维护手册](./schedule-audit.md)。
 
@@ -38,10 +64,17 @@
 - 在统一项目日历下计算任务的最早开始、最早完成、最晚开始和最晚完成；
 - 计算总浮时和自由浮时；
 - 标记关键活动任务；
-- 处理 FS、SS、FF、SF 四类关系的零 Lag 和正 Lag；
-- 处理 ASAP、SNET、FNET 约束；
+- 处理 FS、SS、FF、SF 四类关系的零 Lag、正 Lag 和负 Lag；
+- 处理 ASAP、SNET、FNET、MSO、FNLT 约束；
+- Deadline 和项目 required finish 作为管理目标产生偏差 Issue，不直接移动任务；
+- MSO 与网络冲突时保留固定开始，并输出 `HARD_CONSTRAINT_NETWORK_CONFLICT` 证据；
+- FNLT 与网络冲突时，当前 v12 保留网络计算日期并输出 `FINISH_CONSTRAINT_VIOLATED`，不会为了满足上界而让任务越过前置关系；
+- 在 Canonical v2.6 / Profile v13 下固定 COMPLETED 任务的 actual start/finish，以实际完成约束后续 NOT_STARTED 任务，并按任务有效日历输出 Baseline 0 开始/完成偏差；存在 IN_PROGRESS 时使用 Profile v14，固定 actual start，从状态日期与网络要求边界之后排 remaining work，并用预测完成约束后续；
+- 在 Canonical v2.7 下于 CPM 完成后只读检测资源超配，并输出 Assignment 工作分钟和成本数值；资源分析不会修改 CPM 日期；
+- 在 Canonical v2.8 / Profile v15 下保留 inactive 来源日期并将其标记为“不参与重算”；inactive 不进入 CPM、关键路径、汇总滚动、资源分析或工期优化；
 - 处理自动任务、当前 Profile 支持的手工任务和显式 locked 任务；页面当前不提供任务锁定选择，locked 范围由系统接口调用方传入；
 - 按任务层级自底向上滚动汇总任务日期；
+- 处理零工期里程碑，并保证里程碑的开始与完成时刻相等；
 - 生成独立的重算方案，供用户接受或拒绝；
 - 在不修改来源快照的前提下查看交付内容。
 
@@ -49,22 +82,22 @@
 
 遇到下列输入时，系统应明确显示阻断原因，不会生成近似结果：
 
-- 负 Lag；
-- 多项目日历、日历继承或复杂日历例外；
-- 汇总任务参与依赖关系；
-- 实际进度驱动的重新排期；
+- 未明确任务有效日历或后续任务 Lag 日历策略的多/任务日历，以及未知父日历、继承环、无工作时间、日期范围冲突或时区不一致的日历例外；
+- 未经 Dependency Workbench 明确确认的汇总任务依赖或 inactive 任务依赖；
+- 从完成百分比反推 IN_PROGRESS 的剩余工期；v14 必须使用来源显式提供的 remaining duration；
 - 当前 Profile 以外的约束组合或不合法任务层级；
-- 资源均衡、资源成本优化；
+- 自动资源均衡、资源成本优化；
 - 多项目统筹；
 - MPP/XML 文件直接解析或回写。
 
 “不支持”不是计算失败。它表示系统识别到输入超出已验证范围，为避免输出看似合理但实际错误的日期，主动停止计算。
 
-### 2.3 三个必须记住的边界
+### 2.3 四个必须记住的边界
 
 1. **来源快照始终只读**：生成、接受或拒绝方案都不会原地修改来源任务。
 2. **前端不计算排期**：页面只展示后端 `engine_result` 的确定性结果。
 3. **接受不等于应用**：接受只记录用户对当前方案的态度；正式业务计划是否产生新版本，仍由受控交付和业务适配流程决定。
+4. **FNLT 尚未声明与 Microsoft Project 完全一致**：独立 Project 16.0 观测会让 FNLT 优先于 FS 网络并提前任务；Yuxi 当前采用保留网络、报告违反的安全口径，该差异仍待业务评审。
 
 ## 3. 五分钟快速体验
 
@@ -72,7 +105,7 @@
 
 登录系统，在左侧导航点击“排期审查”。页面左侧应出现“来源快照”列表。
 
-如果列表为空，可以点击页面右上角“导入排期”，选择处理完成的 JSON。页面会自动识别版本化来源 JSON 或 `canonical_schedule_v2.2`，预填外部项目、快照和版本身份；确认后点击“校验并导入”。页面不接受 MPP。
+如果列表为空，可以点击页面右上角“导入排期”，选择处理完成的 JSON。页面会自动识别版本化来源 JSON 或 `canonical_schedule_v2.2` 至 `canonical_schedule_v2.8`，预填外部项目、快照和版本身份；确认后点击“校验并导入”。页面不接受 MPP。
 
 如果导入后仍为空，请确认：
 
@@ -159,7 +192,7 @@ AI 先解释阻断当前目标的 Capability，再按 Issue 严重等级组织�
 - 审查统计回答“哪些来源关系已经过日期合规检查”；
 - CPM 重算回答“当前整个输入是否落在已验证的计算 Profile 内”。
 
-因此，审查中出现“非零 Lag 未检查”不能解释为所有关系都已验证，也不应仅凭这个数字判断 CPM 结果正确或错误。
+因此，审查中出现“非零 Lag 未检查”不能解释为所有关系都已验证，也不应仅凭这个数字判断 CPM 结果正确或错误。Lag 日历策略已冻结后，单一有效项目日历中的非零正负 Lag 关系会按统一项目日历工作分钟真正检查，此时“非零 Lag 未检查”通常为 0；策略未冻结的旧快照或日历口径不支持的场景仍显示为未检查并上报阻断问题。
 
 ## 5. 页面区域说明
 
@@ -198,24 +231,33 @@ Import 快照显示来源格式、Adapter 版本和三个阶段状态。规范�
 
 开放起点或终点不一定是错误。例如项目第一项任务通常没有前置关系，最后一项任务通常没有后续关系。应结合任务用途和 Issue 证据判断。
 
-### 5.4 能力边界
+### 5.4 计划内容
+
+快照详情中部展示来源计划事实，用于直接查看计划内容：
+
+- 任务表：WBS、任务名称、类型（汇总/活动/里程碑）、工期、计划开始、计划完成；任务按层级缩进，汇总行浅色背景加粗。
+- 轻量甘特图：按计划起止日期绘制的日历跨度条，周末灰显，汇总任务用浅色条、里程碑用菱形标记；长排期自动压缩列宽并支持横向滚动。
+
+甘特条表示计划日期的日历跨度，不按工作日历折算，也不代表 CPM 计算结果；重算或优化后的最早/最晚日期、浮时和关键标识请在“排期重算/工期目标优化”方案抽屉中查看。
+
+### 5.5 能力边界
 
 能力边界包括甘特展示、来源排期审查、CPM 重算、资源均衡和资源成本优化。
 
 测试 CPM 时只以“CPM 重算”的状态为准。资源能力被阻断不应影响当前 CPM 用例，也不能据此宣称资源能力已经实现。
 
-### 5.5 审查问题
+### 5.6 审查问题
 
 问题列表支持按严重等级和分类筛选。常用操作：
 
 - “AI 审查计划”：从当前快照进入整份计划对话，汇总 Capability、Issue 数量、主要类别、证据和建议处理顺序；
 - “证据”：查看规则来源、相关对象和直接上下游；
-- “确认关系”：仅在汇总依赖问题上进入关系确认工作台；
+- “确认关系”：在汇总依赖或 inactive 依赖问题上进入关系确认工作台；
 - “Agent 解释”：把已有审查事实带入具备 Schedule 工具的智能体，由智能体辅助解释。
 
 Agent 只能解释已有审查证据，不应代替用户接受方案，也不能自行发明日期、Patch 或业务结论；来源 Validation 和 ignored/unsupported 字段不能被描述成已参与 Yuxi 审查或计算。“AI 审查计划”要求智能体同时启用 `get_schedule_review_context`、`get_schedule_audit` 和 `get_schedule_issue_context`；单 Issue“Agent 解释”只要求后两个工具。
 
-### 5.6 排期重算
+### 5.7 排期重算
 
 “生成重算方案”会基于当前来源快照创建独立候选结果：
 
@@ -223,16 +265,20 @@ Agent 只能解释已有审查证据，不应代替用户接受方案，也不�
 - 不支持时显示阻断原因；
 - 来源任务和来源计算字段都不会变化。
 
-### 5.7 工期目标优化
+### 5.8 工期目标优化
 
 “工期目标优化”用于比较明确授权范围内的有限工期方案，不会让 AI 自由修改排期。第一版支持：
 
 - “在授权范围内尽早完工”；
 - “满足目标完成时间”。
 
-用户需要选择一个自动活动任务、填写业务已确认可实现的缩短后工期，并勾选明确授权；可选的 locked tasks 会保持日期不动。依赖、Lag、日历、里程碑和任务模式始终不变。当前页面一次授权一个任务，后端契约最多接受 10 个授权工期选项。
+用户可以添加 1–10 个 active、自动、未开始的活动任务，并为每个任务分别填写业务已确认可实现的缩短后工期，再勾选明确授权。已完成、进行中、已有实际进度事实、inactive、手工或工期不大于 1 分钟的任务不会出现在授权列表中。系统比较基线以及这些授权任务的全部有限组合，并按主要目标选择方案；授权任务不能重复，也不能同时设为 locked task。可选的 locked tasks 会保持日期不动，依赖、Lag、日历、里程碑和任务模式始终不变。
 
-成功时页面打开 Candidate，展示工期 Patch、来源/优化完成时间、比较方案数量、最早/最晚日期、浮时和关键任务。目标不可达时页面显示 `TARGET_FINISH_UNACHIEVABLE`，不会生成伪成功 Candidate。Candidate 生成后即可查看 Delivery；接受或拒绝只记录用户态度。
+成功时页面打开 Candidate，展示工期 Patch、完成时间、比较方案数量、最早/最晚日期、浮时和关键任务，并新增“方案对比”甘特。对比口径按方案类型区分：工期目标优化对比**引擎基线（未优化重算）与优化后**，排期重算对比**来源计划与重算结果**；每个任务两条条，日期有变化的任务深色描边，完成时刻用竖线标记。目标不可达时页面显示 `TARGET_FINISH_UNACHIEVABLE`，不会生成伪成功 Candidate。Candidate 生成后即可查看 Delivery；接受或拒绝只记录用户态度。
+
+注意：引擎重算日期与来源计划日期是两种计算口径（例如里程碑在来源中可能是瞬时点，引擎按工期重算后项目完成会整体后移），不能直接拿“来源计划完成”与“引擎优化完成”比较；优化是否有效应以同一口径的“基线完成”与“优化完成”对比为准。
+
+生成候选后，主页面“计划内容”卡片自动切换到“方案对比”模式（也可手动切换回“来源计划”），表格按方案类型追加基线/来源与优化/重算日期列，甘特叠加两条条，关掉抽屉也能直接看到优化效果。快照详情新增“已生成方案”卡片，列出当前快照的重算/优化候选（类型、有效状态、审阅态度、完成时间变化），刷新页面后可随时重新打开已生成方案。
 
 “让 AI 帮我梳理目标与授权”只生成未发送的“工期优化规划”草稿。Agent 可以协助逐项确认目标、目标时间、授权任务、授权后工期和 locked tasks，但不能替用户填写工期、创建 Candidate 或提交请求；最终操作必须回到排期页面完成。
 
@@ -267,6 +313,8 @@ Agent 只能解释已有审查证据，不应代替用户接受方案，也不�
 
 ### 6.3 任务结果表
 
+工期目标优化方案的审阅抽屉会尽量使用宽屏空间，减少任务结果表的横向滚动。表格以颜色和文字共同标识变化来源：绿色“工期已优化”表示该任务工期来自明确授权并被直接压缩；蓝色“日期联动调整”表示任务本身未被压缩，但开始或完成日期受到网络计算联动影响。直接优化任务同时发生日期变化时会同时显示两种标签。颜色只用于辅助扫读，判断时仍以标签、工期和日期字段为准。
+
 | 列 | 含义 | 推荐检查方式 |
 | --- | --- | --- |
 | 任务 | 任务名称、WBS、汇总/变化标识 | 先确认任务身份，再看日期 |
@@ -280,6 +328,7 @@ Agent 只能解释已有审查证据，不应代替用户接受方案，也不�
 标签说明：
 
 - “汇总”：该行来自直接子任务的日期和浮时投影，不参与依赖计算；
+- “非活动”：该行显示来源日期，`calculation_status=excluded_inactive`，不应被解释为引擎重算日期；
 - “日期有变化”：最早开始或完成与来源计划不同；
 - “关键”：当前 `total_slack_minutes <= 0`；
 - “非关键”：当前具有正总浮时。
@@ -349,6 +398,12 @@ Agent 只能解释已有审查证据，不应代替用户接受方案，也不�
 
 如果来源计划让汇总任务直接参与依赖，当前 CPM 会明确阻断，需先由业务人员确认并规范化为合适的叶子任务关系。
 
+### 7.7 非活动任务
+
+非活动任务用于保留来源计划事实，不代表可由 Yuxi 继续计算的活动。Profile v15 只把 active 活动任务和里程碑放入 CPM 图，汇总日期也只滚动 active 子项。页面对 inactive 行使用灰化、虚线样式并显示来源日期；它不会产生关键标识、浮时、资源占用或可压缩工期。
+
+如果来源依赖形成 `active → inactive → active`，系统不会猜测应把两端自动连成哪种关系。Dependency Workbench 会把触及同一 inactive 任务的来源边归为一个 Issue，用户必须明确选择 active 叶子前置和后置；Candidate 会同时移除已展示的来源边，再加入经确认的叶子关系。
+
 ## 8. 如何接受或拒绝方案
 
 ### 8.1 接受前检查清单
@@ -399,9 +454,11 @@ Candidate 生成后即可查看 Delivery，来源快照始终不变。点击“�
 
 | 现象 | 处理建议 |
 | --- | --- |
-| 负 Lag | 与计划人员确认能否改为明确任务或非负关系；否则作为后续能力需求 |
-| 多日历/日历例外 | 记录涉及任务和日历，不要把结果近似到统一日历 |
+| 负 Lag | 单日历按统一项目日历计算；v2.4 多/任务日历按后续任务有效日历计算，不要手工换算成自然日 |
+| 多/任务日历 | v2.4 明确项目默认、任务有效日历和 `SUCCESSOR_TASK_CALENDAR` 后可重算；字段缺失或互相矛盾时先修正来源 |
+| 日历例外/继承 | 支持停工、连续停工、补班和父子覆盖；未知父日历、继承环、无工作时间、范围冲突或时区不一致时先修正来源 |
 | 汇总依赖 | 使用“确认关系”明确应由哪些叶子任务替代 |
+| inactive 任务依赖 | 使用“确认关系”同时核对全部来源边，并选择 active 叶子关系；不要手工假定自动跨接 |
 | 实际进度 | 当前不要用重算方案替代进度更新和剩余工期分析 |
 | 非法约束组合 | 修正来源约束后提交新版本 |
 
@@ -421,10 +478,12 @@ Candidate 生成后即可查看 Delivery，来源快照始终不变。点击“�
 准备三类数据：
 
 1. **外部 Import 样例**：带已注册 `schema_version`，用于验证接入、规范化和边界展示；
-2. **受支持 CPM 样例**：统一项目日历、无负 Lag、无汇总依赖，用于验证完整重算和审阅流程；
+2. **受支持 CPM 样例**：统一项目日历、无汇总依赖，可包含已确认语义的负 Lag，用于验证完整重算和审阅流程；
 3. **明确阻断样例**：至少包含一种已知范围外输入，用于验证系统不会近似计算。
 
 业务验收必须使用已脱敏且任务名称可读的代表性业务快照。合成或工程演示样例可以验证页面和协议，但不能替代独立真实业务案例。
+
+仓库中的 `Yuxi_复杂排期测试套件_v1/*/input.json` 使用测试专用协议 `schedule_engine_test_input_v1`，不能直接在页面上传。需要验证页面时，先按 [15.7 将复杂套件导出后导入页面](#_15-7-将复杂套件导出后导入页面) 生成 Canonical JSON；需要验证完整 C01–C08 冻结结果时，运行 [15.6 C01–C08 冻结复杂套件](#_15-6-c01-c08-冻结复杂套件)。
 
 ### 10.3 测试环境检查
 
@@ -520,7 +579,7 @@ Candidate 生成后即可查看 Delivery，来源快照始终不变。点击“�
 
 ### UAT-11 验证范围外输入
 
-**前置条件**：准备包含负 Lag、多日历或汇总依赖的样例。
+**前置条件**：准备包含日历继承环、冲突例外、缺失有效日历或汇总依赖的样例。
 
 **步骤**：选择样例并点击“生成重算方案”。
 
@@ -589,11 +648,11 @@ Candidate 生成后即可查看 Delivery，来源快照始终不变。点击“�
 
 ### UAT-18 验证工期目标优化成功路径
 
-**前置条件**：选择 CPM 允许的 Snapshot；至少一个自动活动任务已取得明确的工期压缩授权。
+**前置条件**：选择 CPM 允许的 Snapshot；至少两个 active、自动、未开始的活动任务已取得明确的工期压缩授权。
 
-**步骤**：点击“工期目标优化”，选择“在授权范围内尽早完工”，选择授权任务并填写短于来源的工作分钟，勾选授权确认后生成 Candidate；核对工期 Patch、来源/优化完成时间、比较方案数量和任务日期结果；在未接受 Candidate 前查看 Delivery。
+**步骤**：点击“工期目标优化”，选择“在授权范围内尽早完工”，添加两个授权任务并分别填写短于来源的工作分钟，确认同一任务不能重复选择；勾选授权确认后生成 Candidate；核对工期 Patch、基线/优化完成时间、比较方案数量和任务日期结果；在未接受 Candidate 前查看 Delivery。
 
-**预期结果**：Candidate 为 `goal_duration_optimization` 且技术状态有效；只修改被授权任务的工期，依赖、Lag、日历、里程碑和任务模式不变；来源 Snapshot 内容哈希不变；Delivery 可读取且用户态度为 `not_reviewed`。
+**预期结果**：Candidate 为 `goal_duration_optimization` 且技术状态有效；系统评估基线和全部授权组合，选择结果符合目标排序；只修改被选中策略中的授权任务工期，依赖、Lag、日历、里程碑和任务模式不变；来源 Snapshot 内容哈希不变；Delivery 可读取且用户态度为 `not_reviewed`。
 
 ### UAT-19 验证目标不可达与 Agent 边界
 
@@ -602,6 +661,38 @@ Candidate 生成后即可查看 Delivery，来源快照始终不变。点击“�
 **步骤**：选择“满足目标完成时间”，填写早于所有授权组合可达到时间的目标并提交；随后点击“让 AI 帮我梳理目标与授权”，选择智能体，检查标题和输入框但不要发送。
 
 **预期结果**：页面显示 `TARGET_FINISH_UNACHIEVABLE` 和最佳可达策略，不生成 Candidate；Agent 页面标题为“工期优化规划”，草稿包含 Snapshot ID、内容哈希、目标与授权确认项和回排期页面提交要求，没有自动发送，也不会创建 Candidate。
+
+### UAT-20 验证已有进度任务不可授权压缩
+
+**前置条件**：使用包含 NOT_STARTED、IN_PROGRESS 和 COMPLETED 活动任务的 Canonical v2.6 或更新快照。
+
+**步骤**：打开“工期目标优化”，搜索三种状态的任务；记录可选任务列表。
+
+**预期结果**：只有 active、自动、NOT_STARTED 且工期大于 1 分钟的活动任务可选；IN_PROGRESS、COMPLETED 和 inactive 任务不出现。通过接口绕过前端提交这些任务时，后端分别返回稳定 blocker，不生成 Candidate。
+
+### UAT-21 验证多条来源依赖参数重新确认
+
+**前置条件**：准备一个 `active → inactive → active` 问题，并让两条来源边的关系类型或 Lag 至少一项不同。
+
+**步骤**：在问题列表点击“确认关系”，核对全部来源边；选择上游和下游 active 叶子任务；观察关系类型和 Lag 初始值；填写参数和理由并确认。
+
+**预期结果**：页面展示全部来源边和“参数不一致”提示；关系类型和 Lag 不从第一条边自动继承，必须重新填写；inactive 任务不出现在候选叶子列表。生成 Candidate 后，全部目标来源边被删除，只新增用户明确确认的叶子关系。
+
+### UAT-22 验证 inactive 与汇总任务展示
+
+**前置条件**：使用 Canonical v2.8 / Profile v15，包含 inactive 活动、汇总任务和至少一个 active 子任务。
+
+**步骤**：查看来源任务表、甘特和重算 Candidate；核对 inactive 行、汇总日期、关键标识、浮时、资源和工期优化选项。
+
+**预期结果**：inactive 行灰化并使用虚线甘特，保留来源日期且显示“不参与重算”；没有最晚日期、浮时、关键标识、资源占用或工期授权选项。汇总任务只滚动 active 后代。
+
+### UAT-23 验证甘特空值和时间对齐
+
+**前置条件**：分别准备完整 Candidate、缺少单个任务 before/optimized 日期的展示数据，以及跨时区但日期部分相同的 ISO 时间。
+
+**步骤**：打开来源甘特和方案对比甘特，横向滚动并对照表格日期；切换 Candidate 和快照。
+
+**预期结果**：缺少完整日期的行被安全跳过，页面不白屏且控制台没有 `Cannot read properties of undefined`；同一日历日期落在同一列，周末背景与表头对齐，里程碑显示为菱形。
 
 ## 12. 反馈记录模板
 
@@ -715,11 +806,11 @@ Delivery 是供后续业务流程读取的交付内容，包含方案、版本�
 
 ### 14.11 来源 JSON 可以包含额外字段吗？
 
-可以。外部 Import 文档允许未知字段并保存在私有来源对象中，但未知字段不会自动参与 Audit 或 CPM。已定义核心字段缺失或类型错误仍会被拒绝。内部 `canonical_schedule_v2.2` 继续保持严格。
+可以。外部 Import 文档允许未知字段并保存在私有来源对象中，但未知字段不会自动参与 Audit 或 CPM。已定义核心字段缺失或类型错误仍会被拒绝。内部 `canonical_schedule_v2.2` 至 `canonical_schedule_v2.8` 都保持严格。
 
 ### 14.12 可以计算资源冲突和成本吗？
 
-当前不可以。资源均衡、成本优化和多项目统筹仍在本功能范围之外。
+可以，但必须直接提交强类型 Canonical v2.7，并提供可追溯的 Resource、Assignment、units、max units 和标准小时费率。系统会在 CPM 之后检测超配区间，并按 `duration_minutes × units / 60 × standard_rate_per_hour` 输出 Assignment 成本数值。当前契约没有币种字段，因此不显示或猜测币种；自动资源均衡、资源成本优化和多项目统筹仍不支持。
 
 ### 14.13 可以把结果写回 MPP 吗？
 
@@ -735,13 +826,153 @@ Yuxi 当前不写回 MPP。需要回写时，由外部业务系统或独立转�
 
 ### 14.16 工期目标优化会修改哪些内容？
 
-只会在 Candidate 副本中缩短用户明确授权的自动活动任务工期。依赖、Lag、日历、里程碑、任务模式和来源 Snapshot 都不会被修改；资源与成本也不在当前范围内。
+只会在 Candidate 副本中缩短用户明确授权的自动活动任务工期。依赖、Lag、日历、里程碑、任务模式和来源 Snapshot 都不会被修改。若来源为 v2.7，Candidate 会重新分析授权工期组合对应的资源冲突和成本，但不会自动调整 Assignment 或执行资源均衡。
 
 ### 14.17 为什么目标不可达时没有 Candidate？
 
 这表示全部有限授权组合都无法满足目标。系统返回 blocker 和最佳可达策略供用户调整目标或重新取得业务授权，不会把未满足目标的结果包装成成功 Candidate。
 
-## 15. 测试完成报告模板
+## 15. 自动化测试执行
+
+以下命令默认从仓库根目录开始，并遵循“检查 → 测试 → Lint → Build”的顺序。首次执行前先运行 `scripts/split-deploy/Install-HostDevDependencies.ps1`，确保 `backend/.venv` 和前端依赖已安装。本地开发采用宿主机 API/Worker/Web 加 Docker Provisioner，完整启动方式见[本地开发指南](../develop-guides/local-development.md)。
+
+### 15.1 环境健康检查
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:5050/api/system/health
+Invoke-WebRequest -UseBasicParsing http://127.0.0.1:5173
+Invoke-RestMethod http://127.0.0.1:8002/health
+```
+
+预期：三个命令均成功。Schedule 核心导入、Audit 和 CPM 不依赖 Sandbox Runtime；只有 Agent/Sandbox 工具链路需要按需 Runtime。Worker 没有独立健康接口，需要检查启动终端并执行 E2E。
+
+### 15.2 Schedule 单元测试
+
+```powershell
+Set-Location backend
+.\.venv\Scripts\python.exe -m pytest test/unit/schedule
+```
+
+预期：全部通过，无 failed/error。若 Windows 测试账号无法访问系统临时目录，可使用工作区内的专用临时目录：
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest test/unit/schedule --basetemp=.test-tmp/schedule-unit
+```
+
+单元测试覆盖契约、预检、Audit、CPM、Workbench、Candidate、Goal Optimizer、Delivery、复杂套件和 Oracle。不要用单元测试通过替代真实 API 或浏览器验收。
+
+### 15.3 Schedule API 集成测试
+
+先按本地开发指南确认 API、PostgreSQL 和 MinIO 可用，然后执行：
+
+```powershell
+Set-Location backend
+.\.venv\Scripts\python.exe -m pytest test/integration/api/test_schedule_router.py
+```
+
+预期：Snapshot、Import、Audit、Candidate、Decision、Delivery、Source 不可变、用户隔离及 v2.8 Workbench 主路径全部通过。集成测试会创建测试数据，只能连接开发/测试基础设施。
+
+### 15.4 Schedule Agent E2E
+
+```powershell
+Set-Location backend
+.\.venv\Scripts\python.exe -m pytest test/e2e/test_schedule_audit_agent_e2e.py -m e2e
+```
+
+预期：Run 被 Worker 消费并进入终态，工具读取同一 Snapshot，测试结束后清理创建的测试资源。Run 长时间停在 `pending` 时先检查 Worker 和 Redis，不要把它记为 Schedule 算法失败。
+
+### 15.5 前端回归、Lint 与构建
+
+```powershell
+Set-Location web
+node --test src/utils/__tests__/scheduleImport.test.js src/utils/__tests__/scheduleGantt.test.js src/utils/__tests__/scheduleReview.test.js
+pnpm exec eslint src/views/ScheduleView.vue src/components/schedule/ScheduleComparisonGantt.vue src/utils/scheduleGantt.js src/utils/scheduleReview.js
+pnpm build
+```
+
+返回仓库根目录后构建文档：
+
+```powershell
+Set-Location ..\docs
+pnpm build
+```
+
+预期：测试、ESLint 和两个 Build 均以退出码 0 完成。依赖注解、大分包或其他既有警告应单独记录；新增排期 warning/error、白屏或控制台异常不能按通过处理。
+
+### 15.6 C01–C08 冻结复杂套件
+
+先验证测试包本身没有被修改：
+
+```powershell
+Set-Location backend
+.\.venv\Scripts\python.exe ..\Yuxi_复杂排期测试套件_v1\verify_package.py
+```
+
+运行全部案例，并把实际结果写到测试包外：
+
+```powershell
+$scheduleActualRoot = Join-Path $PWD 'tmp/schedule-suite-actual'
+.\.venv\Scripts\python.exe scripts/run_schedule_complex_suite.py `
+  --suite-root ..\Yuxi_复杂排期测试套件_v1 `
+  --actual-root $scheduleActualRoot
+.\.venv\Scripts\python.exe ..\Yuxi_复杂排期测试套件_v1\verify_suite.py `
+  --suite-root ..\Yuxi_复杂排期测试套件_v1 `
+  --actual-root $scheduleActualRoot
+```
+
+预期：Package PASS，C01–C08 全部 PASS。C04/C06 的 `SUCCEEDED_WITH_ISSUES` 和 C07 的 `VALIDATION_FAILED` 是冻结业务预期，不等于测试失败。禁止修改 `expected.json` 或向测试包内部写 actual 来掩盖回归。
+
+### 15.7 将复杂套件导出后导入页面
+
+测试套件的原始 `input.json` 不能直接上传。它属于冻结的引擎测试协议，不是生产 Import 协议。执行下面的测试专用转换命令，把可成功规范化的案例输出到测试包外：
+
+```powershell
+Set-Location backend
+$scheduleImportRoot = Join-Path $PWD 'tmp/schedule-ui-import'
+.\.venv\Scripts\python.exe scripts/export_schedule_suite_canonical.py `
+  --suite-root ..\Yuxi_复杂排期测试套件_v1 `
+  --output-root $scheduleImportRoot
+```
+
+预期生成 7 个文件：C01–C06 和 C08。导出器会先把 Engine Actual 与冻结 `expected.json` 的结果契约完全比较；`expected.json` 只做 Oracle 门禁，不参与日期生成。C01–C06 的日期来自已通过门禁的 Engine Result，提取方式为 `YUXI_TEST_SUITE_ENGINE_REFERENCE`；C08 保留 Microsoft Project Observation，不被 Engine 结果覆盖。C07 是故意包含重复 ID、无效引用、环路和非法里程碑的防御性案例，预期为 `VALIDATION_FAILED`；`UNSUPPORTED`、缺失计算结果和 `ORACLE_MISMATCH` 同样明确 `SKIPPED`，不会生成伪造的成功快照。投影后会重新计算 statistics、Capability 和日期相关 Validation，输出仍必须位于冻结 Suite 根目录之外。若只导出单个案例，可增加：
+
+```powershell
+--case-id C05_BASELINE_PROGRESS
+```
+
+然后在页面中逐个导入：
+
+1. 登录 Yuxi，进入“排期审查”；
+2. 点击“导入排期”；
+3. 从 `backend\tmp\schedule-ui-import` 选择一个 `*.canonical.json`；
+4. 核对自动识别的 Schema、项目 ID、快照 ID 和版本；
+5. 点击“校验并导入”，成功后进入新快照执行 Audit、CPM 重算和 Candidate 审阅。
+
+这条路径用于验证页面与正式 Snapshot API。进入产品链路后执行的是正式 Yuxi Audit；它不会沿用冻结套件的 `suite_issue_profile_v1` 投影，所以页面 Issue 数量和文案不要求与 `expected.json` 完全相同。冻结结果的严格比对应继续使用 15.6 的 Runner。
+
+### 15.8 v2.8 Microsoft Project Oracle
+
+```powershell
+Set-Location backend
+.\.venv\Scripts\python.exe scripts/verify_ms_project_v28_oracle.py
+```
+
+预期：输出 `PASSED` 且 errors 为空。该命令验证已经冻结的两次 Microsoft Project 观测；它不会在当前机器上重新启动 Project 或重新采集 COM 数据。
+
+### 15.9 提交前检查表
+
+- [ ] 相关单元测试通过；
+- [ ] 涉及接口时 API 集成测试通过；
+- [ ] 涉及 Agent/Worker 时 E2E 通过；
+- [ ] C01–C08 和相关 Oracle 通过；
+- [ ] 前端排期测试、ESLint、Web Build 通过；
+- [ ] 正式文档修改后 Docs Build 通过；
+- [ ] `git diff --check` 没有错误；
+- [ ] 浏览器执行本次涉及的 UAT，并保存脱敏证据；
+- [ ] Source 哈希不变，Candidate/Delivery 版本门禁正确；
+- [ ] 没有把 `PRODUCTION_NO_GO` 误写成生产可用。
+
+## 16. 测试完成报告模板
 
 ```text
 测试批次：
@@ -773,7 +1004,7 @@ P2：__
 下一轮计划：
 ```
 
-## 16. 安全与发布边界
+## 17. 安全与发布边界
 
 - 不在截图、反馈、测试数据或日志中保存密码、Token、API Key；
 - 不在页面、普通用户响应或日志中展示外部来源未知字段值和私有对象路径；

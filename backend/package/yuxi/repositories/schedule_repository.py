@@ -404,6 +404,34 @@ class ScheduleRepository:
                 )
             )
 
+    async def list_candidates(
+        self, owner_uid: str, base_schedule_snapshot_id: str
+    ) -> list[ScheduleCandidateRecord]:
+        async with self._session_factory() as session:
+            result = await session.scalars(
+                select(ScheduleCandidateRecord)
+                .where(
+                    ScheduleCandidateRecord.owner_uid == owner_uid,
+                    ScheduleCandidateRecord.base_schedule_snapshot_id == base_schedule_snapshot_id,
+                )
+                .order_by(ScheduleCandidateRecord.created_at.desc())
+            )
+            return list(result)
+
+    async def list_candidate_decisions(
+        self, owner_uid: str, candidate_snapshot_ids: list[str]
+    ) -> list[ScheduleCandidateDecisionRecord]:
+        if not candidate_snapshot_ids:
+            return []
+        async with self._session_factory() as session:
+            result = await session.scalars(
+                select(ScheduleCandidateDecisionRecord).where(
+                    ScheduleCandidateDecisionRecord.owner_uid == owner_uid,
+                    ScheduleCandidateDecisionRecord.candidate_snapshot_id.in_(candidate_snapshot_ids),
+                )
+            )
+            return list(result)
+
     async def get_candidate_by_optimization(
         self, owner_uid: str, optimization_id: str
     ) -> ScheduleCandidateRecord | None:

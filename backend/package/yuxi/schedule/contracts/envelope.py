@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .canonical_v2_2 import CanonicalScheduleV22
+from .canonical import CanonicalSchedule
 
 
 class ScheduleSnapshotSubmission(BaseModel):
@@ -12,4 +12,4 @@ class ScheduleSnapshotSubmission(BaseModel):
     external_project_id: str = Field(min_length=1, max_length=256)
     external_snapshot_id: str = Field(min_length=1, max_length=256)
     external_revision: str = Field(min_length=1, max_length=256)
-    snapshot: CanonicalScheduleV22
+    snapshot: CanonicalSchedule

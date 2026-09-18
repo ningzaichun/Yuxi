@@ -11,9 +11,11 @@ from server.utils.auth_middleware import get_required_user
 from yuxi.schedule.contracts.envelope import ScheduleSnapshotSubmission
 from yuxi.schedule.contracts.dependency_decision import DependencyDecisionDraft
 from yuxi.schedule.contracts.errors import (
+    preflight_issues_to_schedule_detail,
     validation_error_to_schedule_detail,
     validation_error_to_schedule_import_detail,
 )
+from yuxi.schedule.preflight import preflight_schedule_input
 from yuxi.schedule.contracts.import_v1 import ScheduleImportEnvelope
 from yuxi.schedule.contracts.optimization import (
     CandidateDecisionRequest,
@@ -58,12 +60,19 @@ async def submit_snapshot(
     if len(raw_body) > MAX_BODY_BYTES:
         raise _error(413, "SCHEDULE_BODY_TOO_LARGE", "排期请求正文超过 10 MiB 限制")
     try:
-        submission = ScheduleSnapshotSubmission.model_validate_json(raw_body)
-    except (ValidationError, json.JSONDecodeError) as exc:
-        if isinstance(exc, ValidationError):
-            detail = validation_error_to_schedule_detail(exc).model_dump(mode="json")
-            raise HTTPException(status_code=422, detail=detail) from exc
+        payload = json.loads(raw_body)
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
         raise _error(422, "SCHEDULE_CONTRACT_INVALID", "排期数据不是有效 JSON") from exc
+    if isinstance(payload, dict) and isinstance(payload.get("snapshot"), dict):
+        preflight_issues = preflight_schedule_input(payload["snapshot"])
+        if preflight_issues:
+            detail = preflight_issues_to_schedule_detail(preflight_issues).model_dump(mode="json")
+            raise HTTPException(status_code=422, detail=detail)
+    try:
+        submission = ScheduleSnapshotSubmission.model_validate(payload)
+    except ValidationError as exc:
+        detail = validation_error_to_schedule_detail(exc).model_dump(mode="json")
+        raise HTTPException(status_code=422, detail=detail) from exc
     try:
         result = await schedule_service.submit(str(current_user.uid), submission)
     except ScheduleConflictError as exc:
@@ -262,6 +271,11 @@ async def create_goal_optimization(
         raise _error(500, "SCHEDULE_OPTIMIZATION_FAILURE", "工期目标优化执行失败") from exc
     response.status_code = 201 if created else 200
     return candidate
+
+
+@schedule_router.get("/snapshots/{snapshot_id}/candidates")
+async def list_candidates(snapshot_id: str, current_user: User = Depends(get_required_user)):
+    return await optimization_service.list_candidates(str(current_user.uid), snapshot_id)
 
 
 @schedule_router.get("/candidates/{candidate_snapshot_id}")

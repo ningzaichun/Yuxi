@@ -6,6 +6,8 @@ import pytest
 from pydantic import ValidationError
 
 from yuxi.schedule.contracts.canonical_v2_2 import CanonicalScheduleV22
+from yuxi.schedule.contracts.canonical import parse_canonical_schedule
+from yuxi.schedule.contracts.canonical_v2_8 import CanonicalScheduleV28
 from yuxi.schedule.contracts.envelope import ScheduleSnapshotSubmission
 from yuxi.schedule.contracts.errors import validation_error_to_schedule_detail
 
@@ -84,12 +86,112 @@ def test_contract_rejects_unfrozen_lag_policy(canonical_schedule_payload: dict) 
         CanonicalScheduleV22.model_validate(payload)
 
 
+def test_contract_accepts_frozen_lag_policy(canonical_schedule_payload: dict) -> None:
+    payload = copy.deepcopy(canonical_schedule_payload)
+    payload["semantics"]["lag_calendar_policy"] = "UNIFIED_PROJECT_CALENDAR_WORKING_MINUTES"
+    payload["dependencies"][0]["lag_calendar_policy"] = "UNIFIED_PROJECT_CALENDAR_WORKING_MINUTES"
+
+    schedule = CanonicalScheduleV22.model_validate(payload)
+
+    assert schedule.semantics.lag_calendar_policy == "UNIFIED_PROJECT_CALENDAR_WORKING_MINUTES"
+    assert schedule.dependencies[0].lag_calendar_policy == "UNIFIED_PROJECT_CALENDAR_WORKING_MINUTES"
+
+
 def test_contract_enforces_task_collection_limit(canonical_schedule_payload: dict) -> None:
     payload = copy.deepcopy(canonical_schedule_payload)
     payload["tasks"] = [copy.deepcopy(payload["tasks"][0]) for _ in range(5_001)]
 
     with pytest.raises(ValidationError, match="at most 5000 items"):
         CanonicalScheduleV22.model_validate(payload)
+
+
+def _v28_payload(canonical_schedule_payload: dict) -> dict:
+    payload = copy.deepcopy(canonical_schedule_payload)
+    payload["schema_version"] = "canonical_schedule_v2.8"
+    payload["resources"] = []
+    payload["assignments"] = []
+    return payload
+
+
+def test_v28_accepts_inactive_task_without_progress_facts(
+    canonical_schedule_payload: dict,
+) -> None:
+    payload = _v28_payload(canonical_schedule_payload)
+    task = next(item for item in payload["tasks"] if item["task_type"] == "activity")
+    task.update(
+        {
+            "active": False,
+            "percent_complete": 0,
+            "actual_start": None,
+            "actual_finish": None,
+        }
+    )
+
+    schedule = parse_canonical_schedule(payload)
+
+    assert isinstance(schedule, CanonicalScheduleV28)
+    assert next(item for item in schedule.tasks if item.task_id == task["task_id"]).active is False
+
+
+@pytest.mark.parametrize(
+    "progress_update",
+    [
+        {"percent_complete": 10},
+        {"actual_start": "2028-01-01T08:00:00+08:00"},
+        {"actual_finish": "2028-01-01T17:00:00+08:00"},
+    ],
+)
+def test_v28_rejects_inactive_task_with_progress_facts(
+    canonical_schedule_payload: dict,
+    progress_update: dict,
+) -> None:
+    payload = _v28_payload(canonical_schedule_payload)
+    payload["tasks"][0].update(
+        {
+            "active": False,
+            "percent_complete": 0,
+            "actual_start": None,
+            "actual_finish": None,
+            **progress_update,
+        }
+    )
+
+    with pytest.raises(ValidationError, match="cannot carry actual or progress facts"):
+        CanonicalScheduleV28.model_validate(payload)
+
+
+def test_v28_rejects_assignment_to_inactive_task(
+    canonical_schedule_payload: dict,
+) -> None:
+    payload = _v28_payload(canonical_schedule_payload)
+    task = next(item for item in payload["tasks"] if item["task_type"] == "activity")
+    task.update(
+        {
+            "active": False,
+            "percent_complete": 0,
+            "actual_start": None,
+            "actual_finish": None,
+        }
+    )
+    payload["resources"] = [
+        {
+            **canonical_schedule_payload["resources"][0],
+            "resource_type": "WORK",
+            "max_units": "1",
+            "standard_rate_per_hour": "100",
+        }
+    ]
+    payload["assignments"] = [
+        {
+            "assignment_id": "assignment:inactive",
+            "task_id": task["task_id"],
+            "resource_id": payload["resources"][0]["resource_id"],
+            "units": "1",
+        }
+    ]
+
+    with pytest.raises(ValidationError, match="cannot reference an inactive task"):
+        CanonicalScheduleV28.model_validate(payload)
 
 
 def test_envelope_validation_error_uses_json_pointer_without_input_value(canonical_schedule_payload: dict) -> None:

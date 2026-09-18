@@ -11,16 +11,18 @@ from typing import Any
 
 from yuxi.repositories.schedule_repository import ScheduleRepository
 from yuxi.schedule.audit.engine import audit_schedule
-from yuxi.schedule.contracts.canonical_v2_2 import MAX_DEPENDENCIES, CanonicalScheduleV22
+from yuxi.schedule.contracts.canonical import parse_canonical_schedule
+from yuxi.schedule.contracts.canonical_v2_2 import MAX_DEPENDENCIES
 from yuxi.schedule.contracts.optimization import (
     CandidateDecisionRequest,
     DependencyOptimizationRequest,
     ForwardRecalculationRequest,
     GoalOptimizationRequest,
 )
-from yuxi.schedule.forward_engine import REVERSE_FLOAT_ENGINE_PROFILE_ID, calculate_minimal_forward_schedule
+from yuxi.schedule.delivery_adapter import delivery_application_blocking_reasons
+from yuxi.schedule.forward_engine import calculate_minimal_forward_schedule, recalculation_profile_for
 from yuxi.schedule.goal_optimizer import optimize_project_finish
-from yuxi.schedule.importers.canonical_v2_2 import import_canonical_schedule_v2_2
+from yuxi.schedule.importers import import_canonical_schedule
 from yuxi.schedule.storage import SCHEDULE_BUCKET, ScheduleSnapshotStore
 
 CANDIDATE_SCHEMA_VERSION = "schedule_candidate_draft_v0"
@@ -31,6 +33,10 @@ STRATEGY_ID = "replace-summary-dependency-v1"
 FORWARD_STRATEGY_ID = "recalculate-automatic-downstream-v1"
 GOAL_STRATEGY_ID = "authorized-duration-goal-v1"
 SOURCE_TYPE_CODES = {"FF": 0, "FS": 1, "SF": 2, "SS": 3}
+DEPENDENCY_DECISION_RULE_IDS = {
+    "SUMMARY_TASK_DEPENDENCY",
+    "INACTIVE_TASK_DEPENDENCY",
+}
 
 
 class ScheduleOptimizationNotFoundError(Exception):
@@ -85,7 +91,7 @@ class ScheduleOptimizationService:
             raise ScheduleOptimizationConflictError
 
         issue = await self._repository.get_issue(owner_uid, decision.issue_id)
-        if issue is None or issue.rule_id != "SUMMARY_TASK_DEPENDENCY":
+        if issue is None or issue.rule_id not in DEPENDENCY_DECISION_RULE_IDS:
             raise ScheduleOptimizationInvalidError
 
         optimization_id = uuid.uuid4().hex
@@ -129,9 +135,9 @@ class ScheduleOptimizationService:
             candidate_schedule, requested_patch, effective_patch, added_dependency_ids = _apply_decision(
                 source, issue, decision, candidate_snapshot_id
             )
-            contract = CanonicalScheduleV22.model_validate(candidate_schedule)
+            contract = parse_canonical_schedule(candidate_schedule)
             projection = audit_schedule(
-                import_canonical_schedule_v2_2(contract),
+                import_canonical_schedule(contract),
                 schedule_snapshot_id=candidate_snapshot_id,
                 audit_run_id=uuid.uuid4().hex,
             )
@@ -139,9 +145,9 @@ class ScheduleOptimizationService:
             candidate_schedule["capabilities"] = {
                 name: capability.model_dump(mode="json") for name, capability in projection.result.capabilities.items()
             }
-            contract = CanonicalScheduleV22.model_validate(candidate_schedule)
+            contract = parse_canonical_schedule(candidate_schedule)
             execution = audit_schedule(
-                import_canonical_schedule_v2_2(contract),
+                import_canonical_schedule(contract),
                 schedule_snapshot_id=candidate_snapshot_id,
                 audit_run_id=uuid.uuid4().hex,
             )
@@ -151,9 +157,10 @@ class ScheduleOptimizationService:
             comparison, candidate_status = _compare_audits(
                 base_issues,
                 execution.findings,
-                target_dependency_id=issue.object_refs[0],
+                target_dependency_ids=set(issue.object_refs),
                 added_dependency_ids=added_dependency_ids,
             )
+            provenance = _candidate_provenance(base, contract.schema_version, None, None)
             candidate_document = {
                 "candidate_schema_version": CANDIDATE_SCHEMA_VERSION,
                 "candidate_snapshot_id": candidate_snapshot_id,
@@ -165,6 +172,7 @@ class ScheduleOptimizationService:
                 "effective_patch": effective_patch,
                 "engine_profile_id": None,
                 "engine_version": None,
+                **provenance,
                 "candidate_kind": CANDIDATE_KIND,
                 "candidate_status": candidate_status,
                 "comparison": comparison,
@@ -189,6 +197,7 @@ class ScheduleOptimizationService:
                     "dependency_decision_id": decision.decision_id,
                     "base_schedule_snapshot_id": snapshot_id,
                     "candidate_schema_version": CANDIDATE_SCHEMA_VERSION,
+                    **provenance,
                     "candidate_kind": CANDIDATE_KIND,
                     "candidate_status": candidate_status,
                     "minio_bucket": SCHEDULE_BUCKET,
@@ -223,11 +232,11 @@ class ScheduleOptimizationService:
 
         try:
             source = json.loads((await self._store.download(base.minio_object)).decode("utf-8"))
-            contract = CanonicalScheduleV22.model_validate(source)
+            contract = parse_canonical_schedule(source)
             engine_result = calculate_minimal_forward_schedule(
                 contract,
                 locked_task_ids=set(request.locked_task_ids),
-                engine_profile_id=REVERSE_FLOAT_ENGINE_PROFILE_ID,
+                engine_profile_id=recalculation_profile_for(contract),
             )
         except Exception as exc:
             raise ScheduleOptimizationDependencyError from exc
@@ -296,6 +305,13 @@ class ScheduleOptimizationService:
                 if item["start_changed"] or item["finish_changed"]
             ]
         }
+        candidate_audit = _engine_candidate_audit(engine_result)
+        provenance = _candidate_provenance(
+            base,
+            contract.schema_version,
+            engine_result["engine_profile_id"],
+            engine_result["engine_version"],
+        )
         candidate_document = {
             "candidate_schema_version": CANDIDATE_SCHEMA_VERSION,
             "candidate_snapshot_id": candidate_snapshot_id,
@@ -307,6 +323,7 @@ class ScheduleOptimizationService:
             "effective_patch": effective_patch,
             "engine_profile_id": engine_result["engine_profile_id"],
             "engine_version": engine_result["engine_version"],
+            **provenance,
             "candidate_kind": FORWARD_CANDIDATE_KIND,
             "candidate_status": "valid" if engine_result["status"] == "calculated" else "invalid",
             "comparison": {
@@ -314,7 +331,7 @@ class ScheduleOptimizationService:
                 "finish_before": engine_result["finish_before"],
                 "finish_after": engine_result["finish_after"],
             },
-            "candidate_audit": {},
+            "candidate_audit": candidate_audit,
         }
         try:
             await self._store.upload(
@@ -336,13 +353,14 @@ class ScheduleOptimizationService:
                     "dependency_decision_id": None,
                     "base_schedule_snapshot_id": snapshot_id,
                     "candidate_schema_version": CANDIDATE_SCHEMA_VERSION,
+                    **provenance,
                     "candidate_kind": FORWARD_CANDIDATE_KIND,
                     "candidate_status": "valid" if engine_result["status"] == "calculated" else "invalid",
                     "minio_bucket": SCHEDULE_BUCKET,
                     "minio_object": object_name,
                     "effective_patch": effective_patch,
                     "comparison": candidate_document["comparison"],
-                    "candidate_audit": {},
+                    "candidate_audit": candidate_audit,
                 },
             )
         except Exception as exc:
@@ -367,7 +385,7 @@ class ScheduleOptimizationService:
 
         try:
             source = json.loads((await self._store.download(base.minio_object)).decode("utf-8"))
-            contract = CanonicalScheduleV22.model_validate(source)
+            contract = parse_canonical_schedule(source)
             engine_result = optimize_project_finish(contract, request)
         except Exception as exc:
             raise ScheduleOptimizationDependencyError from exc
@@ -425,9 +443,9 @@ class ScheduleOptimizationService:
             candidate_tasks = {task["task_id"]: task for task in candidate_schedule["tasks"]}
             for change in duration_changes:
                 candidate_tasks[change["task_id"]]["duration_minutes"] = change["after_duration_minutes"]
-            candidate_contract = CanonicalScheduleV22.model_validate(candidate_schedule)
+            candidate_contract = parse_canonical_schedule(candidate_schedule)
             audit = audit_schedule(
-                import_canonical_schedule_v2_2(candidate_contract),
+                import_canonical_schedule(candidate_contract),
                 schedule_snapshot_id=candidate_snapshot_id,
                 audit_run_id=uuid.uuid4().hex,
             )
@@ -449,6 +467,13 @@ class ScheduleOptimizationService:
                 "total_reduction_minutes": selected["total_reduction_minutes"],
                 "new_blockers": new_blockers,
             }
+            selected_engine = selected["engine_result"]
+            provenance = _candidate_provenance(
+                base,
+                candidate_contract.schema_version,
+                selected_engine["engine_profile_id"],
+                selected_engine["engine_version"],
+            )
             candidate_document = {
                 "candidate_schema_version": CANDIDATE_SCHEMA_VERSION,
                 "candidate_snapshot_id": candidate_snapshot_id,
@@ -458,8 +483,11 @@ class ScheduleOptimizationService:
                 "engine_result": engine_result,
                 "requested_patch": requested_patch,
                 "effective_patch": effective_patch,
-                "engine_profile_id": engine_result["optimizer_profile_id"],
-                "engine_version": engine_result["optimizer_version"],
+                "engine_profile_id": selected_engine["engine_profile_id"],
+                "engine_version": selected_engine["engine_version"],
+                "optimizer_profile_id": engine_result["optimizer_profile_id"],
+                "optimizer_version": engine_result["optimizer_version"],
+                **provenance,
                 "candidate_kind": GOAL_CANDIDATE_KIND,
                 "candidate_status": candidate_status,
                 "comparison": comparison,
@@ -529,6 +557,7 @@ class ScheduleOptimizationService:
                     "dependency_decision_id": None,
                     "base_schedule_snapshot_id": snapshot_id,
                     "candidate_schema_version": CANDIDATE_SCHEMA_VERSION,
+                    **provenance,
                     "candidate_kind": GOAL_CANDIDATE_KIND,
                     "candidate_status": candidate_status,
                     "minio_bucket": SCHEDULE_BUCKET,
@@ -565,6 +594,32 @@ class ScheduleOptimizationService:
             raise ScheduleOptimizationNotFoundError
         return await self._candidate_response(owner_uid, candidate)
 
+    async def list_candidates(self, owner_uid: str, snapshot_id: str) -> dict[str, Any]:
+        records = await self._repository.list_candidates(owner_uid, snapshot_id)
+        decisions = await self._repository.list_candidate_decisions(
+            owner_uid, [record.candidate_snapshot_id for record in records]
+        )
+        attitude_by_id = {item.candidate_snapshot_id: item.attitude for item in decisions}
+        return {
+            "items": [
+                {
+                    "candidate_snapshot_id": record.candidate_snapshot_id,
+                    "candidate_kind": record.candidate_kind,
+                    "candidate_status": record.candidate_status,
+                    "base_schedule_snapshot_id": record.base_schedule_snapshot_id,
+                    "canonical_schema_version": getattr(record, "canonical_schema_version", None),
+                    "adapter_id": getattr(record, "adapter_id", None),
+                    "adapter_version": getattr(record, "adapter_version", None),
+                    "engine_profile_id": getattr(record, "engine_profile_id", None),
+                    "engine_version": getattr(record, "engine_version", None),
+                    "comparison": record.comparison,
+                    "user_attitude": attitude_by_id.get(record.candidate_snapshot_id, "not_reviewed"),
+                    "created_at": record.created_at,
+                }
+                for record in records
+            ]
+        }
+
     async def record_decision(
         self,
         owner_uid: str,
@@ -591,12 +646,16 @@ class ScheduleOptimizationService:
             reasons.append("CANDIDATE_NOT_VALID")
         if candidate["base_snapshot_status"] != "current":
             reasons.append("BASE_SNAPSHOT_OUTDATED")
+        reasons.extend(delivery_application_blocking_reasons(candidate))
         return {
             "delivery_schema_version": "schedule_delivery_draft_v0",
             "candidate_snapshot_id": candidate_snapshot_id,
             "base_schedule_snapshot_id": candidate["base_schedule_snapshot_id"],
             "base_snapshot_content_sha256": candidate["base_snapshot_content_sha256"],
             "candidate_schema_version": candidate["candidate_schema_version"],
+            "canonical_schema_version": candidate["canonical_schema_version"],
+            "adapter_id": candidate["adapter_id"],
+            "adapter_version": candidate["adapter_version"],
             "candidate_kind": candidate["candidate_kind"],
             "candidate_status": candidate["candidate_status"],
             "user_attitude": attitude,
@@ -680,6 +739,13 @@ class ScheduleOptimizationService:
             "optimization_id": candidate.optimization_id,
             "dependency_decision_id": candidate.dependency_decision_id,
             "candidate_schema_version": candidate.candidate_schema_version,
+            "canonical_schema_version": getattr(
+                candidate, "canonical_schema_version", document.get("canonical_schema_version")
+            ),
+            "adapter_id": getattr(candidate, "adapter_id", document.get("adapter_id")),
+            "adapter_version": getattr(candidate, "adapter_version", document.get("adapter_version")),
+            "engine_profile_id": getattr(candidate, "engine_profile_id", document.get("engine_profile_id")),
+            "engine_version": getattr(candidate, "engine_version", document.get("engine_version")),
             "candidate_kind": candidate.candidate_kind,
             "candidate_status": candidate.candidate_status,
             "base_schedule_snapshot_id": candidate.base_schedule_snapshot_id,
@@ -701,26 +767,42 @@ class ScheduleOptimizationService:
         }
 
 
+def _candidate_provenance(
+    base: Any,
+    canonical_schema_version: str,
+    engine_profile_id: str | None,
+    engine_version: str | None,
+) -> dict[str, str | None]:
+    return {
+        "canonical_schema_version": canonical_schema_version,
+        "adapter_id": getattr(base, "adapter_id", None),
+        "adapter_version": getattr(base, "adapter_version", None),
+        "engine_profile_id": engine_profile_id,
+        "engine_version": engine_version,
+    }
+
+
 def _apply_decision(
     source: dict[str, Any],
     issue: Any,
     decision: Any,
     candidate_snapshot_id: str,
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], set[str]]:
-    target_dependency_id = issue.object_refs[0]
-    source_dependency = next(
-        (item for item in source["dependencies"] if item["dependency_id"] == target_dependency_id),
-        None,
-    )
-    if source_dependency is None:
+    target_dependency_ids = set(issue.object_refs)
+    source_dependencies = [
+        item
+        for item in source["dependencies"]
+        if item["dependency_id"] in target_dependency_ids
+    ]
+    if {item["dependency_id"] for item in source_dependencies} != target_dependency_ids:
         raise ScheduleOptimizationInvalidError
 
     candidate = copy.deepcopy(source)
     added_count = len(decision.predecessor_task_ids) * len(decision.successor_task_ids)
-    if len(candidate["dependencies"]) - 1 + added_count > MAX_DEPENDENCIES:
+    if len(candidate["dependencies"]) - len(source_dependencies) + added_count > MAX_DEPENDENCIES:
         raise ScheduleOptimizationInvalidError
     candidate["dependencies"] = [
-        item for item in candidate["dependencies"] if item["dependency_id"] != target_dependency_id
+        item for item in candidate["dependencies"] if item["dependency_id"] not in target_dependency_ids
     ]
     added = []
     for index, (predecessor_id, successor_id) in enumerate(
@@ -739,19 +821,22 @@ def _apply_decision(
                 "type": decision.dependency_type,
                 "source_type_code": SOURCE_TYPE_CODES[decision.dependency_type],
                 "lag_minutes": decision.lag_minutes,
-                "lag_calendar_policy": "UNSPECIFIED_REQUIRES_ENGINE_PROFILE",
+                "lag_calendar_policy": source["semantics"]["lag_calendar_policy"],
             }
         )
     candidate["dependencies"].extend(added)
     operations = [
-        {
-            "operation_id": f"remove:{target_dependency_id}",
-            "operation": "remove_dependency",
-            "dependency_id": target_dependency_id,
-            "expected_before": source_dependency,
-            "reason_issue_id": issue.issue_id,
-            "dependency_decision_id": decision.decision_id,
-        },
+        *[
+            {
+                "operation_id": f"remove:{dependency['dependency_id']}",
+                "operation": "remove_dependency",
+                "dependency_id": dependency["dependency_id"],
+                "expected_before": dependency,
+                "reason_issue_id": issue.issue_id,
+                "dependency_decision_id": decision.decision_id,
+            }
+            for dependency in source_dependencies
+        ],
         *[
             {
                 "operation_id": f"add:{item['dependency_id']}",
@@ -774,7 +859,7 @@ def _apply_decision(
     }
     effective_patch = {
         "operations": operations,
-        "removed_dependencies": [source_dependency],
+        "removed_dependencies": source_dependencies,
         "added_dependencies": added,
         "change_origin": "requested",
     }
@@ -785,7 +870,7 @@ def _compare_audits(
     base_issues: list[Any],
     candidate_findings: tuple[Any, ...],
     *,
-    target_dependency_id: str,
+    target_dependency_ids: set[str],
     added_dependency_ids: set[str],
 ) -> tuple[dict[str, Any], str]:
     before_counts = Counter(item.severity for item in base_issues)
@@ -793,7 +878,8 @@ def _compare_audits(
     before_rules = Counter(item.rule_id for item in base_issues)
     after_rules = Counter(item.rule_id for item in candidate_findings)
     target_resolved = not any(
-        item.rule_id == "SUMMARY_TASK_DEPENDENCY" and target_dependency_id in item.object_refs
+        item.rule_id in DEPENDENCY_DECISION_RULE_IDS
+        and target_dependency_ids.intersection(item.object_refs)
         for item in candidate_findings
     )
     duplicate_added = any(
@@ -829,7 +915,7 @@ def _blocker_signature(issue: Any) -> str:
 
 
 def _canonical_content_sha256(source: dict[str, Any]) -> str:
-    contract = CanonicalScheduleV22.model_validate(source)
+    contract = parse_canonical_schedule(source)
     payload = json.dumps(
         contract.model_dump(mode="json", exclude_none=False),
         ensure_ascii=False,
@@ -867,7 +953,8 @@ def _acceptance_checks(
         )
     )
     target_issue_resolved = new_snapshot_available and not any(
-        issue.rule_id == "SUMMARY_TASK_DEPENDENCY" and removed_ids.intersection(issue.object_refs)
+        issue.rule_id in DEPENDENCY_DECISION_RULE_IDS
+        and removed_ids.intersection(issue.object_refs)
         for issue in latest_issues
     )
     no_statistics_mismatch = new_snapshot_available and not any(
@@ -940,5 +1027,30 @@ def _candidate_audit(execution: Any) -> dict[str, Any]:
                 "recommendation": finding.recommendation,
             }
             for finding in execution.findings
+        ],
+    }
+
+
+def _engine_candidate_audit(engine_result: dict[str, Any]) -> dict[str, Any]:
+    issues = engine_result.get("issues", [])
+    return {
+        "issue_summary": engine_result.get(
+            "issue_summary",
+            {"total": 0, "blocker": 0, "warning": 0, "info": 0},
+        ),
+        "issues": [
+            {
+                "rule_id": issue["code"],
+                "category": (
+                    "resource"
+                    if issue["code"] == "RESOURCE_OVERALLOCATION"
+                    else "constraint"
+                ),
+                "severity": issue["severity"],
+                "object_refs": issue["object_refs"],
+                "evidence": issue["evidence"],
+                "message": issue["message"],
+            }
+            for issue in issues
         ],
     }

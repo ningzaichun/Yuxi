@@ -58,7 +58,11 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 
 def _safe_location(location: tuple[str | int, ...]) -> str:
-    return ".".join(str(part) for part in location)
+    return ".".join(
+        str(part)
+        for part in location
+        if part not in {"canonical_schedule_v2.2", "canonical_schedule_v2.3"}
+    )
 
 
 if __name__ == "__main__":

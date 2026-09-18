@@ -63,7 +63,10 @@
           "type": "string"
         },
         "lag_calendar_policy": {
-          "const": "UNSPECIFIED_REQUIRES_ENGINE_PROFILE",
+          "enum": [
+            "UNSPECIFIED_REQUIRES_ENGINE_PROFILE",
+            "UNIFIED_PROJECT_CALENDAR_WORKING_MINUTES"
+          ],
           "title": "Lag Calendar Policy",
           "type": "string"
         },
@@ -679,7 +682,10 @@
           "type": "string"
         },
         "lag_calendar_policy": {
-          "const": "UNSPECIFIED_REQUIRES_ENGINE_PROFILE",
+          "enum": [
+            "UNSPECIFIED_REQUIRES_ENGINE_PROFILE",
+            "UNIFIED_PROJECT_CALENDAR_WORKING_MINUTES"
+          ],
           "title": "Lag Calendar Policy",
           "type": "string"
         },

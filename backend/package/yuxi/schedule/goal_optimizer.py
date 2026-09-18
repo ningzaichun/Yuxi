@@ -6,19 +6,16 @@ from datetime import datetime
 from itertools import combinations
 from typing import Any
 
-from yuxi.schedule.contracts.canonical_v2_2 import CanonicalScheduleV22
+from yuxi.schedule.contracts.canonical import CanonicalSchedule, parse_canonical_schedule
 from yuxi.schedule.contracts.optimization import GoalOptimizationRequest
-from yuxi.schedule.forward_engine import (
-    REVERSE_FLOAT_ENGINE_PROFILE_ID,
-    calculate_minimal_forward_schedule,
-)
+from yuxi.schedule.forward_engine import calculate_minimal_forward_schedule, recalculation_profile_for
 
 GOAL_OPTIMIZER_PROFILE_ID = "yuxi-authorized-duration-goal-optimizer-v1"
 GOAL_OPTIMIZER_VERSION = "1.0.0"
 
 
 def optimize_project_finish(
-    source: CanonicalScheduleV22,
+    source: CanonicalSchedule,
     request: GoalOptimizationRequest,
 ) -> dict[str, Any]:
     """Evaluate only explicitly authorized duration alternatives."""
@@ -31,8 +28,32 @@ def optimize_project_finish(
             blockers.append(_blocker("AUTHORIZED_TASK_UNKNOWN", option.task_id, "授权项引用了未知任务"))
         elif task.task_type != "activity":
             blockers.append(_blocker("AUTHORIZED_TASK_NOT_ACTIVITY", option.task_id, "只能授权活动任务工期"))
+        elif not task.active:
+            blockers.append(
+                _blocker(
+                    "AUTHORIZED_TASK_INACTIVE",
+                    option.task_id,
+                    "inactive 任务不参与工期优化",
+                )
+            )
         elif task.scheduling_mode != "automatic":
             blockers.append(_blocker("AUTHORIZED_TASK_NOT_AUTOMATIC", option.task_id, "只能优化自动任务工期"))
+        elif getattr(task, "status", "NOT_STARTED") == "COMPLETED":
+            blockers.append(
+                _blocker(
+                    "AUTHORIZED_TASK_COMPLETED",
+                    option.task_id,
+                    "已完成任务的实际事实不能参与工期优化",
+                )
+            )
+        elif getattr(task, "status", "NOT_STARTED") == "IN_PROGRESS":
+            blockers.append(
+                _blocker(
+                    "AUTHORIZED_TASK_IN_PROGRESS",
+                    option.task_id,
+                    "进行中任务的实际事实和剩余工作不能参与工期优化",
+                )
+            )
         elif option.task_id in locked_task_ids:
             blockers.append(_blocker("AUTHORIZED_TASK_LOCKED", option.task_id, "锁定任务不能同时授权修改"))
         elif option.duration_minutes >= task.duration_minutes:
@@ -49,7 +70,7 @@ def optimize_project_finish(
     baseline = calculate_minimal_forward_schedule(
         source,
         locked_task_ids=locked_task_ids,
-        engine_profile_id=REVERSE_FLOAT_ENGINE_PROFILE_ID,
+        engine_profile_id=recalculation_profile_for(source),
     )
     if baseline["status"] != "calculated":
         return {
@@ -120,7 +141,7 @@ def optimize_project_finish(
 
 
 def _strategy_result(
-    source: CanonicalScheduleV22,
+    source: CanonicalSchedule,
     request: GoalOptimizationRequest,
     baseline: dict[str, Any],
     selected: tuple[Any, ...],
@@ -146,11 +167,11 @@ def _strategy_result(
             }
         )
         task["duration_minutes"] = option.duration_minutes
-    variant = CanonicalScheduleV22.model_validate(payload)
+    variant = parse_canonical_schedule(payload)
     result = calculate_minimal_forward_schedule(
         variant,
         locked_task_ids=set(request.locked_task_ids),
-        engine_profile_id=REVERSE_FLOAT_ENGINE_PROFILE_ID,
+        engine_profile_id=recalculation_profile_for(variant),
     )
     return {
         "strategy_id": "duration:"

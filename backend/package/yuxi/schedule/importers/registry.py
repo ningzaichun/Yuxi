@@ -6,7 +6,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any, Protocol
 
-from yuxi.schedule.contracts.canonical_v2_2 import CanonicalScheduleV22
+from yuxi.schedule.contracts.canonical import CanonicalSchedule
 from yuxi.schedule.contracts.import_v1 import ScheduleNormalizationReport
 
 
@@ -17,7 +17,7 @@ class UnsupportedScheduleImportVersionError(ValueError):
 @dataclass(frozen=True, slots=True)
 class ScheduleImportResult:
     source_document: dict[str, Any]
-    canonical: CanonicalScheduleV22
+    canonical: CanonicalSchedule
     normalization_report: ScheduleNormalizationReport
 
 

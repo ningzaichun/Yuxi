@@ -9,8 +9,13 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from server.utils.auth_middleware import get_required_user
+from test.support.schedule_suite import normalize_suite_document
 from yuxi.schedule.importers.registry import UnsupportedScheduleImportVersionError
-from yuxi.services.schedule_audit_service import ScheduleConflictError, ScheduleNotFoundError
+from yuxi.services.schedule_audit_service import (
+    ScheduleConflictError,
+    ScheduleDependencyError,
+    ScheduleNotFoundError,
+)
 from yuxi.services.schedule_optimization_service import ScheduleOptimizationConflictError
 
 schedule_module = importlib.import_module("server.routers.schedule_router")
@@ -19,6 +24,18 @@ IMPORT_CASE_PATH = (
     / "Microsoft_Project_水泵站排期_MOCK_v1.1"
     / "Microsoft_Project_水泵站排期_MOCK_v1.1.json"
 )
+SUITE_C02_PATH = (
+    Path(__file__).resolve().parents[4]
+    / "Yuxi_复杂排期测试套件_v1"
+    / "C02_MULTI_CALENDAR_EXCEPTIONS"
+    / "input.json"
+)
+SUITE_C06_PATH = (
+    Path(__file__).resolve().parents[4]
+    / "Yuxi_复杂排期测试套件_v1"
+    / "C06_RESOURCE_OVERALLOCATION"
+    / "input.json"
+)
 
 
 class FakeService:
@@ -26,11 +43,16 @@ class FakeService:
         self.replay = False
         self.conflict = False
         self.unsupported = False
+        self.dependency_failure = False
+        self.last_submission = None
 
     async def submit(self, owner_uid, submission):
         assert owner_uid == "owner-1"
+        self.last_submission = submission
         if self.conflict:
             raise ScheduleConflictError
+        if self.dependency_failure:
+            raise ScheduleDependencyError("s3://private-bucket/source.json?token=must-not-leak")
         return {
             "schedule_snapshot_id": "snapshot-1",
             "audit_run_id": "audit-1",
@@ -47,6 +69,8 @@ class FakeService:
             raise UnsupportedScheduleImportVersionError
         if self.conflict:
             raise ScheduleConflictError
+        if self.dependency_failure:
+            raise ScheduleDependencyError("s3://private-bucket/source.json?token=must-not-leak")
         return {
             "schedule_snapshot_id": "snapshot-import-1",
             "audit_run_id": "audit-import-1",
@@ -63,6 +87,8 @@ class FakeService:
         }
 
     async def get_snapshot(self, owner_uid, snapshot_id):
+        if self.dependency_failure:
+            raise ScheduleDependencyError("s3://private-bucket/source.json?token=must-not-leak")
         raise ScheduleNotFoundError
 
     async def save_dependency_decision(self, owner_uid, issue_id, draft):
@@ -188,6 +214,42 @@ def test_schedule_post_statuses_and_error_contract(monkeypatch, canonical_schedu
     assert conflict.json()["detail"]["code"] == "SCHEDULE_IDEMPOTENCY_CONFLICT"
 
 
+def test_schedule_post_accepts_v24_multi_calendar_snapshot(monkeypatch) -> None:
+    service = FakeService()
+    client = _client(monkeypatch, service)
+    document = json.loads(SUITE_C02_PATH.read_text(encoding="utf-8"))
+    canonical, _ = normalize_suite_document(document)
+    request = _request(canonical.model_dump(mode="json", exclude_none=False))
+    request["external_revision"] = "V2.4-multi-calendar"
+
+    response = client.post("/api/schedule/snapshots", json=request)
+
+    assert response.status_code == 201
+    assert service.last_submission.snapshot.schema_version == "canonical_schedule_v2.4"
+    assert len(service.last_submission.snapshot.calendars) == 2
+    assert service.last_submission.snapshot.semantics.lag_calendar_policy == "SUCCESSOR_TASK_CALENDAR"
+
+
+def test_schedule_post_accepts_v25_constraints_snapshot(monkeypatch) -> None:
+    service = FakeService()
+    client = _client(monkeypatch, service)
+    suite_root = Path(__file__).resolve().parents[4] / "Yuxi_复杂排期测试套件_v1"
+    document = json.loads(
+        (suite_root / "C04_CONSTRAINTS_DEADLINES" / "input.json").read_text(encoding="utf-8")
+    )
+    canonical, _ = normalize_suite_document(document)
+    request = _request(canonical.model_dump(mode="json", exclude_none=False))
+    request["external_revision"] = "V2.5-constraints"
+
+    response = client.post("/api/schedule/snapshots", json=request)
+
+    assert response.status_code == 201
+    assert service.last_submission.snapshot.schema_version == "canonical_schedule_v2.5"
+    assert service.last_submission.snapshot.project.required_finish.isoformat() == (
+        "2026-09-18T17:00:00+08:00"
+    )
+
+
 def test_schedule_import_statuses_and_version_error(monkeypatch) -> None:
     service = FakeService()
     client = _client(monkeypatch, service)
@@ -233,6 +295,83 @@ def test_schedule_post_returns_stable_json_pointer(monkeypatch, canonical_schedu
     assert "not-a-date" not in response.text
 
 
+def test_schedule_post_aggregates_structural_preflight_errors_before_service(monkeypatch) -> None:
+    service = FakeService()
+    client = _client(monkeypatch, service)
+    canonical, _ = normalize_suite_document(
+        json.loads(SUITE_C06_PATH.read_text(encoding="utf-8"))
+    )
+    payload = _request(canonical.model_dump(mode="json", exclude_none=False))
+    snapshot = payload["snapshot"]
+    tasks = {task["task_id"]: task for task in snapshot["tasks"]}
+    tasks["task:start"]["duration_minutes"] = 480
+    tasks["task:c"]["calendar_id"] = "calendar:missing"
+    tasks["task:c"]["parent_task_id"] = "task:missing-parent"
+    snapshot["assignments"][0]["resource_id"] = "resource:missing"
+    snapshot["dependencies"].extend(
+        [
+            {
+                "dependency_id": "dep:a:b:cycle",
+                "predecessor_task_id": "task:a",
+                "successor_task_id": "task:b",
+                "type": "FS",
+                "source_type_code": 1,
+                "lag_minutes": 0,
+                "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR",
+            },
+            {
+                "dependency_id": "dep:b:a:cycle",
+                "predecessor_task_id": "task:b",
+                "successor_task_id": "task:a",
+                "type": "FS",
+                "source_type_code": 1,
+                "lag_minutes": 0,
+                "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR",
+            },
+            {
+                "dependency_id": "dep:a:missing",
+                "predecessor_task_id": "task:a",
+                "successor_task_id": "task:missing",
+                "type": "FS",
+                "source_type_code": 1,
+                "lag_minutes": 0,
+                "lag_calendar_policy": "SUCCESSOR_TASK_CALENDAR",
+            },
+        ]
+    )
+
+    response = client.post("/api/schedule/snapshots", json=payload)
+
+    assert response.status_code == 422
+    assert response.json()["detail"]["code"] == "SCHEDULE_PREFLIGHT_FAILED"
+    assert [item["code"] for item in response.json()["detail"]["errors"]] == [
+        "ASSIGNMENT_RESOURCE_NOT_FOUND",
+        "DEPENDENCY_CYCLE",
+        "DEPENDENCY_TASK_NOT_FOUND",
+        "MILESTONE_DURATION_NONZERO",
+        "PARENT_TASK_NOT_FOUND",
+        "TASK_CALENDAR_NOT_FOUND",
+    ]
+    assert service.last_submission is None
+
+
+def test_schedule_post_leaves_non_string_references_to_contract_validation(monkeypatch) -> None:
+    service = FakeService()
+    client = _client(monkeypatch, service)
+    canonical, _ = normalize_suite_document(
+        json.loads(SUITE_C06_PATH.read_text(encoding="utf-8"))
+    )
+    payload = _request(canonical.model_dump(mode="json", exclude_none=False))
+    payload["snapshot"]["assignments"][0]["task_id"] = 7
+
+    response = client.post("/api/schedule/snapshots", json=payload)
+
+    assert response.status_code == 422
+    assert response.json()["detail"]["code"] == "SCHEDULE_CONTRACT_INVALID"
+    assert response.json()["detail"]["errors"][0]["path"] == "/snapshot/assignments/0/task_id"
+    assert service.last_submission is None
+
+
 def test_schedule_post_rejects_oversized_body(monkeypatch) -> None:
     client = _client(monkeypatch, FakeService())
     body = b"{" + b" " * schedule_module.MAX_BODY_BYTES + b"}"
@@ -249,6 +388,30 @@ def test_schedule_read_hides_missing_and_unauthorized_resources(monkeypatch) -> 
 
     assert response.status_code == 404
     assert response.json()["detail"]["code"] == "SCHEDULE_NOT_FOUND"
+
+
+def test_schedule_dependency_failures_do_not_expose_internal_details(
+    monkeypatch,
+    canonical_schedule_payload: dict,
+) -> None:
+    service = FakeService()
+    service.dependency_failure = True
+    client = _client(monkeypatch, service)
+
+    responses = [
+        client.post("/api/schedule/snapshots", json=_request(canonical_schedule_payload)),
+        client.post("/api/schedule/imports", json=_import_request()),
+        client.get("/api/schedule/snapshots/snapshot-private"),
+    ]
+
+    assert [response.status_code for response in responses] == [500, 500, 500]
+    assert [response.json()["detail"]["code"] for response in responses] == [
+        "SCHEDULE_DEPENDENCY_FAILURE",
+        "SCHEDULE_DEPENDENCY_FAILURE",
+        "SCHEDULE_DEPENDENCY_FAILURE",
+    ]
+    assert all("must-not-leak" not in response.text for response in responses)
+    assert all("private-bucket" not in response.text for response in responses)
 
 
 def test_dependency_decision_save_and_confirm_contract(monkeypatch) -> None:

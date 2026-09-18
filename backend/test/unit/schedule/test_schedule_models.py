@@ -34,6 +34,9 @@ def test_schedule_tables_share_business_metadata() -> None:
         for constraint in ScheduleOptimizationRunRecord.__table__.constraints
     )
     assert ScheduleCandidateRecord.__table__.columns["optimization_id"].unique is True
+    assert ScheduleCandidateRecord.__table__.columns["canonical_schema_version"].nullable is True
+    assert ScheduleCandidateRecord.__table__.columns["adapter_id"].nullable is True
+    assert ScheduleCandidateRecord.__table__.columns["engine_profile_id"].nullable is True
     assert any(
         constraint.name == "uq_schedule_candidate_decision_request"
         for constraint in ScheduleCandidateDecisionRecord.__table__.constraints

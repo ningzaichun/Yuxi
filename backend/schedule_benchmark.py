@@ -91,3 +91,44 @@ def build_schedule_benchmark_payload(*, task_count: int = 1_000, dependency_coun
         "reasons": [],
     }
     return payload
+
+
+def build_multi_calendar_schedule_benchmark_payload(
+    *,
+    task_count: int = 1_000,
+    dependency_count: int = 5_000,
+) -> dict:
+    """Extend the M4.5 DAG with two effective task calendars for Profile v11."""
+    payload = build_schedule_benchmark_payload(
+        task_count=task_count,
+        dependency_count=dependency_count,
+    )
+    payload["schema_version"] = "canonical_schedule_v2.4"
+    payload["semantics"]["lag_calendar_policy"] = "SUCCESSOR_TASK_CALENDAR"
+    default_calendar = payload["calendars"][0]
+    task_calendar = copy.deepcopy(default_calendar)
+    task_calendar.update(
+        {
+            "calendar_id": "calendar:benchmark:six-day",
+            "source_index": default_calendar["source_index"] + 1,
+            "name": "Benchmark Six-Day Calendar",
+            "parent_calendar_id": None,
+            "exceptions": [],
+        }
+    )
+    task_calendar["weekly_pattern"]["SATURDAY"] = {
+        "day_type": "WORKING",
+        "intervals": [
+            {"start": "07:00:00", "finish": "12:00:00"},
+            {"start": "13:00:00", "finish": "18:00:00"},
+        ],
+    }
+    payload["calendars"].append(task_calendar)
+    for index, task in enumerate(payload["tasks"]):
+        if index % 2:
+            task["calendar_id"] = task_calendar["calendar_id"]
+            task["effective_calendar_id"] = task_calendar["calendar_id"]
+    for dependency in payload["dependencies"]:
+        dependency["lag_calendar_policy"] = "SUCCESSOR_TASK_CALENDAR"
+    payload["statistics"]["calendars"] = 2
+    return payload

@@ -1,0 +1,103 @@
+{
+  "schema_version": "microsoft_project_schedule_semantics_oracle_v1",
+  "case_id": "MSP-V28-INACTIVE-SUMMARY-DEPENDENCY",
+  "purpose": "Freeze Microsoft Project behavior for inactive tasks and dependencies touching summary tasks after save, close, reopen, and recalculate.",
+  "project_start": "2026-09-07T08:00:00+08:00",
+  "calendar": {
+    "working_weekdays": ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"],
+    "working_intervals": [
+      {"start": "08:00", "finish": "12:00"},
+      {"start": "13:00", "finish": "17:00"}
+    ]
+  },
+  "tasks": [
+    {"task_id": "task:1", "name": "Inactive chain", "outline_level": 1, "duration_minutes": 0},
+    {"task_id": "task:2", "name": "Active predecessor", "outline_level": 2, "duration_minutes": 480},
+    {"task_id": "task:3", "name": "Inactive bridge", "outline_level": 2, "duration_minutes": 960, "active": false},
+    {"task_id": "task:4", "name": "Active successor", "outline_level": 2, "duration_minutes": 480},
+
+    {"task_id": "task:5", "name": "Inactive facts", "outline_level": 1, "duration_minutes": 0},
+    {"task_id": "task:6", "name": "Inactive with actual constraint calendar", "outline_level": 2, "duration_minutes": 960, "active": false, "task_calendar": "Yuxi Phase 9 Task Calendar", "constraint_type": "START_NO_EARLIER_THAN", "constraint_date": "2026-09-10T08:00:00+08:00", "actual_start": "2026-09-07T08:00:00+08:00", "actual_finish": "2026-09-08T17:00:00+08:00"},
+
+    {"task_id": "task:7", "name": "Inactive rollup", "outline_level": 1, "duration_minutes": 0},
+    {"task_id": "task:8", "name": "Active rollup child A", "outline_level": 2, "duration_minutes": 480},
+    {"task_id": "task:9", "name": "Inactive late rollup child", "outline_level": 2, "duration_minutes": 2400, "active": false, "constraint_type": "START_NO_EARLIER_THAN", "constraint_date": "2026-09-21T08:00:00+08:00"},
+    {"task_id": "task:10", "name": "Active rollup child B", "outline_level": 2, "duration_minutes": 480},
+
+    {"task_id": "task:11", "name": "Summary predecessor", "outline_level": 1, "duration_minutes": 0},
+    {"task_id": "task:12", "name": "Summary predecessor child A", "outline_level": 2, "duration_minutes": 480},
+    {"task_id": "task:13", "name": "Summary predecessor child B", "outline_level": 2, "duration_minutes": 480},
+    {"task_id": "task:14", "name": "Activity after summary", "outline_level": 1, "duration_minutes": 480},
+
+    {"task_id": "task:15", "name": "Activity before summary", "outline_level": 1, "duration_minutes": 480},
+    {"task_id": "task:16", "name": "Summary successor", "outline_level": 1, "duration_minutes": 0},
+    {"task_id": "task:17", "name": "Summary successor child A", "outline_level": 2, "duration_minutes": 480},
+    {"task_id": "task:18", "name": "Summary successor child B", "outline_level": 2, "duration_minutes": 480},
+
+    {"task_id": "task:19", "name": "Summary to summary A", "outline_level": 1, "duration_minutes": 0},
+    {"task_id": "task:20", "name": "Summary A child A", "outline_level": 2, "duration_minutes": 480},
+    {"task_id": "task:21", "name": "Summary A child B", "outline_level": 2, "duration_minutes": 480},
+    {"task_id": "task:22", "name": "Summary to summary B", "outline_level": 1, "duration_minutes": 0},
+    {"task_id": "task:23", "name": "Summary B child A", "outline_level": 2, "duration_minutes": 480},
+    {"task_id": "task:24", "name": "Summary B child B", "outline_level": 2, "duration_minutes": 480}
+  ],
+  "dependencies": [
+    {"dependency_id": "dependency:1", "predecessor_task_id": "task:2", "successor_task_id": "task:3", "type": "FS", "lag_minutes": 0, "scenario": "ACTIVE_TO_INACTIVE"},
+    {"dependency_id": "dependency:2", "predecessor_task_id": "task:3", "successor_task_id": "task:4", "type": "FS", "lag_minutes": 0, "scenario": "INACTIVE_TO_ACTIVE"},
+    {"dependency_id": "dependency:3", "predecessor_task_id": "task:8", "successor_task_id": "task:10", "type": "FS", "lag_minutes": 0, "scenario": "ACTIVE_ROLLUP_CHILDREN"},
+    {"dependency_id": "dependency:4", "predecessor_task_id": "task:12", "successor_task_id": "task:13", "type": "FS", "lag_minutes": 0, "scenario": "SUMMARY_PREDECESSOR_CHILDREN"},
+    {"dependency_id": "dependency:5", "predecessor_task_id": "task:11", "successor_task_id": "task:14", "type": "FS", "lag_minutes": 0, "scenario": "SUMMARY_TO_ACTIVITY"},
+    {"dependency_id": "dependency:6", "predecessor_task_id": "task:17", "successor_task_id": "task:18", "type": "FS", "lag_minutes": 0, "scenario": "SUMMARY_SUCCESSOR_CHILDREN"},
+    {"dependency_id": "dependency:7", "predecessor_task_id": "task:15", "successor_task_id": "task:16", "type": "FS", "lag_minutes": 0, "scenario": "ACTIVITY_TO_SUMMARY"},
+    {"dependency_id": "dependency:8", "predecessor_task_id": "task:20", "successor_task_id": "task:21", "type": "FS", "lag_minutes": 0, "scenario": "SUMMARY_A_CHILDREN"},
+    {"dependency_id": "dependency:9", "predecessor_task_id": "task:23", "successor_task_id": "task:24", "type": "FS", "lag_minutes": 0, "scenario": "SUMMARY_B_CHILDREN"},
+    {"dependency_id": "dependency:10", "predecessor_task_id": "task:19", "successor_task_id": "task:22", "type": "FS", "lag_minutes": 0, "scenario": "SUMMARY_TO_SUMMARY"}
+  ],
+  "external_observation": {
+    "observation_status": "CAPTURED_BY_MS_PROJECT_COM",
+    "captured_at": "2026-08-20T17:37:57+08:00",
+    "capture_method": "MICROSOFT_PROJECT_COM_AFTER_SAVE_CLOSE_REOPEN_RECALCULATE",
+    "microsoft_project_version": "16.0",
+    "independent_recapture_count": 2,
+    "save_reopen_mismatches": [],
+    "mutation_outcomes": [
+      {"operation": "SET_INACTIVE", "object_ref": "task:3", "accepted": true},
+      {"operation": "SET_INACTIVE", "object_ref": "task:6", "accepted": false, "result_code": "PROGRESS_TASK_CANNOT_BE_INACTIVE", "observed_message": "无法取消激活正在进行的任务。"},
+      {"operation": "SET_INACTIVE", "object_ref": "task:9", "accepted": true},
+      {"operation": "SET_DEPENDENCY:SUMMARY_TO_ACTIVITY", "object_ref": "dependency:5", "accepted": true},
+      {"operation": "SET_DEPENDENCY:ACTIVITY_TO_SUMMARY", "object_ref": "dependency:7", "accepted": true},
+      {"operation": "SET_DEPENDENCY:SUMMARY_TO_SUMMARY", "object_ref": "dependency:10", "accepted": true}
+    ],
+    "task_facts": [
+      {"task_id": "task:1", "summary": true, "active": true, "start": "2026-09-07T08:00:00+08:00", "finish": "2026-09-08T17:00:00+08:00"},
+      {"task_id": "task:2", "summary": false, "active": true, "start": "2026-09-07T08:00:00+08:00", "finish": "2026-09-07T17:00:00+08:00", "successors": "3"},
+      {"task_id": "task:3", "summary": false, "active": false, "start": "2026-09-08T08:00:00+08:00", "finish": "2026-09-09T17:00:00+08:00", "predecessors": "2", "successors": "4", "total_slack_minutes": 0, "critical": false},
+      {"task_id": "task:4", "summary": false, "active": true, "start": "2026-09-08T08:00:00+08:00", "finish": "2026-09-08T17:00:00+08:00", "predecessors": "3"},
+      {"task_id": "task:5", "summary": true, "active": true, "start": "2026-09-07T08:00:00+08:00", "finish": "2026-09-08T17:00:00+08:00", "percent_complete": 100},
+      {"task_id": "task:6", "summary": false, "active": true, "start": "2026-09-07T08:00:00+08:00", "finish": "2026-09-08T17:00:00+08:00", "constraint_type": 4, "constraint_date": "2026-09-10T08:00:00+08:00", "calendar_name": "Yuxi Phase 9 Task Calendar", "percent_complete": 100, "actual_start": "2026-09-07T08:00:00+08:00", "actual_finish": "2026-09-08T17:00:00+08:00"},
+      {"task_id": "task:7", "summary": true, "active": true, "start": "2026-09-07T08:00:00+08:00", "finish": "2026-09-08T17:00:00+08:00"},
+      {"task_id": "task:8", "summary": false, "active": true, "start": "2026-09-07T08:00:00+08:00", "finish": "2026-09-07T17:00:00+08:00", "successors": "10"},
+      {"task_id": "task:9", "summary": false, "active": false, "start": "2026-09-21T08:00:00+08:00", "finish": "2026-09-25T17:00:00+08:00", "constraint_type": 4, "constraint_date": "2026-09-21T08:00:00+08:00", "total_slack_minutes": -5280, "critical": false},
+      {"task_id": "task:10", "summary": false, "active": true, "start": "2026-09-08T08:00:00+08:00", "finish": "2026-09-08T17:00:00+08:00", "predecessors": "8"},
+      {"task_id": "task:11", "summary": true, "active": true, "start": "2026-09-07T08:00:00+08:00", "finish": "2026-09-08T17:00:00+08:00", "successors": "14"},
+      {"task_id": "task:14", "summary": false, "active": true, "start": "2026-09-09T08:00:00+08:00", "finish": "2026-09-09T17:00:00+08:00", "predecessors": "11"},
+      {"task_id": "task:15", "summary": false, "active": true, "start": "2026-09-07T08:00:00+08:00", "finish": "2026-09-07T17:00:00+08:00", "successors": "16"},
+      {"task_id": "task:16", "summary": true, "active": true, "start": "2026-09-08T08:00:00+08:00", "finish": "2026-09-09T17:00:00+08:00", "predecessors": "15"},
+      {"task_id": "task:19", "summary": true, "active": true, "start": "2026-09-07T08:00:00+08:00", "finish": "2026-09-08T17:00:00+08:00", "successors": "22", "critical": true},
+      {"task_id": "task:22", "summary": true, "active": true, "start": "2026-09-09T08:00:00+08:00", "finish": "2026-09-10T17:00:00+08:00", "predecessors": "19", "critical": true}
+    ]
+  },
+  "business_decisions": {
+    "inactive_progress_policy": "REJECT_INACTIVE_WITH_ACTUAL_OR_PROGRESS_FACTS",
+    "inactive_rollup_policy": "EXCLUDE_INACTIVE_DESCENDANTS",
+    "inactive_dependency_policy": "PRESERVE_SOURCE_RELATION_AND_REQUIRE_EXPLICIT_LEAF_REPLACEMENT",
+    "summary_dependency_policy": "PRESERVE_SOURCE_RELATION_AND_REQUIRE_EXPLICIT_LEAF_REPLACEMENT",
+    "microsoft_project_difference": "Microsoft Project accepts and schedules through inactive and summary relations, but Yuxi does not silently infer replacement leaf relations."
+  },
+  "expected": {
+    "confirmation_status": "CONFIRMED_BY_MS_PROJECT",
+    "confirmed_by": "Microsoft Project 16.0 COM independent double capture",
+    "confirmed_at": "2026-08-20T17:37:57+08:00",
+    "microsoft_project_version": "16.0"
+  }
+}

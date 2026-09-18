@@ -28,7 +28,7 @@ REQUIRED_MARKERS = {
     "WHOLE_PLAN_REVIEW=SUPPORTED",
     "GOAL_OPTIMIZATION_MUTATION=UI_ONLY",
     "EVIDENCE_SOURCE=YUXI_AUDIT",
-    "POSITIVE_LAG_STATUS=UNCHECKED",
+    "POSITIVE_LAG_STATUS=CHECKED",
     "CPM_RECALCULATION=UNSUPPORTED",
     "PATCH_GENERATION=UNSUPPORTED",
     "IGNORED_UNSUPPORTED_STATUS=NOT_AUDITED_OR_CALCULATED",
@@ -62,7 +62,7 @@ Validation 或规范化报告中 ignored/unsupported 的字段描述成已参与
 WHOLE_PLAN_REVIEW=SUPPORTED
 GOAL_OPTIMIZATION_MUTATION=UI_ONLY
 EVIDENCE_SOURCE=YUXI_AUDIT
-POSITIVE_LAG_STATUS=UNCHECKED
+POSITIVE_LAG_STATUS=CHECKED
 CPM_RECALCULATION=UNSUPPORTED
 PATCH_GENERATION=UNSUPPORTED
 IGNORED_UNSUPPORTED_STATUS=NOT_AUDITED_OR_CALCULATED""",
@@ -77,8 +77,9 @@ IGNORED_UNSUPPORTED_STATUS=NOT_AUDITED_OR_CALCULATED""",
         "skills": [],
         "subagents": [],
     }
-    if default_context.get("model"):
-        context["model"] = default_context["model"]
+    model = os.getenv("E2E_MODEL") or default_context.get("model")
+    if model:
+        context["model"] = model
 
     response = await client.post(
         "/api/agent",
@@ -176,10 +177,10 @@ async def test_schedule_snapshot_review_issue_explanation_and_boundaries(
         assert created.json()["adapter_id"] == "microsoft_project_interchange_v1_1"
         assert created.json()["normalization_report"]["unsupported_semantics"]
         assert created.json()["dependency_date_checks"] == {
-            "checked": 16,
-            "skipped": 3,
+            "checked": 19,
+            "skipped": 0,
             "violation_count": 0,
-            "skipped_reasons": {"LAG_CALENDAR_POLICY_UNSPECIFIED": 3},
+            "skipped_reasons": {},
         }
 
         issues_response = await e2e_client.get(
@@ -187,8 +188,10 @@ async def test_schedule_snapshot_review_issue_explanation_and_boundaries(
             headers=e2e_headers,
         )
         assert issues_response.status_code == 200, issues_response.text
+        # Lag 日历策略已冻结，非零正 Lag 关系全部被检查，不再存在
+        # LAG_CALENDAR_POLICY_UNSPECIFIED blocker；改用 OPEN_START 作为解释对象。
         issue = next(
-            item for item in issues_response.json()["items"] if item["rule_id"] == "LAG_CALENDAR_POLICY_UNSPECIFIED"
+            item for item in issues_response.json()["items"] if item["rule_id"] == "OPEN_START"
         )
 
         agent_slug = await _create_schedule_agent(e2e_client, e2e_headers, uid)
@@ -223,10 +226,8 @@ async def test_schedule_snapshot_review_issue_explanation_and_boundaries(
         assert result_response.status_code == 200, result_response.text
         output = str(result_response.json().get("output") or "")
         assert all(marker in output for marker in REQUIRED_MARKERS), output
-        # Natural-language wording varies by model (for example, "未检查" or
-        # "未审查"); the fixed marker is the stable behavior contract.
-        assert "3" in output, output
-        assert "19 条全部验证通过" not in output
+        # Natural-language wording varies by model; the fixed markers above are
+        # the stable behavior contract, and the JSON assertion pins the counts.
 
         history_response = await e2e_client.get(f"/api/chat/thread/{thread_id}/history", headers=e2e_headers)
         assert history_response.status_code == 200, history_response.text

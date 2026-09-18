@@ -16,6 +16,14 @@
     </header>
 
     <a-alert
+      type="warning"
+      show-icon
+      message="生产门禁尚未解除"
+      description="Engine 已支持、当前来源已提供、生产允许使用是三个独立结论；请分别查看 Capability、来源规范化报告和生产门禁。"
+      class="page-alert"
+    />
+
+    <a-alert
       v-if="pageError"
       type="error"
       show-icon
@@ -61,7 +69,10 @@
                   规则集 {{ audit.rule_set_version }}
                 </p>
               </div>
-              <a-tag color="green">只读来源快照</a-tag>
+              <a-space>
+                <a-tag color="geekblue">{{ sourcePresentation.label }}</a-tag>
+                <a-tag color="green">只读来源快照</a-tag>
+              </a-space>
             </div>
 
             <section v-if="importOverview" class="content-card">
@@ -113,6 +124,21 @@
                   </p>
                 </article>
               </div>
+
+              <a-descriptions :column="1" bordered size="small" class="source-traceability">
+                <a-descriptions-item label="来源类型">
+                  {{ sourcePresentation.label }}
+                </a-descriptions-item>
+                <a-descriptions-item label="提取方式">
+                  {{ importOverview.extractionMethod }}
+                </a-descriptions-item>
+                <a-descriptions-item label="来源 JSON SHA-256">
+                  <code>{{ importOverview.sourceDocumentSha256 }}</code>
+                </a-descriptions-item>
+                <a-descriptions-item label="Canonical SHA-256">
+                  <code>{{ importOverview.canonicalSnapshotSha256 }}</code>
+                </a-descriptions-item>
+              </a-descriptions>
 
               <div class="normalization-summary">
                 <div>
@@ -173,8 +199,144 @@
                     <Ban v-else :size="18" class="blocked" />
                     <strong>{{ capabilityLabel(name) }}</strong>
                   </div>
-                  <p>{{ capability.allowed ? '允许' : capability.reasons.join('、') }}</p>
+                  <p>{{ capability.allowed ? '允许' : capability.reasons.map(capabilityReasonLabel).join('、') }}</p>
                 </article>
+              </div>
+            </section>
+
+            <section v-if="planTasks.length" class="content-card">
+              <div class="section-title">
+                <div>
+                  <h3>计划内容</h3>
+                  <span>{{ planCompareHint }}</span>
+                </div>
+                <div class="plan-heading-actions">
+                  <div v-if="planProjectPeriod" class="plan-period">
+                    <CalendarDays :size="16" />
+                    <span>{{ planProjectPeriod }}</span>
+                  </div>
+                  <a-segmented
+                    v-if="planCompareAvailable"
+                    v-model:value="planCompareMode"
+                    size="small"
+                    :options="[
+                      { label: sourcePresentation.label, value: 'source' },
+                      { label: '方案对比', value: 'comparison' }
+                    ]"
+                  />
+                </div>
+              </div>
+
+              <a-table
+                :columns="planColumns"
+                :data-source="planCompareMode === 'comparison' ? comparisonTaskRows : planTasks"
+                :pagination="false"
+                row-key="task_id"
+                size="small"
+                :row-class-name="planRowClass"
+                class="plan-table"
+              >
+                <template #bodyCell="{ column, record }">
+                  <template v-if="column.key === 'name'">
+                    <span
+                      class="plan-task-name"
+                      :class="{ 'plan-task-summary': record.task_type === 'summary' }"
+                      :style="{ paddingLeft: `${Math.max(record.outline_level - 1, 0) * 18 + 4}px` }"
+                    >
+                      {{ record.name }}
+                      <a-tag v-if="record.active === false" class="plan-inactive-tag">inactive</a-tag>
+                    </span>
+                  </template>
+                  <template v-else-if="column.key === 'type'">
+                    <a-tag v-if="record.task_type === 'summary'" color="default">汇总</a-tag>
+                    <a-tag v-else-if="record.duration_minutes === 0" color="blue">里程碑</a-tag>
+                    <span v-else class="plan-type-plain">活动</span>
+                  </template>
+                  <template v-else-if="column.key === 'duration'">
+                    {{ formatWorkMinutes(record.duration_minutes) }}
+                  </template>
+                  <template v-else-if="column.key === 'start'">
+                    {{ formatScheduleDate(record.planned_start) }}
+                  </template>
+                  <template v-else-if="column.key === 'finish'">
+                    {{ formatScheduleDate(record.planned_finish) }}
+                  </template>
+                  <template v-else-if="column.key === 'before_start'">
+                    {{ formatScheduleDate(record.before?.start) }}
+                  </template>
+                  <template v-else-if="column.key === 'before_finish'">
+                    {{ formatScheduleDate(record.before?.finish) }}
+                  </template>
+                  <template v-else-if="column.key === 'optimized_start'">
+                    {{ formatScheduleDate(record.optimized?.start) }}
+                  </template>
+                  <template v-else-if="column.key === 'optimized_finish'">
+                    {{ formatScheduleDate(record.optimized?.finish) }}
+                  </template>
+                </template>
+              </a-table>
+
+              <ScheduleComparisonGantt
+                v-if="planCompareMode === 'comparison'"
+                :rows="comparisonTaskRows"
+                :finish-before="comparisonFinishBefore"
+                :finish-after="comparisonFinishAfter"
+                :source-label="isGoalCandidate ? '基线（未优化重算）' : sourcePresentation.label"
+                :optimized-label="isGoalCandidate ? '优化后' : 'Yuxi 候选计算日期'"
+                :before-label="isGoalCandidate ? '基线完成' : '来源完成'"
+                :after-label="isGoalCandidate ? '优化完成' : '重算完成'"
+              />
+              <div v-else-if="planGantt" class="gantt-scroll">
+                <div class="gantt-canvas" :style="{ width: `${planGantt.canvasWidth}px` }">
+                  <div class="gantt-header">
+                    <span class="gantt-label gantt-header-label">任务</span>
+                    <div class="gantt-track">
+                      <div
+                        v-for="day in planGantt.days"
+                        :key="day.key"
+                        class="gantt-day"
+                        :class="{ 'gantt-day-weekend': day.weekend }"
+                        :style="{ width: `${planGantt.dayWidth}px` }"
+                      >
+                        {{ day.label }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="gantt-body">
+                    <div
+                      v-for="cell in planGantt.weekendCells"
+                      :key="cell.key"
+                      class="gantt-weekend-cell"
+                      :style="{ left: `${cell.left}px`, width: `${cell.width}px` }"
+                    />
+                    <div
+                      v-for="row in planGantt.rows"
+                      :key="row.task_id"
+                      class="gantt-row"
+                      :class="{
+                        'gantt-row-summary': row.task_type === 'summary',
+                        'gantt-row-inactive': row.active === false
+                      }"
+                    >
+                      <span class="gantt-label" :title="`${row.wbs} ${row.name}`">
+                        {{ row.wbs }} {{ row.name }}
+                        <span v-if="row.active === false" class="gantt-task-kind">inactive</span>
+                      </span>
+                      <div class="gantt-track">
+                        <div
+                          class="gantt-bar"
+                          :class="{
+                            'gantt-bar-summary': row.task_type === 'summary',
+                            'gantt-bar-milestone': row.isMilestone,
+                            'gantt-bar-inactive': row.active === false
+                          }"
+                          :style="row.barStyle"
+                          :title="`${row.name}：${formatScheduleDate(row.planned_start)} → ${formatScheduleDate(row.planned_finish)}`"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -185,15 +347,33 @@
                   <span>计算最早/最晚日期、浮时与关键任务；负 Lag、多日历和其他范围外输入会明确阻断</span>
                 </div>
                 <a-space>
-                  <a-button :loading="recalculatingForward" @click="recalculateForward">
+                  <a-button
+                    :loading="recalculatingForward"
+                    :disabled="!cpmAction.allowed"
+                    :title="cpmBlockedReason"
+                    @click="recalculateForward"
+                  >
                     生成重算方案
                   </a-button>
-                  <a-button type="primary" :disabled="!selectedSnapshotId" @click="openGoalOptimization">
+                  <a-button
+                    type="primary"
+                    :disabled="!selectedSnapshotId || !cpmAction.allowed"
+                    :title="cpmBlockedReason"
+                    @click="openGoalOptimization"
+                  >
                     <Target :size="16" />
                     工期目标优化
                   </a-button>
                 </a-space>
               </div>
+              <a-alert
+                v-if="!cpmAction.allowed"
+                type="warning"
+                show-icon
+                message="当前来源不能生成重算或优化方案"
+                :description="cpmBlockedReason"
+                class="workbench-alert"
+              />
               <a-alert
                 v-if="forwardBlockedResult"
                 type="warning"
@@ -211,6 +391,41 @@
                   </code>
                 </div>
               </div>
+            </section>
+
+            <section class="content-card">
+              <div class="section-title issue-title">
+                <div>
+                  <h3>已生成方案</h3>
+                  <span>当前快照已生成的重算与优化候选，可随时重新打开审阅</span>
+                </div>
+                <a-button size="small" :loading="loadingCandidates" @click="loadCandidates">刷新</a-button>
+              </div>
+              <a-spin :spinning="loadingCandidates">
+                <div v-if="candidates.length" class="candidate-list">
+                  <div v-for="item in candidates" :key="item.candidate_snapshot_id" class="candidate-list-row">
+                    <a-tag :color="candidateKindTagColor(item.candidate_kind)">
+                      {{ candidateKindLabelOf(item.candidate_kind) }}
+                    </a-tag>
+                    <a-tag :color="item.candidate_status === 'valid' ? 'green' : 'red'">
+                      {{ item.candidate_status === 'valid' ? '有效' : '不可应用' }}
+                    </a-tag>
+                    <a-tag :color="attitudeTagColor(item.user_attitude)">{{ attitudeLabel(item.user_attitude) }}</a-tag>
+                    <span class="candidate-list-summary">
+                      <template v-if="item.comparison?.finish_before && item.comparison?.finish_after">
+                        {{ formatScheduleDate(item.comparison.finish_before) }}
+                        → {{ formatScheduleDate(item.comparison.finish_after) }}
+                      </template>
+                      <template v-else>{{ candidateKindLabelOf(item.candidate_kind) }}</template>
+                    </span>
+                    <small>{{ formatDate(item.created_at) }}</small>
+                    <a-button type="link" size="small" @click="openCandidate(item.candidate_snapshot_id)">
+                      打开方案
+                    </a-button>
+                  </div>
+                </div>
+                <a-empty v-else image="simple" description="尚未生成方案，可先执行排期重算或工期目标优化" />
+              </a-spin>
             </section>
 
             <section class="content-card">
@@ -264,7 +479,7 @@
                     <a-space>
                       <a-button type="link" size="small" @click="openIssue(record.issue_id)">证据</a-button>
                       <a-button
-                        v-if="record.rule_id === 'SUMMARY_TASK_DEPENDENCY'"
+                        v-if="['SUMMARY_TASK_DEPENDENCY', 'INACTIVE_TASK_DEPENDENCY'].includes(record.rule_id)"
                         type="link"
                         size="small"
                         @click="openDependencyWorkbench(record.issue_id)"
@@ -322,25 +537,42 @@
       </a-spin>
     </a-drawer>
 
-    <a-drawer v-model:open="workbenchOpen" title="汇总依赖确认工作台" width="760">
+    <a-drawer v-model:open="workbenchOpen" title="依赖确认工作台" width="760">
       <a-spin :spinning="loadingWorkbench">
         <template v-if="dependencyWorkbench">
           <a-alert
             type="info"
             show-icon
-            message="这里只记录业务确认，不修改来源排期，也不运行日期计算。"
+            :message="dependencyWorkbench.issue.rule_id === 'INACTIVE_TASK_DEPENDENCY'
+              ? 'inactive 任务不会被自动跨接；请选择明确的活动叶子关系。'
+              : '汇总依赖不会被自动展开；请选择明确的叶子关系。'"
+            description="这里只记录业务确认，不修改来源排期，也不运行日期计算。"
             class="workbench-alert"
           />
           <a-descriptions :column="1" bordered size="small">
-            <a-descriptions-item label="原关系">
+            <a-descriptions-item label="原关系" v-if="dependencyWorkbench.source_dependencies.length === 1">
               {{ dependencyWorkbench.source_dependency.predecessor_task_id }}
               → {{ dependencyWorkbench.source_dependency.successor_task_id }}
             </a-descriptions-item>
-            <a-descriptions-item label="类型 / Lag">
+            <a-descriptions-item label="原关系" v-else>
+              <div v-for="edge in dependencyWorkbench.source_dependencies" :key="edge.dependency_id">
+                <code>{{ edge.predecessor_task_id }} → {{ edge.successor_task_id }}</code>
+                <span> · {{ edge.type }} / Lag {{ edge.lag_minutes }} 分钟</span>
+              </div>
+            </a-descriptions-item>
+            <a-descriptions-item v-if="dependencyWorkbench.source_dependencies.length === 1" label="类型 / Lag">
               {{ dependencyWorkbench.source_dependency.type }} /
               {{ dependencyWorkbench.source_dependency.lag_minutes }} 分钟
             </a-descriptions-item>
           </a-descriptions>
+          <a-alert
+            v-if="dependencyWorkbench.source_dependencies.length > 1 && !sourceDependencyDefaults"
+            type="warning"
+            show-icon
+            message="多条来源关系的类型或 Lag 不一致"
+            description="替代关系参数不会沿用任意一条来源关系，请在下方重新明确选择关系类型和 Lag。"
+            class="workbench-alert"
+          />
 
           <div class="task-context-grid">
             <section>
@@ -353,6 +585,7 @@
                   :style="{ paddingLeft: `${Math.max(task.outline_level - 1, 0) * 14 + 10}px` }"
                 >
                   <span>{{ task.wbs }} {{ task.name }}</span>
+                  <a-tag v-if="task.active === false">inactive</a-tag>
                   <a-tag
                     v-if="dependencyWorkbench.predecessor.candidate_task_ids.includes(task.task_id)"
                     color="blue"
@@ -372,6 +605,7 @@
                   :style="{ paddingLeft: `${Math.max(task.outline_level - 1, 0) * 14 + 10}px` }"
                 >
                   <span>{{ task.wbs }} {{ task.name }}</span>
+                  <a-tag v-if="task.active === false">inactive</a-tag>
                   <a-tag
                     v-if="dependencyWorkbench.successor.candidate_task_ids.includes(task.task_id)"
                     color="cyan"
@@ -440,10 +674,15 @@
                     v-model:value="decisionForm.dependency_type"
                     :disabled="decisionConfirmed"
                     :options="dependencyTypeOptions"
+                    placeholder="请选择替代关系类型"
                   />
                 </a-form-item>
                 <a-form-item label="Lag（分钟）">
-                  <a-input-number v-model:value="decisionForm.lag_minutes" :disabled="decisionConfirmed" />
+                  <a-input-number
+                    v-model:value="decisionForm.lag_minutes"
+                    :disabled="decisionConfirmed"
+                    placeholder="请输入替代关系 Lag"
+                  />
                 </a-form-item>
               </div>
             </template>
@@ -493,6 +732,7 @@
     <a-modal
       v-model:open="goalModalOpen"
       title="工期目标优化"
+      width="min(760px, 96vw)"
       ok-text="确认授权并生成候选"
       cancel-text="取消"
       :confirm-loading="goalSubmitting"
@@ -511,24 +751,61 @@
           />
         </a-form-item>
         <a-form-item label="允许压缩的活动任务" required>
-          <a-select
-            v-model:value="goalForm.taskId"
-            show-search
-            option-filter-prop="label"
-            :options="goalTaskOptions"
-            placeholder="选择一个已确认可压缩的自动任务"
-            @change="handleGoalTaskChange"
-          />
-        </a-form-item>
-        <a-form-item label="授权后的工期（工作分钟）" required>
-          <a-input-number
-            v-model:value="goalForm.durationMinutes"
-            :min="1"
-            :max="selectedGoalTaskDuration ? selectedGoalTaskDuration - 1 : undefined"
-            style="width: 100%"
-          />
-          <div v-if="selectedGoalTaskDuration" class="field-hint">
-            来源工期 {{ selectedGoalTaskDuration }} 分钟；这里只填写业务已确认可实现的工期。
+          <div class="goal-authorization-list">
+            <div class="goal-authorization-header">
+              <span>活动任务</span>
+              <span>授权后工期（工作分钟）</span>
+              <span />
+            </div>
+            <div
+              v-for="authorization in goalForm.authorizedDurationOptions"
+              :key="authorization.authorizationId"
+              class="goal-authorization-item"
+            >
+              <div class="goal-authorization-row">
+                <a-select
+                  v-model:value="authorization.taskId"
+                  class="goal-authorization-task"
+                  show-search
+                  option-filter-prop="label"
+                  :options="goalTaskOptionsFor(authorization.taskId)"
+                  placeholder="选择已确认可压缩的自动任务"
+                  aria-label="允许压缩的活动任务"
+                  @change="handleGoalTaskChange(authorization)"
+                />
+                <a-input-number
+                  v-model:value="authorization.durationMinutes"
+                  class="goal-authorization-duration"
+                  :min="1"
+                  :max="goalTaskDuration(authorization.taskId) ? goalTaskDuration(authorization.taskId) - 1 : undefined"
+                  :precision="0"
+                  :disabled="!authorization.taskId"
+                  placeholder="填写授权后工期"
+                  aria-label="授权后的工期（工作分钟）"
+                />
+                <a-button
+                  v-if="goalForm.authorizedDurationOptions.length > 1"
+                  type="text"
+                  danger
+                  class="goal-authorization-remove"
+                  @click="removeGoalAuthorization(authorization.authorizationId)"
+                >
+                  移除
+                </a-button>
+              </div>
+              <div v-if="goalTaskDuration(authorization.taskId)" class="field-hint">
+                来源工期 {{ goalTaskDuration(authorization.taskId) }} 分钟；这里只填写业务已确认可实现的工期。
+              </div>
+            </div>
+            <a-button
+              block
+              type="dashed"
+              :disabled="!canAddGoalAuthorization"
+              @click="addGoalAuthorization"
+            >
+              添加授权任务（{{ goalForm.authorizedDurationOptions.length }}/10）
+            </a-button>
+            <div class="field-hint">系统会比较基线及所有已授权任务组合，并按主要目标选择方案。</div>
           </div>
         </a-form-item>
         <a-form-item label="锁定任务日期">
@@ -537,7 +814,7 @@
             mode="multiple"
             show-search
             option-filter-prop="label"
-            :options="goalTaskOptions"
+            :options="goalLockTaskOptions"
             placeholder="可选；锁定任务不得因依赖要求移动"
           />
         </a-form-item>
@@ -566,7 +843,7 @@
       </a-form>
     </a-modal>
 
-    <a-drawer v-model:open="candidateOpen" :title="candidateDrawerTitle" width="min(1120px, 96vw)">
+    <a-drawer v-model:open="candidateOpen" :title="candidateDrawerTitle" width="min(1480px, 98vw)">
       <a-spin :spinning="loadingCandidate">
         <template v-if="candidateDetail">
           <a-alert
@@ -588,6 +865,12 @@
             </a-descriptions-item>
             <a-descriptions-item label="审阅状态">{{ userAttitudeLabel }}</a-descriptions-item>
             <a-descriptions-item label="变更类型">{{ candidateKindLabel }}</a-descriptions-item>
+            <a-descriptions-item label="基础 Source Hash" :span="2">
+              <code>{{ candidateDetail.base_snapshot_content_sha256 }}</code>
+            </a-descriptions-item>
+            <a-descriptions-item label="日期性质" :span="2">
+              Yuxi 候选计算日期；只用于审阅和受控 Delivery，不覆盖 Source
+            </a-descriptions-item>
           </a-descriptions>
 
           <h4>请求变更</h4>
@@ -624,7 +907,9 @@
             <a-descriptions :column="2" bordered size="small">
               <a-descriptions-item label="受影响任务">{{ candidateDetail.comparison.affected_task_count }}</a-descriptions-item>
               <a-descriptions-item label="关键活动任务">{{ forwardCriticalCount }}</a-descriptions-item>
-              <a-descriptions-item label="来源完成">{{ formatScheduleDate(candidateDetail.comparison.finish_before) }}</a-descriptions-item>
+              <a-descriptions-item :label="isGoalCandidate ? '基线完成' : '来源完成'">
+                {{ formatScheduleDate(candidateDetail.comparison.finish_before) }}
+              </a-descriptions-item>
               <a-descriptions-item :label="isGoalCandidate ? '优化完成' : '重算完成'">
                 {{ formatScheduleDate(candidateDetail.comparison.finish_after) }}
               </a-descriptions-item>
@@ -641,11 +926,60 @@
                 </a-descriptions-item>
               </template>
             </a-descriptions>
+            <template v-if="candidateConstraintIssues.length">
+              <h4>约束、进度与截止日期提示</h4>
+              <div class="patch-list">
+                <div v-for="issue in candidateConstraintIssues" :key="`${issue.rule_id}-${issue.object_refs.join('-')}`">
+                  <a-tag color="orange">{{ constraintIssueLabel(issue.rule_id) }}</a-tag>
+                  <span>{{ issue.message }}</span>
+                  <small>{{ constraintIssueEvidence(issue) }}</small>
+                </div>
+              </div>
+            </template>
+            <template v-if="candidateResourceConflicts.length">
+              <h4>资源超配</h4>
+              <div class="patch-list">
+                <div
+                  v-for="conflict in candidateResourceConflicts"
+                  :key="`${conflict.resource_id}-${conflict.overlap_start}-${conflict.overlap_finish}`"
+                >
+                  <a-tag color="orange">{{ conflict.resource_id }}</a-tag>
+                  <span>{{ conflict.task_ids.join('、') }}</span>
+                  <small>
+                    {{ formatScheduleDate(conflict.overlap_start) }} 至
+                    {{ formatScheduleDate(conflict.overlap_finish) }}；分配
+                    {{ formatResourceNumber(conflict.combined_units) }} / 可用
+                    {{ formatResourceNumber(conflict.max_units) }}
+                  </small>
+                </div>
+              </div>
+            </template>
+            <template v-if="candidateAssignmentCosts.length">
+              <h4>Assignment 成本分析</h4>
+              <div class="patch-list">
+                <div v-for="item in candidateAssignmentCosts" :key="item.assignment_id">
+                  <a-tag color="blue">{{ item.assignment_id }}</a-tag>
+                  <span>工作量 {{ formatWorkMinutes(item.work_minutes) }}</span>
+                  <small>成本数值 {{ formatResourceNumber(item.cost) }}</small>
+                </div>
+              </div>
+            </template>
+            <h4>方案对比</h4>
+            <ScheduleComparisonGantt
+              :rows="comparisonTaskRows"
+              :finish-before="comparisonFinishBefore"
+              :finish-after="comparisonFinishAfter"
+              :source-label="isGoalCandidate ? '基线（未优化重算）' : sourcePresentation.label"
+              :optimized-label="isGoalCandidate ? '优化后' : 'Yuxi 候选计算日期'"
+              :before-label="isGoalCandidate ? '基线完成' : '来源完成'"
+              :after-label="isGoalCandidate ? '优化完成' : '重算完成'"
+            />
             <a-table
               :columns="forwardResultColumns"
               :data-source="forwardTaskResults"
               :pagination="false"
-              :scroll="{ x: 1080 }"
+              :scroll="{ x: 1440 }"
+              :row-class-name="candidateResultRowClass"
               row-key="task_id"
               size="small"
               class="schedule-result-table"
@@ -657,7 +991,11 @@
                     <span>{{ record.wbs || record.task_id }}</span>
                     <div>
                       <a-tag v-if="record.summary">汇总</a-tag>
-                      <a-tag v-if="record.changed" color="blue">日期有变化</a-tag>
+                      <a-tag v-if="record.active === false">inactive · 已排除</a-tag>
+                      <a-tag v-if="record.duration_optimized" color="green">工期已优化</a-tag>
+                      <a-tag v-if="record.changed" color="blue">
+                        {{ isGoalCandidate ? (record.duration_optimized ? '优化日期变化' : '日期联动调整') : '日期有变化' }}
+                      </a-tag>
                     </div>
                   </div>
                 </template>
@@ -667,10 +1005,35 @@
                     <span>终 {{ formatScheduleDate(record.source_finish) }}</span>
                   </div>
                 </template>
+                <template v-else-if="column.key === 'actual_period'">
+                  <div class="result-period">
+                    <a-tag
+                      v-if="record.status"
+                      :color="record.status === 'COMPLETED' ? 'green' : record.status === 'IN_PROGRESS' ? 'orange' : 'default'"
+                    >
+                      {{ progressStatusLabel(record.status) }}
+                    </a-tag>
+                    <span>始 {{ formatScheduleDate(record.actual_start) }}</span>
+                    <span>终 {{ formatScheduleDate(record.actual_finish) }}</span>
+                    <span v-if="record.status === 'IN_PROGRESS'">
+                      剩余 {{ formatWorkMinutes(record.remaining_duration_minutes) }}，从
+                      {{ formatScheduleDate(record.remaining_start) }} 排起
+                    </span>
+                  </div>
+                </template>
+                <template v-else-if="column.key === 'baseline_period'">
+                  <div class="result-period">
+                    <span>始 {{ formatScheduleDate(record.baseline_start) }}</span>
+                    <span>终 {{ formatScheduleDate(record.baseline_finish) }}</span>
+                  </div>
+                </template>
                 <template v-else-if="column.key === 'early_period'">
                   <div class="result-period">
-                    <span>始 {{ formatScheduleDate(record.early_start) }}</span>
-                    <span>终 {{ formatScheduleDate(record.early_finish) }}</span>
+                    <span v-if="record.calculation_status === 'excluded_inactive'">不参与重算，显示来源日期</span>
+                    <template v-else>
+                      <span>始 {{ formatScheduleDate(record.early_start) }}</span>
+                      <span>终 {{ formatScheduleDate(record.early_finish) }}</span>
+                    </template>
                   </div>
                 </template>
                 <template v-else-if="column.key === 'late_period'">
@@ -687,7 +1050,7 @@
                 </template>
                 <template v-else-if="column.key === 'critical'">
                   <a-tag :color="record.critical ? 'red' : 'default'">
-                    {{ record.critical ? '关键' : '非关键' }}
+                    {{ record.calculation_status === 'excluded_inactive' ? '不参与计算' : (record.critical ? '关键' : '非关键') }}
                   </a-tag>
                 </template>
               </template>
@@ -789,10 +1152,18 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { Ban, CheckCircle2, MessageSquareText, Target, Upload } from 'lucide-vue-next'
+import { Ban, CalendarDays, CheckCircle2, MessageSquareText, Target, Upload } from 'lucide-vue-next'
 import { scheduleApi } from '@/apis/schedule_api'
+import ScheduleComparisonGantt from '@/components/schedule/ScheduleComparisonGantt.vue'
 import ScheduleImportModal from '@/components/schedule/ScheduleImportModal.vue'
 import { buildScheduleReviewRouteQuery } from '@/utils/scheduleAgentEntry'
+import { ganttBar, ganttDayWidth, ganttDays, ganttWindow } from '@/utils/scheduleGantt'
+import {
+  cpmActionState,
+  isGoalOptimizableTask,
+  scheduleSourcePresentation,
+  uniformDependencyParameters
+} from '@/utils/scheduleReview'
 
 const route = useRoute()
 const router = useRouter()
@@ -829,6 +1200,9 @@ const candidateDetail = ref(null)
 const deliveryDetail = ref(null)
 const acceptanceEvidence = ref(null)
 const forwardBlockedResult = ref(null)
+const planCompareMode = ref('source')
+const candidates = ref([])
+const loadingCandidates = ref(false)
 const goalModalOpen = ref(false)
 const goalSubmitting = ref(false)
 const goalTargetFinish = ref(null)
@@ -850,16 +1224,46 @@ const decisionForm = reactive({
   lag_minutes: 0,
   reason: ''
 })
+let goalAuthorizationSequence = 0
+const createGoalAuthorization = () => ({
+  authorizationId: `goal-authorization-${goalAuthorizationSequence++}`,
+  taskId: '',
+  durationMinutes: null
+})
 const goalForm = reactive({
   objective: 'MEET_TARGET_FINISH',
-  taskId: '',
-  durationMinutes: null,
+  authorizedDurationOptions: [createGoalAuthorization()],
   lockedTaskIds: [],
   authorizationConfirmed: false
 })
 
 const SNAPSHOT_PAGE_SIZE = 50
 const ISSUE_PAGE_SIZE = 100
+const PLAN_LABEL_WIDTH = 220
+
+const planColumns = computed(() => {
+  if (planCompareMode.value !== 'comparison') {
+    return [
+      { title: 'WBS', dataIndex: 'wbs', key: 'wbs', width: 90 },
+      { title: '任务名称', key: 'name' },
+      { title: '类型', key: 'type', width: 80 },
+      { title: '工期', key: 'duration', width: 130 },
+      { title: sourcePresentation.value.label.replace('日期', '开始'), key: 'start', width: 220 },
+      { title: sourcePresentation.value.label.replace('日期', '完成'), key: 'finish', width: 220 }
+    ]
+  }
+  const goal = isGoalCandidate.value
+  return [
+    { title: 'WBS', dataIndex: 'wbs', key: 'wbs', width: 90 },
+    { title: '任务名称', key: 'name' },
+    { title: '类型', key: 'type', width: 80 },
+    { title: '工期', key: 'duration', width: 130 },
+    { title: goal ? '基线开始' : '计划开始', key: 'before_start', width: 200 },
+    { title: goal ? '基线完成' : '计划完成', key: 'before_finish', width: 200 },
+    { title: goal ? '优化开始' : 'Yuxi 候选开始', key: 'optimized_start', width: 200 },
+    { title: goal ? '优化完成' : 'Yuxi 候选完成', key: 'optimized_finish', width: 200 }
+  ]
+})
 
 const severityOptions = [
   { label: 'Blocker', value: 'blocker' },
@@ -876,6 +1280,8 @@ const issueColumns = [
 const forwardResultColumns = [
   { title: '任务', key: 'task', width: 220, fixed: 'left' },
   { title: '来源计划', key: 'source_period', width: 180 },
+  { title: '实际事实', key: 'actual_period', width: 180 },
+  { title: 'Baseline 0', key: 'baseline_period', width: 180 },
   { title: '最早日期', key: 'early_period', width: 180 },
   { title: '最晚日期', key: 'late_period', width: 180 },
   { title: '总浮时', key: 'total_slack', width: 120 },
@@ -887,6 +1293,7 @@ const categoryOptions = [
   { label: '网络', value: 'network' },
   { label: '依赖', value: 'dependency' },
   { label: '项目管理', value: 'management' },
+  { label: '约束与截止日期', value: 'constraint' },
   { label: '资源', value: 'resource' },
   { label: '引擎边界', value: 'engine_contract' }
 ]
@@ -930,6 +1337,9 @@ const importOverview = computed(() => {
     sourceSchemaVersion: detail.source_schema_version,
     adapterId: detail.adapter_id,
     adapterVersion: detail.adapter_version,
+    sourceDocumentSha256: detail.source_document_sha256,
+    canonicalSnapshotSha256: detail.canonical_snapshot_sha256,
+    extractionMethod: detail.snapshot?.source?.extraction_method || '未提供',
     preservedFieldCount: (report.preserved_fields || []).length,
     ignoredAuditCount: (report.ignored_for_audit || []).length,
     ignoredCalculationCount: (report.ignored_for_calculation || []).length,
@@ -941,7 +1351,74 @@ const importOverview = computed(() => {
     cpm: audit.value?.capabilities?.cpm_recalculation || { allowed: false, reasons: [] }
   }
 })
+const sourcePresentation = computed(() =>
+  scheduleSourcePresentation(snapshotDetail.value?.snapshot)
+)
+const cpmAction = computed(() => cpmActionState(audit.value))
+const cpmBlockedReason = computed(() =>
+  cpmAction.value.allowed
+    ? ''
+    : cpmAction.value.reasons.map(capabilityReasonLabel).join('、') || '当前快照未声明 CPM 重算能力'
+)
+const planTasks = computed(() => snapshotDetail.value?.snapshot?.tasks || [])
+const planProjectPeriod = computed(() => {
+  const project = snapshotDetail.value?.snapshot?.project
+  if (!project?.planned_start || !project?.planned_finish) return ''
+  return `${formatScheduleDate(project.planned_start)} → ${formatScheduleDate(project.planned_finish)}`
+})
+const planCompareHint = computed(() => {
+  if (planCompareMode.value !== 'comparison') {
+    return '来源计划日期与任务结构；甘特条表示计划起止的日历跨度，不按工作日历折算'
+  }
+  return isGoalCandidate.value
+    ? '引擎基线（未优化重算）与优化后方案对比；甘特条为日历跨度，不按工作日历折算'
+    : '来源计划与重算结果对比；甘特条为日历跨度，不按工作日历折算'
+})
+const planGantt = computed(() => {
+  const project = snapshotDetail.value?.snapshot?.project || {}
+  const window = ganttWindow(project.planned_start, project.planned_finish, planTasks.value)
+  if (!window) return null
+  const dayWidth = ganttDayWidth(window.days)
+  const days = ganttDays(window)
+  const weekendCells = days
+    .filter((day) => day.weekend)
+    .map((day) => ({ key: day.key, left: PLAN_LABEL_WIDTH + day.index * dayWidth, width: dayWidth }))
+  const rows = planTasks.value.map((task) => {
+    const bar = ganttBar(task.planned_start, task.planned_finish, window)
+    const left = PLAN_LABEL_WIDTH + bar.startIndex * dayWidth
+    return {
+      task_id: task.task_id,
+      wbs: task.wbs || '',
+      name: task.name || task.task_id,
+      task_type: task.task_type,
+      isMilestone: task.duration_minutes === 0,
+      planned_start: task.planned_start,
+      planned_finish: task.planned_finish,
+      barStyle: task.duration_minutes === 0
+        ? { left: `${left + dayWidth / 2 - 4}px` }
+        : { left: `${left + 1}px`, width: `${Math.max(bar.spanDays * dayWidth - 2, 6)}px` }
+    }
+  })
+  return { dayWidth, canvasWidth: PLAN_LABEL_WIDTH + window.days * dayWidth, days, weekendCells, rows }
+})
+const planRowClass = (record) =>
+  [record.task_type === 'summary' ? 'plan-row-summary' : '', record.active === false ? 'plan-row-inactive' : '']
+    .filter(Boolean)
+    .join(' ')
+const formatWorkMinutes = (minutes) => {
+  if (minutes === null || minutes === undefined) return '—'
+  if (minutes === 0) return '0 分钟'
+  if (minutes % 480 === 0) return `${minutes / 480} 个工作日`
+  return `${minutes} 分钟`
+}
+const formatResourceNumber = (value) =>
+  Number.isFinite(Number(value))
+    ? Number(value).toLocaleString('zh-CN', { maximumFractionDigits: 4 })
+    : '—'
 const decisionConfirmed = computed(() => dependencyWorkbench.value?.decision?.status === 'confirmed')
+const sourceDependencyDefaults = computed(() =>
+  uniformDependencyParameters(dependencyWorkbench.value?.source_dependencies)
+)
 const candidateEligible = computed(
   () => decisionConfirmed.value && dependencyWorkbench.value?.decision?.resolution === 'replace_with_leaf_tasks'
 )
@@ -975,6 +1452,22 @@ const candidateKindLabel = computed(() =>
       ? '自动排期重算'
       : '依赖关系调整'
 )
+const candidateKindLabelOf = (kind) =>
+  ({
+    goal_duration_optimization: '工期目标优化',
+    automatic_forward_recalculation: '排期重算',
+    dependency_normalization: '依赖关系调整'
+  })[kind] || kind
+const candidateKindTagColor = (kind) =>
+  ({
+    goal_duration_optimization: 'blue',
+    automatic_forward_recalculation: 'cyan',
+    dependency_normalization: 'purple'
+  })[kind] || 'default'
+const attitudeLabel = (attitude) =>
+  ({ accepted: '已接受', rejected: '已拒绝', not_reviewed: '待审阅' })[attitude] || attitude
+const attitudeTagColor = (attitude) =>
+  ({ accepted: 'green', rejected: 'orange', not_reviewed: 'default' })[attitude] || 'default'
 const candidateNotice = computed(() =>
   isGoalCandidate.value
     ? '系统只比较基线与明确授权的任务工期组合；依赖、Lag、日历、里程碑和任务模式保持不变。'
@@ -989,45 +1482,127 @@ const goalObjectiveLabel = computed(
 )
 const goalTaskOptions = computed(() =>
   (snapshotDetail.value?.snapshot?.tasks || [])
-    .filter(
-      (task) =>
-        task.task_type === 'activity' &&
-        task.scheduling_mode === 'automatic' &&
-        task.duration_minutes > 1
-    )
+    .filter(isGoalOptimizableTask)
     .map((task) => ({
       value: task.task_id,
       label: `${task.wbs || task.task_id} ${task.name} · ${task.duration_minutes} 分钟`,
       durationMinutes: task.duration_minutes
     }))
 )
-const selectedGoalTaskDuration = computed(
-  () => goalTaskOptions.value.find((item) => item.value === goalForm.taskId)?.durationMinutes || 0
+const selectedGoalTaskIds = computed(
+  () => new Set(goalForm.authorizedDurationOptions.map((item) => item.taskId).filter(Boolean))
 )
+const goalLockTaskOptions = computed(() =>
+  goalTaskOptions.value.filter((option) => !selectedGoalTaskIds.value.has(option.value))
+)
+const canAddGoalAuthorization = computed(
+  () =>
+    goalForm.authorizedDurationOptions.length < 10 &&
+    goalForm.authorizedDurationOptions.length < goalTaskOptions.value.length
+)
+const goalTaskDuration = (taskId) =>
+  goalTaskOptions.value.find((item) => item.value === taskId)?.durationMinutes || 0
+const goalTaskOptionsFor = (currentTaskId) =>
+  goalTaskOptions.value.filter(
+    (option) => option.value === currentTaskId || !selectedGoalTaskIds.value.has(option.value)
+  )
 const candidateEngineResult = computed(() => {
   const result = candidateDetail.value?.candidate_snapshot?.engine_result
   return isGoalCandidate.value ? result?.selected_strategy?.engine_result : result
 })
+const candidateConstraintIssues = computed(
+  () => candidateDetail.value?.candidate_audit?.issues?.filter((issue) => issue.category === 'constraint') || []
+)
+const candidateResourceConflicts = computed(
+  () => candidateEngineResult.value?.resource_conflicts || []
+)
+const candidateAssignmentCosts = computed(
+  () => candidateEngineResult.value?.assignment_costs || []
+)
 const forwardTaskResults = computed(() => {
   const document = candidateDetail.value?.candidate_snapshot
   const tasks = new Map(
     (document?.candidate_schedule?.tasks || []).map((task) => [task.task_id, task])
   )
-  return (candidateEngineResult.value?.task_dates || []).map((result) => {
+  const optimizedTaskIds = new Set(
+    (isGoalCandidate.value ? candidateDetail.value?.effective_patch?.duration_changes || [] : [])
+      .map((change) => change.task_id)
+  )
+  const rows = (candidateEngineResult.value?.task_dates || []).map((result) => {
     const task = tasks.get(result.task_id) || {}
     return {
       ...result,
       name: task.name || result.task_id,
       wbs: task.wbs || '',
+      outline_level: task.outline_level ?? 99,
+      task_type: task.task_type || (result.summary ? 'summary' : 'activity'),
+      duration_minutes: task.duration_minutes,
       summary: result.summary ?? task.task_type === 'summary',
+      duration_optimized: optimizedTaskIds.has(result.task_id),
       changed: result.start_changed || result.finish_changed
     }
   })
+  const order = new Map(planTasks.value.map((task, index) => [task.task_id, index]))
+  return rows.sort((a, b) => {
+    const left = order.get(a.task_id) ?? 999
+    const right = order.get(b.task_id) ?? 999
+    return left - right || (a.task_id < b.task_id ? -1 : a.task_id > b.task_id ? 1 : 0)
+  })
 })
+const candidateResultRowClass = (record) => {
+  if (!isGoalCandidate.value) return ''
+  if (record.duration_optimized) return 'schedule-result-row-optimized'
+  return record.changed ? 'schedule-result-row-affected' : ''
+}
 const forwardCriticalCount = computed(
   () => forwardTaskResults.value.filter((task) => task.critical && !task.summary).length
 )
+const goalBaselineEngineResult = computed(() => {
+  const result = candidateDetail.value?.candidate_snapshot?.engine_result
+  return isGoalCandidate.value ? result?.baseline_result : null
+})
+const candidateForCurrentSnapshot = computed(() => {
+  const detail = candidateDetail.value
+  if (!detail || !isEngineCandidate.value) return null
+  if (detail.base_schedule_snapshot_id !== selectedSnapshotId.value) return null
+  return detail
+})
+const planCompareAvailable = computed(() => Boolean(candidateForCurrentSnapshot.value))
+const comparisonFinishBefore = computed(
+  () => candidateForCurrentSnapshot.value?.comparison?.finish_before || null
+)
+const comparisonFinishAfter = computed(
+  () => candidateForCurrentSnapshot.value?.comparison?.finish_after || null
+)
+const comparisonTaskRows = computed(() => {
+  const baselineRows = new Map(
+    (goalBaselineEngineResult.value?.task_dates || []).map((row) => [row.task_id, row])
+  )
+  return forwardTaskResults.value.map((row) => {
+    const before = isGoalCandidate.value
+      ? { start: baselineRows.get(row.task_id)?.early_start || row.source_start, finish: baselineRows.get(row.task_id)?.early_finish || row.source_finish }
+      : { start: row.source_start, finish: row.source_finish }
+    return {
+      task_id: row.task_id,
+      wbs: row.wbs,
+      name: row.name,
+      task_type: row.task_type,
+      summary: row.summary,
+      changed: row.changed,
+      outline_level: row.outline_level,
+      duration_minutes: row.duration_minutes,
+      active: row.active,
+      planned_start: before.start,
+      planned_finish: before.finish,
+      before,
+      optimized: { start: row.early_start, finish: row.early_finish }
+    }
+  })
+})
 const deliveryMessage = computed(() => {
+  if (deliveryDetail.value?.application_blocking_reasons?.includes('DELIVERY_ADAPTER_UNAVAILABLE')) {
+    return 'Delivery 可读取，但当前 Candidate 类型、Canonical 版本或来源组合没有受控回流适配器'
+  }
   if (!deliveryDetail.value?.application_allowed) return 'Delivery 可读取，但当前技术状态或来源版本不允许应用'
   return isEngineCandidate.value
     ? '可交付确定性引擎结果和 Patch 供外部业务流程审批；不会改写 Source'
@@ -1087,17 +1662,50 @@ const selectSnapshot = async (snapshotId) => {
   selectedSnapshotId.value = snapshotId
   loadingDetail.value = true
   pageError.value = ''
+  planCompareMode.value = 'source'
   try {
     ;[snapshotDetail.value, audit.value] = await Promise.all([
       scheduleApi.getSnapshot(snapshotId),
       scheduleApi.getAudit(snapshotId)
     ])
     await loadIssues(false)
+    await loadCandidates()
   } catch (error) {
     pageError.value = error.message || '快照不存在或当前用户无权访问'
     audit.value = null
   } finally {
     loadingDetail.value = false
+  }
+}
+
+const loadCandidates = async () => {
+  if (!selectedSnapshotId.value) return
+  loadingCandidates.value = true
+  try {
+    const response = await scheduleApi.listCandidates(selectedSnapshotId.value)
+    candidates.value = response.items || []
+  } catch {
+    candidates.value = []
+  } finally {
+    loadingCandidates.value = false
+  }
+}
+
+const openCandidate = async (candidateId) => {
+  candidateOpen.value = true
+  loadingCandidate.value = true
+  candidateDetail.value = null
+  try {
+    candidateDetail.value = await scheduleApi.getCandidate(candidateId)
+    const kind = candidateDetail.value?.candidate_kind
+    planCompareMode.value =
+      kind === 'goal_duration_optimization' || kind === 'automatic_forward_recalculation'
+        ? 'comparison'
+        : 'source'
+  } catch (error) {
+    message.error(error.message || '候选方案读取失败')
+  } finally {
+    loadingCandidate.value = false
   }
 }
 
@@ -1137,11 +1745,12 @@ const openIssue = async (issueId) => {
 }
 
 const applyDecision = (decision) => {
+  const sourceParameters = sourceDependencyDefaults.value
   decisionForm.resolution = decision?.resolution || 'replace_with_leaf_tasks'
   decisionForm.predecessor_task_ids = [...(decision?.predecessor_task_ids || [])]
   decisionForm.successor_task_ids = [...(decision?.successor_task_ids || [])]
-  decisionForm.dependency_type = decision?.dependency_type || dependencyWorkbench.value?.source_dependency.type || 'FS'
-  decisionForm.lag_minutes = decision?.lag_minutes ?? dependencyWorkbench.value?.source_dependency.lag_minutes ?? 0
+  decisionForm.dependency_type = decision?.dependency_type ?? sourceParameters?.type ?? null
+  decisionForm.lag_minutes = decision?.lag_minutes ?? sourceParameters?.lag_minutes ?? null
   decisionForm.reason = decision?.reason || ''
 }
 
@@ -1200,7 +1809,12 @@ const confirmDecision = async () => {
   }
 }
 
-const requestId = (prefix) => `${prefix}-${crypto.randomUUID()}`
+const requestId = (prefix) =>
+  `${prefix}-${
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  }`
 
 const generateCandidate = async () => {
   generatingCandidate.value = true
@@ -1233,8 +1847,11 @@ const generateCandidate = async () => {
 
 const openGoalOptimization = () => {
   goalForm.objective = 'MEET_TARGET_FINISH'
-  goalForm.taskId = ''
-  goalForm.durationMinutes = null
+  goalForm.authorizedDurationOptions.splice(
+    0,
+    goalForm.authorizedDurationOptions.length,
+    createGoalAuthorization()
+  )
   goalForm.lockedTaskIds = []
   goalForm.authorizationConfirmed = false
   goalTargetFinish.value = null
@@ -1243,19 +1860,51 @@ const openGoalOptimization = () => {
   goalModalOpen.value = true
 }
 
-const handleGoalTaskChange = () => {
-  goalForm.durationMinutes = null
-  goalForm.lockedTaskIds = goalForm.lockedTaskIds.filter((taskId) => taskId !== goalForm.taskId)
+const addGoalAuthorization = () => {
+  if (canAddGoalAuthorization.value) {
+    goalForm.authorizedDurationOptions.push(createGoalAuthorization())
+  }
+}
+
+const removeGoalAuthorization = (authorizationId) => {
+  const index = goalForm.authorizedDurationOptions.findIndex(
+    (item) => item.authorizationId === authorizationId
+  )
+  if (index >= 0 && goalForm.authorizedDurationOptions.length > 1) {
+    goalForm.authorizedDurationOptions.splice(index, 1)
+  }
+}
+
+const handleGoalTaskChange = (authorization) => {
+  authorization.durationMinutes = null
+  goalForm.lockedTaskIds = goalForm.lockedTaskIds.filter(
+    (taskId) => taskId !== authorization.taskId
+  )
 }
 
 const submitGoalOptimization = async () => {
   if (!selectedSnapshotId.value || !snapshotDetail.value) return
-  if (!goalForm.taskId || !goalForm.durationMinutes) {
-    message.warning('请选择已授权任务并填写压缩后的工期')
+  const authorizations = goalForm.authorizedDurationOptions
+  if (
+    !authorizations.length ||
+    authorizations.length > 10 ||
+    authorizations.some(
+      (item) => !item.taskId || !Number.isInteger(item.durationMinutes) || item.durationMinutes <= 0
+    )
+  ) {
+    message.warning('请为每个已授权任务填写有效的压缩后工期')
     return
   }
-  if (goalForm.durationMinutes >= selectedGoalTaskDuration.value) {
-    message.warning('授权后的工期必须短于来源工期')
+  const authorizedTaskIds = authorizations.map((item) => item.taskId)
+  if (new Set(authorizedTaskIds).size !== authorizedTaskIds.length) {
+    message.warning('同一个活动任务只能授权一次')
+    return
+  }
+  const invalidAuthorization = authorizations.find(
+    (item) => item.durationMinutes >= goalTaskDuration(item.taskId)
+  )
+  if (invalidAuthorization) {
+    message.warning('每个授权后的工期都必须短于对应来源工期')
     return
   }
   if (goalForm.objective === 'MEET_TARGET_FINISH' && !goalTargetFinish.value) {
@@ -1280,9 +1929,10 @@ const submitGoalOptimization = async () => {
         goalForm.objective === 'MEET_TARGET_FINISH'
           ? goalTargetFinish.value.toISOString()
           : null,
-      authorized_duration_options: [
-        { task_id: goalForm.taskId, duration_minutes: goalForm.durationMinutes }
-      ],
+      authorized_duration_options: authorizations.map((item) => ({
+        task_id: item.taskId,
+        duration_minutes: item.durationMinutes
+      })),
       locked_task_ids: goalForm.lockedTaskIds,
       authorization_confirmed: true
     })
@@ -1294,6 +1944,8 @@ const submitGoalOptimization = async () => {
     candidateDetail.value = result
     candidateOpen.value = true
     goalModalOpen.value = false
+    planCompareMode.value = 'comparison'
+    await loadCandidates()
     message.success('工期目标优化候选已生成，来源快照未修改')
   } catch (error) {
     message.error(error.message || '工期目标优化失败')
@@ -1319,6 +1971,8 @@ const recalculateForward = async () => {
     }
     candidateDetail.value = result
     candidateOpen.value = true
+    planCompareMode.value = 'comparison'
+    await loadCandidates()
     message.success('排期重算方案已生成，来源快照未修改')
   } catch (error) {
     message.error(error.message || '正向重算失败')
@@ -1459,6 +2113,12 @@ const capabilityLabel = (name) =>
     resource_leveling: '资源均衡',
     resource_cost_optimization: '资源成本优化'
   })[name] || name
+const capabilityReasonLabel = (reason) =>
+  ({
+    INACTIVE_TASK_DEPENDENCIES: '存在涉及 inactive 任务的依赖，需先确认替代叶子关系',
+    SUMMARY_TASK_DEPENDENCIES: '存在汇总任务依赖，需先确认替代叶子关系',
+    NO_SOURCE_ASSIGNMENTS: '来源没有资源分配数据'
+  })[reason] || reason
 const unsupportedSemanticLabel = (code) =>
   ({
     SOURCE_CALCULATION_UNAVAILABLE: '来源未提供可验证的计算字段',
@@ -1467,10 +2127,32 @@ const unsupportedSemanticLabel = (code) =>
     MILESTONE_UNSUPPORTED: '当前 CPM 不支持零工期里程碑',
     RESOURCE_ASSIGNMENTS_UNAVAILABLE: '来源未提供资源分配'
   })[code] || '当前版本不支持该来源语义'
+const constraintIssueLabel = (code) =>
+  ({
+    DEADLINE_MISSED: '已超过截止日期',
+    FINISH_CONSTRAINT_VIOLATED: '违反不得晚于完成约束',
+    HARD_CONSTRAINT_NETWORK_CONFLICT: '固定开始与网络冲突',
+    ACTUAL_START_NETWORK_CONFLICT: '实际开始与网络冲突',
+    PROJECT_REQUIRED_FINISH_MISSED: '未满足项目要求完成日期'
+  })[code] || code
+const constraintIssueEvidence = (issue) => {
+  const evidence = issue.evidence || {}
+  if (Number.isFinite(evidence.variance_minutes)) return `工作时间偏差 ${evidence.variance_minutes} 分钟`
+  if (Number.isFinite(evidence.negative_float_minutes)) return `项目负浮时 ${evidence.negative_float_minutes} 分钟`
+  if (evidence.fixed_start && evidence.network_required_start) {
+    return `固定开始 ${formatScheduleDate(evidence.fixed_start)}；网络要求 ${formatScheduleDate(evidence.network_required_start)}`
+  }
+  if (evidence.actual_start && evidence.network_required_start) {
+    return `实际开始 ${formatScheduleDate(evidence.actual_start)}；网络要求 ${formatScheduleDate(evidence.network_required_start)}；剩余工作从 ${formatScheduleDate(evidence.remaining_start)} 排起`
+  }
+  return (issue.object_refs || []).join('、')
+}
 const severityColor = (severity) => ({ blocker: 'red', warning: 'orange', info: 'blue' })[severity]
 const shortId = (value) => `${value.slice(0, 8)}…`
 const formatDate = (value) => (value ? new Date(value).toLocaleString() : '处理中')
 const formatScheduleDate = (value) => (value ? new Date(value).toLocaleString() : '—')
+const progressStatusLabel = (status) =>
+  ({ NOT_STARTED: '未开始', IN_PROGRESS: '进行中', COMPLETED: '已完成' })[status] || status
 const formatSlack = (minutes) => {
   if (!Number.isFinite(minutes)) return '—'
   if (minutes === 0) return '0 分钟'
@@ -1665,6 +2347,15 @@ onMounted(async () => {
   word-break: break-all;
 }
 
+.source-traceability {
+  margin-top: 16px;
+}
+
+.source-traceability code,
+.ant-descriptions code {
+  word-break: break-all;
+}
+
 .normalization-summary span,
 .normalization-summary strong {
   display: block;
@@ -1772,6 +2463,40 @@ h4 {
   font-size: 12px;
 }
 
+.goal-authorization-list {
+  display: grid;
+  gap: 10px;
+}
+
+.goal-authorization-header,
+.goal-authorization-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px 48px;
+  gap: 8px;
+  align-items: center;
+}
+
+.goal-authorization-header {
+  padding: 0 10px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.goal-authorization-item {
+  padding: 10px;
+  border: 1px solid var(--gray-150);
+  border-radius: 8px;
+  background: var(--gray-10);
+}
+
+.goal-authorization-duration {
+  width: 100%;
+}
+
+.goal-authorization-remove {
+  padding: 0;
+}
+
 .goal-blocker-list {
   margin-bottom: 12px;
 }
@@ -1785,6 +2510,30 @@ h4 {
 
 .schedule-result-table {
   margin-top: 16px;
+}
+
+:deep(.schedule-result-row-optimized > td) {
+  background: var(--color-success-50) !important;
+}
+
+:deep(.schedule-result-row-optimized > td:first-child) {
+  box-shadow: inset 3px 0 0 var(--color-success-500);
+}
+
+:deep(.schedule-result-row-optimized:hover > td) {
+  background: var(--color-success-100) !important;
+}
+
+:deep(.schedule-result-row-affected > td) {
+  background: var(--color-info-50) !important;
+}
+
+:deep(.schedule-result-row-affected > td:first-child) {
+  box-shadow: inset 3px 0 0 var(--color-info-500);
+}
+
+:deep(.schedule-result-row-affected:hover > td) {
+  background: var(--color-info-100) !important;
 }
 
 .result-task,
@@ -1868,6 +2617,205 @@ h4 {
   gap: 8px;
 }
 
+.plan-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.plan-period {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.plan-table {
+  margin-bottom: 16px;
+}
+
+.plan-task-name {
+  display: inline-block;
+}
+
+.plan-task-summary {
+  font-weight: 600;
+}
+
+:deep(.plan-row-summary) {
+  background: var(--gray-10);
+}
+
+:deep(.plan-row-inactive) {
+  opacity: 0.58;
+}
+
+.plan-inactive-tag {
+  margin-left: 8px;
+}
+
+.plan-type-plain {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.gantt-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--gray-150);
+  border-radius: 8px;
+  background: var(--color-bg-container);
+}
+
+.gantt-canvas {
+  position: relative;
+  min-width: 100%;
+}
+
+.gantt-header {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--gray-150);
+  background: var(--gray-10);
+}
+
+.gantt-label {
+  flex: none;
+  width: 220px;
+  padding: 5px 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  border-right: 1px solid var(--gray-150);
+  box-sizing: border-box;
+}
+
+.gantt-header-label {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.gantt-track {
+  position: relative;
+  display: flex;
+  flex: 1;
+}
+
+.gantt-day {
+  flex: none;
+  padding: 5px 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  border-right: 1px solid var(--gray-100);
+  box-sizing: border-box;
+}
+
+.gantt-day-weekend {
+  background: var(--gray-25);
+}
+
+.gantt-body {
+  position: relative;
+}
+
+.gantt-weekend-cell {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--gray-25);
+  pointer-events: none;
+}
+
+.gantt-row {
+  display: flex;
+  align-items: center;
+  height: 26px;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.gantt-row:last-child {
+  border-bottom: 0;
+}
+
+.gantt-row .gantt-label {
+  color: var(--color-text);
+}
+
+.gantt-row-summary .gantt-label {
+  font-weight: 600;
+}
+
+.gantt-row-inactive {
+  opacity: 0.58;
+}
+
+.gantt-task-kind {
+  margin-left: 6px;
+  color: var(--gray-600);
+  font-size: 11px;
+}
+
+.gantt-bar {
+  position: absolute;
+  top: 6px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--main-500);
+  box-sizing: border-box;
+}
+
+.gantt-bar-summary {
+  background: var(--main-30);
+  border: 1px solid var(--main-100);
+}
+
+.gantt-bar-inactive {
+  background: var(--gray-400);
+  border: 1px dashed var(--gray-600);
+}
+
+.gantt-bar-milestone {
+  top: 9px;
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  background: var(--main-700);
+  transform: rotate(45deg);
+}
+
+.candidate-list {
+  display: grid;
+  gap: 8px;
+}
+
+.candidate-list-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--gray-150);
+  border-radius: 8px;
+}
+
+.candidate-list-summary {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.candidate-list-row small {
+  flex: none;
+  color: var(--color-text-tertiary);
+  font-size: 12px;
+}
+
 @media (max-width: 1000px) {
   .workspace-grid {
     grid-template-columns: 1fr;
@@ -1887,6 +2835,18 @@ h4 {
   .import-stage-grid,
   .normalization-summary {
     grid-template-columns: 1fr;
+  }
+
+  .goal-authorization-header {
+    display: none;
+  }
+
+  .goal-authorization-row {
+    grid-template-columns: minmax(0, 1fr) 48px;
+  }
+
+  .goal-authorization-task {
+    grid-column: 1 / -1;
   }
 }
 </style>

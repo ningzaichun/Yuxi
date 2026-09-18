@@ -15,8 +15,11 @@ if str(BACKEND_ROOT / "package") not in sys.path:
     sys.path.insert(0, str(BACKEND_ROOT / "package"))
 
 from yuxi.schedule.contracts.canonical_v2_2 import CanonicalScheduleV22  # noqa: E402
+from yuxi.schedule.contracts.canonical_v2_5 import CanonicalScheduleV25  # noqa: E402
 from yuxi.schedule.forward_engine import (  # noqa: E402
+    CONSTRAINTS_ENGINE_PROFILE_ID,
     ENGINE_PROFILE_ID,
+    NEGATIVE_LAG_ENGINE_PROFILE_ID,
     REVERSE_FLOAT_ENGINE_PROFILE_ID,
     SUMMARY_ROLLUP_ENGINE_PROFILE_ID,
     calculate_minimal_forward_schedule,
@@ -30,6 +33,8 @@ MICROSOFT_PROJECT_CONSTRAINT_TYPES = {
     "AS_SOON_AS_POSSIBLE": 0,
     "START_NO_EARLIER_THAN": 4,
     "FINISH_NO_EARLIER_THAN": 6,
+    "MUST_START_ON": 2,
+    "FINISH_NO_LATER_THAN": 7,
 }
 
 
@@ -124,6 +129,8 @@ def _validate_case(case: dict[str, Any]) -> list[str]:
         ENGINE_PROFILE_ID,
         SUMMARY_ROLLUP_ENGINE_PROFILE_ID,
         REVERSE_FLOAT_ENGINE_PROFILE_ID,
+        NEGATIVE_LAG_ENGINE_PROFILE_ID,
+        CONSTRAINTS_ENGINE_PROFILE_ID,
     }:
         errors.append("ENGINE_PROFILE_MISMATCH")
     if case.get("expected_value_source") != "MICROSOFT_PROJECT_MANUAL_CONFIRMATION":
@@ -172,8 +179,6 @@ def _validate_external_case(case: dict[str, Any]) -> list[str]:
             errors.append("DEPENDENCY_SUCCESSOR_UNKNOWN")
         if dependency.get("type") not in {"FS", "SS", "FF", "SF"}:
             errors.append("DEPENDENCY_TYPE_INVALID")
-        if dependency.get("lag_minutes", -1) < 0:
-            errors.append("NEGATIVE_DEPENDENCY_LAG_UNSUPPORTED")
     for task in case.get("tasks", []):
         scheduling_mode = task.get("scheduling_mode", "automatic")
         if scheduling_mode not in {"automatic", "manual"}:
@@ -244,7 +249,7 @@ def _validate_external_case(case: dict[str, Any]) -> list[str]:
                 lag_minutes = dependency["lag_minutes"]
                 if dependency_type != "FS" and dependency_type not in relation:
                     errors.append(f"EXTERNAL_OBSERVATION_RELATION_TYPE_MISMATCH:{dependency['successor_task_id']}")
-                if lag_minutes > 0 and str(lag_minutes) not in relation:
+                if lag_minutes != 0 and f"{lag_minutes:+d}" not in relation:
                     errors.append(f"EXTERNAL_OBSERVATION_RELATION_LAG_MISMATCH:{dependency['successor_task_id']}")
         if any("constraint" in task for task in case.get("tasks", [])):
             constraints_by_task = {item.get("task_id"): item for item in observation.get("task_constraints", [])}
@@ -270,6 +275,52 @@ def _validate_external_case(case: dict[str, Any]) -> list[str]:
                     expected_manual = task.get("scheduling_mode", "automatic") == "manual"
                     if modes_by_task[task["task_id"]].get("microsoft_project_manual") is not expected_manual:
                         errors.append(f"EXTERNAL_OBSERVATION_SCHEDULING_MODE_MISMATCH:{task['task_id']}")
+        if case.get("project_status_date") is not None:
+            if observation.get("project_status_date") != case["project_status_date"]:
+                errors.append("EXTERNAL_OBSERVATION_STATUS_DATE_MISMATCH")
+            if observation.get("reschedule_uncompleted_work_after_status_date") is not bool(
+                case.get("reschedule_uncompleted_work_after_status_date")
+            ):
+                errors.append("EXTERNAL_OBSERVATION_RESCHEDULE_FLAG_MISMATCH")
+            if observation.get("reschedule_action_code") != case.get("reschedule_action_code"):
+                errors.append("EXTERNAL_OBSERVATION_RESCHEDULE_ACTION_MISMATCH")
+            progress_by_task = {
+                item.get("task_id"): item for item in observation.get("task_progress", [])
+            }
+            if set(progress_by_task) != known_task_ids:
+                errors.append("EXTERNAL_OBSERVATION_PROGRESS_SET_MISMATCH")
+            else:
+                for task in case.get("tasks", []):
+                    task_id = task["task_id"]
+                    progress = progress_by_task[task_id]
+                    status = task.get("status", "NOT_STARTED")
+                    expected_percent = task.get(
+                        "percent_complete",
+                        100 if status == "COMPLETED" else 0,
+                    )
+                    expected_remaining = (
+                        0
+                        if status == "COMPLETED"
+                        else task.get("remaining_duration_minutes", task["duration_minutes"])
+                    )
+                    expected_values = {
+                        "microsoft_project_percent_complete": expected_percent,
+                        "microsoft_project_actual_start": task.get("actual_start"),
+                        "microsoft_project_actual_finish": task.get("actual_finish"),
+                        "microsoft_project_remaining_duration_minutes": expected_remaining,
+                    }
+                    for field, expected_value in expected_values.items():
+                        if progress.get(field) != expected_value:
+                            errors.append(f"EXTERNAL_OBSERVATION_PROGRESS_MISMATCH:{task_id}:{field}")
+                    if status == "IN_PROGRESS":
+                        try:
+                            resume = datetime.fromisoformat(progress.get("microsoft_project_resume", ""))
+                            status_date = datetime.fromisoformat(case["project_status_date"])
+                        except (TypeError, ValueError):
+                            errors.append(f"EXTERNAL_OBSERVATION_RESUME_INVALID:{task_id}")
+                        else:
+                            if resume <= status_date:
+                                errors.append(f"EXTERNAL_OBSERVATION_RESUME_NOT_AFTER_STATUS_DATE:{task_id}")
 
     expected = case.get("expected")
     if not isinstance(expected, dict):
@@ -367,7 +418,7 @@ def _validate_rollup_assertions(
     return errors
 
 
-def _build_canonical_source(case: dict[str, Any]) -> CanonicalScheduleV22:
+def _build_canonical_source(case: dict[str, Any]) -> CanonicalScheduleV22 | CanonicalScheduleV25:
     source = json.loads(BASE_SOURCE_PATH.read_text(encoding="utf-8"))
     source["snapshot_id"] = f"golden:{case['case_id']}"
     source["source"]["file_name"] = f"{case['case_id']}.json"
@@ -451,6 +502,12 @@ def _build_canonical_source(case: dict[str, Any]) -> CanonicalScheduleV22:
                 "lag_calendar_policy": "UNSPECIFIED_REQUIRES_ENGINE_PROFILE",
             }
         )
+    if case["engine_profile_id"] == CONSTRAINTS_ENGINE_PROFILE_ID:
+        source["schema_version"] = "canonical_schedule_v2.5"
+        source["semantics"]["lag_calendar_policy"] = "SUCCESSOR_TASK_CALENDAR"
+        for dependency in dependencies:
+            dependency["lag_calendar_policy"] = "SUCCESSOR_TASK_CALENDAR"
+        source["project"]["required_finish"] = case.get("required_finish")
     source["dependencies"] = dependencies
     summary_ids = {task["task_id"] for task in tasks if task["task_type"] == "summary"}
     activity_ids = {task["task_id"] for task in tasks if task["task_type"] == "activity"}
@@ -481,7 +538,12 @@ def _build_canonical_source(case: dict[str, Any]) -> CanonicalScheduleV22:
             ),
         }
     )
-    return CanonicalScheduleV22.model_validate(source)
+    contract = (
+        CanonicalScheduleV25
+        if case["engine_profile_id"] == CONSTRAINTS_ENGINE_PROFILE_ID
+        else CanonicalScheduleV22
+    )
+    return contract.model_validate(source)
 
 
 def _gate_result(

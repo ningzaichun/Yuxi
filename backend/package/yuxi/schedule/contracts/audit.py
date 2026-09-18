@@ -68,3 +68,17 @@ class ScheduleErrorDetail(OutputModel):
     code: str
     message: str
     errors: list[ScheduleFieldError] = Field(default_factory=list)
+
+
+class SchedulePreflightError(OutputModel):
+    code: str
+    object_ref: str | None = None
+    object_refs: list[str] = Field(default_factory=list)
+    details: dict[str, Any] = Field(default_factory=dict)
+    message: str
+
+
+class SchedulePreflightErrorDetail(OutputModel):
+    code: Literal["SCHEDULE_PREFLIGHT_FAILED"] = "SCHEDULE_PREFLIGHT_FAILED"
+    message: str = "排期数据未通过结构预检"
+    errors: list[SchedulePreflightError]

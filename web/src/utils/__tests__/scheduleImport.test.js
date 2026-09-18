@@ -36,6 +36,24 @@ assert.equal(
   'import'
 )
 
+const formalSource = parseScheduleDocument(
+  { ...sourceDocument, schema_version: 'microsoft_project_interchange_v1.1' },
+  'formal-source.json'
+)
+assert.equal(formalSource.kind, 'import')
+
+for (const version of [
+  'canonical_schedule_v2.2',
+  'canonical_schedule_v2.3',
+  'canonical_schedule_v2.4',
+  'canonical_schedule_v2.5',
+  'canonical_schedule_v2.6',
+  'canonical_schedule_v2.7',
+  'canonical_schedule_v2.8'
+]) {
+  assert.equal(parseScheduleDocument({ ...canonicalDocument, schema_version: version }).kind, 'snapshot')
+}
+
 const sourceSubmission = buildScheduleSubmission(source, {
   requestId: 'schedule-import-request-1',
   externalProjectId: source.externalProjectId,
@@ -78,6 +96,27 @@ assert.equal(
     }
   }),
   '排期来源数据不符合声明的导入格式：/document/project/name Field required'
+)
+assert.equal(
+  scheduleSubmissionErrorMessage({
+    response: {
+      status: 422,
+      data: {
+        detail: {
+          message: '排期数据未通过结构预检',
+          errors: [
+            {
+              code: 'DEPENDENCY_CYCLE',
+              object_ref: null,
+              object_refs: ['task:a', 'task:b'],
+              message: '任务依赖网络存在循环。'
+            }
+          ]
+        }
+      }
+    }
+  }),
+  '排期数据未通过结构预检：task:a、task:b 任务依赖网络存在循环。'
 )
 assert.equal(
   scheduleSubmissionErrorMessage({ response: { status: 409, data: { detail: { code: 'SCHEDULE_SUBMISSION_IN_PROGRESS' } } } }),

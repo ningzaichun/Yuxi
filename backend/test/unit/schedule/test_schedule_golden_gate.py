@@ -6,7 +6,9 @@ from pathlib import Path
 
 from scripts.verify_schedule_golden_case import evaluate_external_observation, evaluate_golden_gate, load_golden_case
 from yuxi.schedule.forward_engine import (
+    CONSTRAINTS_ENGINE_PROFILE_ID,
     ENGINE_PROFILE_ID,
+    NEGATIVE_LAG_ENGINE_PROFILE_ID,
     REVERSE_FLOAT_ENGINE_PROFILE_ID,
     SUMMARY_ROLLUP_ENGINE_PROFILE_ID,
 )
@@ -31,6 +33,24 @@ REVERSE_FLOAT_CASE_PATH = (
     / "data"
     / "schedule"
     / "microsoft_project_s4_reverse_float_critical_golden_case.json"
+)
+NEGATIVE_LAG_CASE_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "data"
+    / "schedule"
+    / "microsoft_project_s5_negative_lag_golden_case.json"
+)
+HARD_CONSTRAINTS_CASE_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "data"
+    / "schedule"
+    / "microsoft_project_v12_hard_constraints_golden_case.json"
+)
+STATUS_DATE_CASE_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "data"
+    / "schedule"
+    / "microsoft_project_v14_status_date_golden_case.json"
 )
 
 
@@ -228,4 +248,89 @@ def test_reverse_float_gate_rejects_slack_or_critical_drift() -> None:
     assert result["errors"] == [
         "EXTERNAL_OBSERVATION_DATE_MISMATCH:synthetic-task:short-work:total_slack_minutes",
         "EXTERNAL_OBSERVATION_DATE_MISMATCH:synthetic-task:short-work:critical",
+    ]
+
+
+def test_negative_lag_slice_matches_independent_microsoft_project_observation() -> None:
+    case = json.loads(NEGATIVE_LAG_CASE_PATH.read_text(encoding="utf-8"))
+
+    result = evaluate_golden_gate(case)
+
+    assert case["engine_profile_id"] == NEGATIVE_LAG_ENGINE_PROFILE_ID
+    assert {dependency["type"] for dependency in case["dependencies"]} == {"FS", "SS", "FF", "SF"}
+    assert {dependency["lag_minutes"] for dependency in case["dependencies"]} == {0, -120}
+    assert result["gate_status"] == "PASSED"
+    assert result["external_observation_status"] == "PASSED"
+    assert result["errors"] == []
+
+
+def test_negative_lag_observation_rejects_lag_sign_drift() -> None:
+    case = json.loads(NEGATIVE_LAG_CASE_PATH.read_text(encoding="utf-8"))
+    case["external_observation"]["task_relations"][1]["microsoft_project_predecessors"] = "2FS+120 分钟工时"
+
+    result = evaluate_external_observation(case)
+
+    assert result["gate_status"] == "FAILED"
+    assert result["errors"] == ["EXTERNAL_OBSERVATION_RELATION_LAG_MISMATCH:negative-task:fs"]
+
+
+def test_hard_constraint_observation_records_current_microsoft_project_divergence() -> None:
+    case = json.loads(HARD_CONSTRAINTS_CASE_PATH.read_text(encoding="utf-8"))
+
+    observation_result = evaluate_external_observation(case)
+    engine_result = evaluate_golden_gate(case)
+
+    assert case["engine_profile_id"] == CONSTRAINTS_ENGINE_PROFILE_ID
+    assert observation_result["external_observation_status"] == "PASSED"
+    assert observation_result["gate_status"] == "PASSED"
+    assert case["compatibility_decision"]["status"] == "KNOWN_DIVERGENCE_ACCEPTED"
+    assert case["compatibility_decision"]["policy"] == "YUXI_NETWORK_PRECEDENCE_WITH_FNLT_WARNING"
+    assert engine_result["gate_status"] == "FAILED"
+    assert engine_result["errors"] == [
+        "EXTERNAL_OBSERVATION_DATE_MISMATCH:constraint-v12:a:free_slack_minutes",
+        "EXTERNAL_OBSERVATION_DATE_MISMATCH:constraint-v12:b:free_slack_minutes",
+        "EXTERNAL_OBSERVATION_DATE_MISMATCH:constraint-v12:c:total_slack_minutes",
+        "EXTERNAL_OBSERVATION_DATE_MISMATCH:constraint-v12:d:early_start",
+        "EXTERNAL_OBSERVATION_DATE_MISMATCH:constraint-v12:d:early_finish",
+    ]
+
+
+def test_status_date_observation_confirms_remaining_work_reschedule_for_v14() -> None:
+    case = json.loads(STATUS_DATE_CASE_PATH.read_text(encoding="utf-8"))
+
+    result = evaluate_external_observation(case)
+
+    assert result["gate_status"] == "PASSED"
+    assert result["external_observation_status"] == "PASSED"
+    assert result["errors"] == []
+    assert case["external_observation"]["reschedule_action_code"] == 2
+    progress = {
+        item["task_id"]: item for item in case["external_observation"]["task_progress"]
+    }
+    assert progress["progress-v14:b"] == {
+        "task_id": "progress-v14:b",
+        "microsoft_project_percent_complete": 40,
+        "microsoft_project_actual_start": "2026-09-11T08:00:00+08:00",
+        "microsoft_project_actual_finish": None,
+        "microsoft_project_remaining_duration_minutes": 1440,
+        "microsoft_project_stop": "2026-09-14T17:00:00+08:00",
+        "microsoft_project_resume": "2026-09-17T08:00:00+08:00",
+    }
+    dates = {item["task_id"]: item for item in case["expected"]["task_dates"]}
+    assert dates["progress-v14:b"]["early_finish"] == "2026-09-21T17:00:00+08:00"
+    assert dates["progress-v14:c"]["early_finish"] == "2026-09-24T17:00:00+08:00"
+
+
+def test_status_date_observation_rejects_remaining_duration_drift() -> None:
+    case = json.loads(STATUS_DATE_CASE_PATH.read_text(encoding="utf-8"))
+    case["external_observation"]["task_progress"][1][
+        "microsoft_project_remaining_duration_minutes"
+    ] = 480
+
+    result = evaluate_external_observation(case)
+
+    assert result["gate_status"] == "FAILED"
+    assert result["errors"] == [
+        "EXTERNAL_OBSERVATION_PROGRESS_MISMATCH:progress-v14:b:"
+        "microsoft_project_remaining_duration_minutes"
     ]

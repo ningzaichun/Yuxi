@@ -157,6 +157,24 @@ def _import_submission(request_id: str = "import-request-1") -> ScheduleImportEn
     )
 
 
+def _import_submission_with_calendar_exception(
+    request_id: str = "import-v24-request-1",
+) -> ScheduleImportEnvelope:
+    submission = _import_submission(request_id)
+    document = copy.deepcopy(submission.document)
+    document["calendars"][0]["exceptions"] = [
+        {
+            "exception_id": "future-holiday",
+            "name": "未来停工日",
+            "start_date": "2030-01-01T00:00:00+08:00",
+            "finish_date": "2030-01-01T23:59:59+08:00",
+            "working": False,
+            "intervals": [],
+        }
+    ]
+    return submission.model_copy(update={"document": document})
+
+
 @pytest.mark.asyncio
 async def test_submit_is_idempotent_for_same_owner_request_and_content(canonical_schedule_payload: dict) -> None:
     repository = FakeScheduleRepository()
@@ -234,8 +252,38 @@ async def test_import_persists_source_and_canonical_with_dual_hashes() -> None:
     assert created["canonical_snapshot_sha256"] == f"sha256:{hashlib.sha256(uploads[record.minio_object]).hexdigest()}"
     assert record.source_document_sha256 == created["source_document_sha256"]
     assert record.snapshot_content_sha256 == created["canonical_snapshot_sha256"]
+    assert record.schema_version == "canonical_schedule_v2.3"
     assert record.adapter_id == "microsoft_project_interchange_v1_1"
+    assert record.adapter_version == "1.6.0"
+    assert created["capabilities"]["cpm_recalculation"] == {"allowed": True, "reasons": []}
     assert created["normalization_report"]["unsupported_semantics"]
+
+
+@pytest.mark.asyncio
+async def test_import_v24_persists_calendar_exceptions_with_stable_dual_hashes() -> None:
+    repository = FakeScheduleRepository()
+    store = FakeScheduleStore()
+    service = ScheduleAuditService(repository, store)
+    submission = _import_submission_with_calendar_exception()
+
+    created = await service.submit_import("owner-1", submission)
+    replay = await service.submit_import("owner-1", submission)
+
+    record = repository.records[("owner-1", submission.request_id)]
+    uploads = {name: data for name, data in store.uploads}
+    canonical = json.loads(uploads[record.minio_object])
+    source = json.loads(uploads[record.source_document_object])
+    assert len(uploads) == 2
+    assert replay["idempotent_replay"] is True
+    assert replay["source_document_sha256"] == created["source_document_sha256"]
+    assert replay["canonical_snapshot_sha256"] == created["canonical_snapshot_sha256"]
+    assert record.schema_version == "canonical_schedule_v2.4"
+    assert record.adapter_version == "1.6.0"
+    assert record.source_document_sha256 == created["source_document_sha256"]
+    assert record.snapshot_content_sha256 == created["canonical_snapshot_sha256"]
+    assert canonical["schema_version"] == "canonical_schedule_v2.4"
+    assert canonical["calendars"][0]["exceptions"] == source["calendars"][0]["exceptions"]
+    assert created["capabilities"]["cpm_recalculation"] == {"allowed": True, "reasons": []}
 
 
 @pytest.mark.asyncio

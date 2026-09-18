@@ -61,6 +61,35 @@ def test_goal_optimizer_meets_target_with_least_authorized_change() -> None:
     ]
 
 
+def test_goal_optimizer_combines_multiple_authorized_tasks_when_target_requires_both() -> None:
+    result = optimize_project_finish(
+        _source(),
+        _request(
+            target_finish="2026-09-03T15:00:00+08:00",
+            authorized_duration_options=[
+                {"task_id": "synthetic-task:long-work", "duration_minutes": 240},
+                {"task_id": "synthetic-task:short-review", "duration_minutes": 120},
+            ],
+        ),
+    )
+
+    assert result["status"] == "calculated"
+    assert result["evaluated_strategy_count"] == 4
+    assert result["finish_after"] == "2026-09-03T15:00:00+08:00"
+    assert result["selected_strategy"]["duration_changes"] == [
+        {
+            "task_id": "synthetic-task:long-work",
+            "before_duration_minutes": 960,
+            "after_duration_minutes": 240,
+        },
+        {
+            "task_id": "synthetic-task:short-review",
+            "before_duration_minutes": 240,
+            "after_duration_minutes": 120,
+        },
+    ]
+
+
 def test_goal_optimizer_returns_blocked_when_authorized_options_cannot_meet_target() -> None:
     result = optimize_project_finish(
         _source(),
@@ -90,6 +119,25 @@ def test_goal_optimizer_rejects_unknown_locked_or_non_shorter_authorization() ->
         "AUTHORIZED_TASK_UNKNOWN",
     }
     assert result["evaluated_strategy_count"] == 0
+
+
+def test_goal_optimizer_rejects_inactive_authorized_task() -> None:
+    source = _source()
+    task = next(
+        item for item in source.tasks if item.task_id == "synthetic-task:long-work"
+    )
+    task.active = False
+
+    result = optimize_project_finish(source, _request())
+
+    assert result["status"] == "blocked"
+    assert result["support"]["blockers"] == [
+        {
+            "code": "AUTHORIZED_TASK_INACTIVE",
+            "object_refs": ["synthetic-task:long-work"],
+            "message": "inactive 任务不参与工期优化",
+        }
+    ]
 
 
 def test_goal_contract_requires_matching_target_and_unique_authorizations() -> None:

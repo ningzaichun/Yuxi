@@ -79,6 +79,7 @@ class MicrosoftProjectImportProject(ImportDocumentModel):
     default_calendar_id: NonEmptyString
     default_daily_work_minutes: PositiveInteger
     default_weekly_work_minutes: PositiveInteger
+    required_finish: AwareDatetime | None = None
 
     @model_validator(mode="after")
     def validate_dates(self) -> Self:
@@ -115,11 +116,35 @@ class MicrosoftProjectImportWeekDay(ImportDocumentModel):
         return self
 
 
+class MicrosoftProjectImportCalendarException(ImportDocumentModel):
+    exception_id: NonEmptyString
+    name: NonEmptyString
+    start_date: AwareDatetime
+    finish_date: AwareDatetime
+    working: StrictBool
+    intervals: list[MicrosoftProjectImportInterval]
+
+    @model_validator(mode="after")
+    def validate_exception(self) -> Self:
+        if self.finish_date < self.start_date:
+            raise ValueError(f"calendar exception {self.exception_id} finish precedes start")
+        if self.working != bool(self.intervals):
+            raise ValueError(
+                f"calendar exception {self.exception_id} working flag must match intervals"
+            )
+        previous_finish: time | None = None
+        for interval in self.intervals:
+            if previous_finish is not None and interval.start < previous_finish:
+                raise ValueError(f"calendar exception {self.exception_id} intervals must not overlap")
+            previous_finish = interval.finish
+        return self
+
+
 class MicrosoftProjectImportCalendar(ImportDocumentModel):
     calendar_id: NonEmptyString
     name: NonEmptyString
     week_days: Annotated[list[MicrosoftProjectImportWeekDay], Field(min_length=7, max_length=7)]
-    exceptions: list[dict[str, Any]]
+    exceptions: list[MicrosoftProjectImportCalendarException]
 
     @model_validator(mode="after")
     def validate_week(self) -> Self:
@@ -137,13 +162,14 @@ class MicrosoftProjectImportTask(ImportDocumentModel):
     outline_level: PositiveInteger
     name: NonEmptyString
     task_type: Literal["TASK", "SUMMARY", "MILESTONE"]
+    active: StrictBool = True
     scheduling_mode: Literal["AUTO", "MANUAL"]
     duration_minutes: NonNegativeInteger | None
     project_rollup_duration_minutes: NonNegativeInteger
     start: AwareDatetime
     finish: AwareDatetime
     percent_complete: Annotated[StrictInt, Field(ge=0, le=100)]
-    constraint_type_code: Literal[0, 4, 6]
+    constraint_type_code: Literal[0, 2, 4, 6, 7]
     constraint_date: AwareDatetime | None
     deadline: AwareDatetime | None
     calendar_id: NonEmptyString
@@ -160,7 +186,7 @@ class MicrosoftProjectImportTask(ImportDocumentModel):
             raise ValueError(f"milestone task {self.task_id} must have zero duration")
         if self.constraint_type_code == 0 and self.constraint_date is not None:
             raise ValueError(f"ASAP task {self.task_id} must not have constraint_date")
-        if self.constraint_type_code in {4, 6} and self.constraint_date is None:
+        if self.constraint_type_code in {2, 4, 6, 7} and self.constraint_date is None:
             raise ValueError(f"constrained task {self.task_id} requires constraint_date")
         return self
 
@@ -178,7 +204,10 @@ class MicrosoftProjectImportDependency(ImportDocumentModel):
 class MicrosoftProjectInterchangeV11(ImportDocumentModel):
     """Typed boundary for the current Microsoft Project interchange artifact."""
 
-    schema_version: Literal["microsoft_project_interchange_mock_v1.1"]
+    schema_version: Literal[
+        "microsoft_project_interchange_v1.1",
+        "microsoft_project_interchange_mock_v1.1",
+    ]
     artifact_version: NonEmptyString | None = None
     data_classification: NonEmptyString | None = None
     source: MicrosoftProjectImportSource
@@ -216,6 +245,12 @@ class MicrosoftProjectInterchangeV11(ImportDocumentModel):
             if dependency.predecessor_task_id not in task_ids or dependency.successor_task_id not in task_ids:
                 raise ValueError(f"dependency {dependency.dependency_id} references an unknown task")
         return self
+
+
+class MicrosoftProjectInterchangeFormalV11(MicrosoftProjectInterchangeV11):
+    """Strict schema publication model for the maintained v1.1 source protocol."""
+
+    schema_version: Literal["microsoft_project_interchange_v1.1"]
 
 
 class FieldDisposition(BaseModel):

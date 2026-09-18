@@ -1,0 +1,1520 @@
+{
+  "$defs": {
+    "CalendarExceptionV24": {
+      "additionalProperties": false,
+      "properties": {
+        "exception_id": {
+          "title": "Exception Id",
+          "type": "string"
+        },
+        "finish_date": {
+          "format": "date-time",
+          "title": "Finish Date",
+          "type": "string"
+        },
+        "intervals": {
+          "items": {
+            "$ref": "#/$defs/WorkingInterval"
+          },
+          "title": "Intervals",
+          "type": "array"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "start_date": {
+          "format": "date-time",
+          "title": "Start Date",
+          "type": "string"
+        },
+        "working": {
+          "title": "Working",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "exception_id",
+        "name",
+        "start_date",
+        "finish_date",
+        "working",
+        "intervals"
+      ],
+      "title": "CalendarExceptionV24",
+      "type": "object"
+    },
+    "CanonicalCalendarV24": {
+      "additionalProperties": false,
+      "properties": {
+        "calendar_id": {
+          "title": "Calendar Id",
+          "type": "string"
+        },
+        "exceptions": {
+          "items": {
+            "$ref": "#/$defs/CalendarExceptionV24"
+          },
+          "title": "Exceptions",
+          "type": "array"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "parent_calendar_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parent Calendar Id"
+        },
+        "source_index": {
+          "title": "Source Index",
+          "type": "integer"
+        },
+        "weekly_pattern": {
+          "$ref": "#/$defs/WeeklyPattern"
+        }
+      },
+      "required": [
+        "calendar_id",
+        "source_index",
+        "name",
+        "parent_calendar_id",
+        "weekly_pattern",
+        "exceptions"
+      ],
+      "title": "CanonicalCalendarV24",
+      "type": "object"
+    },
+    "CanonicalDependencyV24": {
+      "additionalProperties": false,
+      "properties": {
+        "dependency_id": {
+          "title": "Dependency Id",
+          "type": "string"
+        },
+        "lag_calendar_policy": {
+          "enum": [
+            "UNSPECIFIED_REQUIRES_ENGINE_PROFILE",
+            "UNIFIED_PROJECT_CALENDAR_WORKING_MINUTES",
+            "SUCCESSOR_TASK_CALENDAR"
+          ],
+          "title": "Lag Calendar Policy",
+          "type": "string"
+        },
+        "lag_minutes": {
+          "title": "Lag Minutes",
+          "type": "integer"
+        },
+        "predecessor_task_id": {
+          "title": "Predecessor Task Id",
+          "type": "string"
+        },
+        "source_type_code": {
+          "title": "Source Type Code",
+          "type": "integer"
+        },
+        "successor_task_id": {
+          "title": "Successor Task Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "FS",
+            "SS",
+            "FF",
+            "SF"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dependency_id",
+        "predecessor_task_id",
+        "successor_task_id",
+        "type",
+        "source_type_code",
+        "lag_minutes",
+        "lag_calendar_policy"
+      ],
+      "title": "CanonicalDependencyV24",
+      "type": "object"
+    },
+    "CanonicalProject": {
+      "additionalProperties": false,
+      "properties": {
+        "current_date": {
+          "format": "date-time",
+          "title": "Current Date",
+          "type": "string"
+        },
+        "default_calendar_id": {
+          "title": "Default Calendar Id",
+          "type": "string"
+        },
+        "default_calendar_weekly_work_minutes": {
+          "exclusiveMinimum": 0,
+          "title": "Default Calendar Weekly Work Minutes",
+          "type": "integer"
+        },
+        "default_daily_work_minutes": {
+          "exclusiveMinimum": 0,
+          "title": "Default Daily Work Minutes",
+          "type": "integer"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "planned_date_source": {
+          "title": "Planned Date Source",
+          "type": "string"
+        },
+        "planned_finish": {
+          "format": "date-time",
+          "title": "Planned Finish",
+          "type": "string"
+        },
+        "planned_start": {
+          "format": "date-time",
+          "title": "Planned Start",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "source_file_name": {
+          "title": "Source File Name",
+          "type": "string"
+        },
+        "source_project_summary": {
+          "$ref": "#/$defs/SourceProjectSummary"
+        },
+        "status_date": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Status Date"
+        }
+      },
+      "required": [
+        "project_id",
+        "name",
+        "source_file_name",
+        "planned_start",
+        "planned_finish",
+        "planned_date_source",
+        "source_project_summary",
+        "current_date",
+        "status_date",
+        "default_calendar_id",
+        "default_daily_work_minutes",
+        "default_calendar_weekly_work_minutes"
+      ],
+      "title": "CanonicalProject",
+      "type": "object"
+    },
+    "CanonicalResource": {
+      "additionalProperties": false,
+      "properties": {
+        "assignments_count": {
+          "minimum": 0,
+          "title": "Assignments Count",
+          "type": "integer"
+        },
+        "base_calendar_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Base Calendar Id"
+        },
+        "classification_status": {
+          "title": "Classification Status",
+          "type": "string"
+        },
+        "code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Code"
+        },
+        "group": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Group"
+        },
+        "in_use": {
+          "title": "In Use",
+          "type": "boolean"
+        },
+        "material_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Material Label"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "notes": {
+          "title": "Notes",
+          "type": "string"
+        },
+        "resource_id": {
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "semantic_type": {
+          "title": "Semantic Type",
+          "type": "string"
+        },
+        "source_declared_type": {
+          "title": "Source Declared Type",
+          "type": "string"
+        },
+        "source_guid": {
+          "title": "Source Guid",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "integer"
+        },
+        "source_unique_id": {
+          "title": "Source Unique Id",
+          "type": "integer"
+        },
+        "work_minutes": {
+          "minimum": 0,
+          "title": "Work Minutes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "resource_id",
+        "source_id",
+        "source_unique_id",
+        "source_guid",
+        "name",
+        "source_declared_type",
+        "semantic_type",
+        "classification_status",
+        "in_use",
+        "assignments_count",
+        "work_minutes",
+        "group",
+        "code",
+        "material_label",
+        "notes",
+        "base_calendar_id"
+      ],
+      "title": "CanonicalResource",
+      "type": "object"
+    },
+    "CanonicalStatistics": {
+      "additionalProperties": false,
+      "properties": {
+        "assignments": {
+          "minimum": 0,
+          "title": "Assignments",
+          "type": "integer"
+        },
+        "calendars": {
+          "minimum": 0,
+          "title": "Calendars",
+          "type": "integer"
+        },
+        "dependencies": {
+          "minimum": 0,
+          "title": "Dependencies",
+          "type": "integer"
+        },
+        "dependency_types": {
+          "$ref": "#/$defs/DependencyTypeStatistics"
+        },
+        "leaf_tasks": {
+          "minimum": 0,
+          "title": "Leaf Tasks",
+          "type": "integer"
+        },
+        "milestones": {
+          "minimum": 0,
+          "title": "Milestones",
+          "type": "integer"
+        },
+        "negative_lag_dependencies": {
+          "minimum": 0,
+          "title": "Negative Lag Dependencies",
+          "type": "integer"
+        },
+        "open_finish_tasks": {
+          "minimum": 0,
+          "title": "Open Finish Tasks",
+          "type": "integer"
+        },
+        "open_start_tasks": {
+          "minimum": 0,
+          "title": "Open Start Tasks",
+          "type": "integer"
+        },
+        "positive_lag_dependencies": {
+          "minimum": 0,
+          "title": "Positive Lag Dependencies",
+          "type": "integer"
+        },
+        "resources_raw": {
+          "minimum": 0,
+          "title": "Resources Raw",
+          "type": "integer"
+        },
+        "source_schedule_dependency_violations": {
+          "minimum": 0,
+          "title": "Source Schedule Dependency Violations",
+          "type": "integer"
+        },
+        "summary_task_dependencies": {
+          "minimum": 0,
+          "title": "Summary Task Dependencies",
+          "type": "integer"
+        },
+        "summary_tasks": {
+          "minimum": 0,
+          "title": "Summary Tasks",
+          "type": "integer"
+        },
+        "tasks": {
+          "minimum": 0,
+          "title": "Tasks",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "tasks",
+        "summary_tasks",
+        "leaf_tasks",
+        "milestones",
+        "dependencies",
+        "dependency_types",
+        "positive_lag_dependencies",
+        "negative_lag_dependencies",
+        "calendars",
+        "resources_raw",
+        "assignments",
+        "open_start_tasks",
+        "open_finish_tasks",
+        "summary_task_dependencies",
+        "source_schedule_dependency_violations"
+      ],
+      "title": "CanonicalStatistics",
+      "type": "object"
+    },
+    "CanonicalTaskV23": {
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "title": "Active",
+          "type": "boolean"
+        },
+        "actual_finish": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actual Finish"
+        },
+        "actual_start": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actual Start"
+        },
+        "baseline_0": {
+          "$ref": "#/$defs/TaskBaseline"
+        },
+        "boundary_role": {
+          "anyOf": [
+            {
+              "enum": [
+                "PROJECT_START",
+                "PROJECT_FINISH"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Boundary Role"
+        },
+        "calendar_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Calendar Id"
+        },
+        "constraint": {
+          "$ref": "#/$defs/TaskConstraint"
+        },
+        "deadline": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Deadline"
+        },
+        "duration_minutes": {
+          "minimum": 0,
+          "title": "Duration Minutes",
+          "type": "integer"
+        },
+        "effective_calendar_id": {
+          "title": "Effective Calendar Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "notes": {
+          "title": "Notes",
+          "type": "string"
+        },
+        "outline_level": {
+          "minimum": 0,
+          "title": "Outline Level",
+          "type": "integer"
+        },
+        "parent_task_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parent Task Id"
+        },
+        "percent_complete": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Percent Complete",
+          "type": "integer"
+        },
+        "planned_finish": {
+          "format": "date-time",
+          "title": "Planned Finish",
+          "type": "string"
+        },
+        "planned_start": {
+          "format": "date-time",
+          "title": "Planned Start",
+          "type": "string"
+        },
+        "project_task_type": {
+          "enum": [
+            "FIXED_DURATION",
+            "FIXED_UNITS"
+          ],
+          "title": "Project Task Type",
+          "type": "string"
+        },
+        "scheduling_mode": {
+          "enum": [
+            "automatic",
+            "manual"
+          ],
+          "title": "Scheduling Mode",
+          "type": "string"
+        },
+        "source_calculation": {
+          "$ref": "#/$defs/SourceCalculation"
+        },
+        "source_guid": {
+          "title": "Source Guid",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "integer"
+        },
+        "source_resource_names_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Resource Names Text"
+        },
+        "source_unique_id": {
+          "title": "Source Unique Id",
+          "type": "integer"
+        },
+        "source_work_minutes": {
+          "minimum": 0,
+          "title": "Source Work Minutes",
+          "type": "integer"
+        },
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "task_type": {
+          "enum": [
+            "activity",
+            "milestone",
+            "summary"
+          ],
+          "title": "Task Type",
+          "type": "string"
+        },
+        "wbs": {
+          "title": "Wbs",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id",
+        "source_id",
+        "source_unique_id",
+        "source_guid",
+        "parent_task_id",
+        "wbs",
+        "outline_level",
+        "name",
+        "task_type",
+        "active",
+        "scheduling_mode",
+        "project_task_type",
+        "calendar_id",
+        "effective_calendar_id",
+        "planned_start",
+        "planned_finish",
+        "duration_minutes",
+        "source_work_minutes",
+        "percent_complete",
+        "actual_start",
+        "actual_finish",
+        "deadline",
+        "constraint",
+        "baseline_0",
+        "source_calculation",
+        "source_resource_names_text",
+        "notes"
+      ],
+      "title": "CanonicalTaskV23",
+      "type": "object"
+    },
+    "ConversionDefect": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "corrected_behavior": {
+          "title": "Corrected Behavior",
+          "type": "string"
+        },
+        "previous_behavior": {
+          "title": "Previous Behavior",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "source",
+        "previous_behavior",
+        "corrected_behavior"
+      ],
+      "title": "ConversionDefect",
+      "type": "object"
+    },
+    "DependencyTypeStatistics": {
+      "additionalProperties": false,
+      "properties": {
+        "FF": {
+          "minimum": 0,
+          "title": "Ff",
+          "type": "integer"
+        },
+        "FS": {
+          "minimum": 0,
+          "title": "Fs",
+          "type": "integer"
+        },
+        "SF": {
+          "minimum": 0,
+          "title": "Sf",
+          "type": "integer"
+        },
+        "SS": {
+          "minimum": 0,
+          "title": "Ss",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "FS",
+        "SS",
+        "FF",
+        "SF"
+      ],
+      "title": "DependencyTypeStatistics",
+      "type": "object"
+    },
+    "ScheduleSemanticsV24": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_storage_unit": {
+          "const": "working_minute",
+          "title": "Duration Storage Unit",
+          "type": "string"
+        },
+        "lag_calendar_policy": {
+          "enum": [
+            "UNSPECIFIED_REQUIRES_ENGINE_PROFILE",
+            "UNIFIED_PROJECT_CALENDAR_WORKING_MINUTES",
+            "SUCCESSOR_TASK_CALENDAR"
+          ],
+          "title": "Lag Calendar Policy",
+          "type": "string"
+        },
+        "lag_storage_unit": {
+          "const": "working_minute",
+          "title": "Lag Storage Unit",
+          "type": "string"
+        },
+        "source_dates_preserved": {
+          "title": "Source Dates Preserved",
+          "type": "boolean"
+        },
+        "task_calendar_resolution": {
+          "title": "Task Calendar Resolution",
+          "type": "string"
+        },
+        "time_zone": {
+          "title": "Time Zone",
+          "type": "string"
+        },
+        "time_zone_source": {
+          "title": "Time Zone Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "time_zone",
+        "time_zone_source",
+        "duration_storage_unit",
+        "lag_storage_unit",
+        "lag_calendar_policy",
+        "task_calendar_resolution",
+        "source_dates_preserved"
+      ],
+      "title": "ScheduleSemanticsV24",
+      "type": "object"
+    },
+    "SourceCalculation": {
+      "additionalProperties": false,
+      "properties": {
+        "critical": {
+          "title": "Critical",
+          "type": "boolean"
+        },
+        "early_finish": {
+          "format": "date-time",
+          "title": "Early Finish",
+          "type": "string"
+        },
+        "early_start": {
+          "format": "date-time",
+          "title": "Early Start",
+          "type": "string"
+        },
+        "free_slack_minutes": {
+          "title": "Free Slack Minutes",
+          "type": "integer"
+        },
+        "late_finish": {
+          "format": "date-time",
+          "title": "Late Finish",
+          "type": "string"
+        },
+        "late_start": {
+          "format": "date-time",
+          "title": "Late Start",
+          "type": "string"
+        },
+        "total_slack_minutes": {
+          "title": "Total Slack Minutes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "early_start",
+        "early_finish",
+        "late_start",
+        "late_finish",
+        "total_slack_minutes",
+        "free_slack_minutes",
+        "critical"
+      ],
+      "title": "SourceCalculation",
+      "type": "object"
+    },
+    "SourceCapabilities": {
+      "additionalProperties": false,
+      "properties": {
+        "cpm_recalculation": {
+          "$ref": "#/$defs/SourceCapability"
+        },
+        "gantt_display": {
+          "$ref": "#/$defs/SourceCapability"
+        },
+        "resource_cost_optimization": {
+          "$ref": "#/$defs/SourceCapability"
+        },
+        "resource_leveling": {
+          "$ref": "#/$defs/SourceCapability"
+        },
+        "source_schedule_review": {
+          "$ref": "#/$defs/SourceCapability"
+        }
+      },
+      "required": [
+        "gantt_display",
+        "source_schedule_review",
+        "cpm_recalculation",
+        "resource_leveling",
+        "resource_cost_optimization"
+      ],
+      "title": "SourceCapabilities",
+      "type": "object"
+    },
+    "SourceCapability": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed": {
+          "title": "Allowed",
+          "type": "boolean"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "allowed",
+        "reasons"
+      ],
+      "title": "SourceCapability",
+      "type": "object"
+    },
+    "SourceDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "extraction_application_version": {
+          "title": "Extraction Application Version",
+          "type": "string"
+        },
+        "extraction_method": {
+          "title": "Extraction Method",
+          "type": "string"
+        },
+        "file_name": {
+          "title": "File Name",
+          "type": "string"
+        },
+        "format": {
+          "title": "Format",
+          "type": "string"
+        },
+        "opened_read_only": {
+          "title": "Opened Read Only",
+          "type": "boolean"
+        },
+        "sha256": {
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "file_name",
+        "sha256",
+        "extraction_method",
+        "extraction_application_version",
+        "opened_read_only"
+      ],
+      "title": "SourceDescriptor",
+      "type": "object"
+    },
+    "SourceFidelityChecks": {
+      "additionalProperties": false,
+      "properties": {
+        "assignments_match_source": {
+          "title": "Assignments Match Source",
+          "type": "boolean"
+        },
+        "calendars_match_source": {
+          "title": "Calendars Match Source",
+          "type": "boolean"
+        },
+        "dependencies_match_source": {
+          "title": "Dependencies Match Source",
+          "type": "boolean"
+        },
+        "project_dates_resolved_from_source_summary": {
+          "title": "Project Dates Resolved From Source Summary",
+          "type": "boolean"
+        },
+        "resources_match_source": {
+          "title": "Resources Match Source",
+          "type": "boolean"
+        },
+        "synthetic_assignments_added": {
+          "title": "Synthetic Assignments Added",
+          "type": "boolean"
+        },
+        "synthetic_project_summary_added": {
+          "title": "Synthetic Project Summary Added",
+          "type": "boolean"
+        },
+        "synthetic_resources_added": {
+          "title": "Synthetic Resources Added",
+          "type": "boolean"
+        },
+        "tasks_match_source": {
+          "title": "Tasks Match Source",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "tasks_match_source",
+        "dependencies_match_source",
+        "calendars_match_source",
+        "resources_match_source",
+        "assignments_match_source",
+        "synthetic_project_summary_added",
+        "synthetic_resources_added",
+        "synthetic_assignments_added",
+        "project_dates_resolved_from_source_summary"
+      ],
+      "title": "SourceFidelityChecks",
+      "type": "object"
+    },
+    "SourceFinding": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "object_ref": {
+          "title": "Object Ref",
+          "type": "string"
+        },
+        "object_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Object Refs",
+          "type": "array"
+        },
+        "severity": {
+          "title": "Severity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "object_ref"
+      ],
+      "title": "SourceFinding",
+      "type": "object"
+    },
+    "SourceNetworkQuality": {
+      "additionalProperties": false,
+      "properties": {
+        "open_finish_task_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Open Finish Task Ids",
+          "type": "array"
+        },
+        "open_start_task_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Open Start Task Ids",
+          "type": "array"
+        },
+        "source_schedule_violations": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Source Schedule Violations",
+          "type": "array"
+        },
+        "summary_task_dependency_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Summary Task Dependency Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "open_start_task_ids",
+        "open_finish_task_ids",
+        "summary_task_dependency_ids",
+        "source_schedule_violations"
+      ],
+      "title": "SourceNetworkQuality",
+      "type": "object"
+    },
+    "SourceProjectSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "duration_minutes": {
+          "minimum": 0,
+          "title": "Duration Minutes",
+          "type": "integer"
+        },
+        "finish": {
+          "format": "date-time",
+          "title": "Finish",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "source_unique_id": {
+          "title": "Source Unique Id",
+          "type": "integer"
+        },
+        "start": {
+          "format": "date-time",
+          "title": "Start",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_unique_id",
+        "name",
+        "start",
+        "finish",
+        "duration_minutes"
+      ],
+      "title": "SourceProjectSummary",
+      "type": "object"
+    },
+    "SourceValidation": {
+      "additionalProperties": false,
+      "properties": {
+        "capabilities": {
+          "$ref": "#/$defs/SourceCapabilities"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "issues": {
+          "items": {
+            "$ref": "#/$defs/SourceValidationIssue"
+          },
+          "title": "Issues",
+          "type": "array"
+        },
+        "network_quality": {
+          "$ref": "#/$defs/SourceNetworkQuality"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "source_fidelity_checks": {
+          "$ref": "#/$defs/SourceFidelityChecks"
+        },
+        "source_sha256": {
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "source_vs_conversion_assessment": {
+          "$ref": "#/$defs/SourceVsConversionAssessment"
+        },
+        "summary": {
+          "$ref": "#/$defs/SourceValidationSummary"
+        }
+      },
+      "required": [
+        "schema_version",
+        "snapshot_id",
+        "generated_at",
+        "source_sha256",
+        "summary",
+        "source_fidelity_checks",
+        "network_quality",
+        "capabilities",
+        "source_vs_conversion_assessment",
+        "issues"
+      ],
+      "title": "SourceValidation",
+      "type": "object"
+    },
+    "SourceValidationIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "issue_id": {
+          "title": "Issue Id",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "object_ref": {
+          "title": "Object Ref",
+          "type": "string"
+        },
+        "object_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Object Refs",
+          "type": "array"
+        },
+        "origin": {
+          "title": "Origin",
+          "type": "string"
+        },
+        "severity": {
+          "title": "Severity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "issue_id",
+        "code",
+        "origin",
+        "severity",
+        "object_ref",
+        "message"
+      ],
+      "title": "SourceValidationIssue",
+      "type": "object"
+    },
+    "SourceValidationSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "blocker_count": {
+          "minimum": 0,
+          "title": "Blocker Count",
+          "type": "integer"
+        },
+        "display_allowed": {
+          "title": "Display Allowed",
+          "type": "boolean"
+        },
+        "issue_count": {
+          "minimum": 0,
+          "title": "Issue Count",
+          "type": "integer"
+        },
+        "recalculation_allowed": {
+          "title": "Recalculation Allowed",
+          "type": "boolean"
+        },
+        "source_fidelity_valid": {
+          "title": "Source Fidelity Valid",
+          "type": "boolean"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "warning_count": {
+          "minimum": 0,
+          "title": "Warning Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "status",
+        "issue_count",
+        "blocker_count",
+        "warning_count",
+        "source_fidelity_valid",
+        "recalculation_allowed",
+        "display_allowed"
+      ],
+      "title": "SourceValidationSummary",
+      "type": "object"
+    },
+    "SourceVsConversionAssessment": {
+      "additionalProperties": false,
+      "properties": {
+        "conversion_defects_fixed_in_v2_2": {
+          "items": {
+            "$ref": "#/$defs/ConversionDefect"
+          },
+          "title": "Conversion Defects Fixed In V2 2",
+          "type": "array"
+        },
+        "engine_contract_decisions_required": {
+          "items": {
+            "$ref": "#/$defs/SourceFinding"
+          },
+          "title": "Engine Contract Decisions Required",
+          "type": "array"
+        },
+        "source_format_limitations": {
+          "items": {
+            "$ref": "#/$defs/SourceFinding"
+          },
+          "title": "Source Format Limitations",
+          "type": "array"
+        },
+        "source_mpp_findings": {
+          "items": {
+            "$ref": "#/$defs/SourceFinding"
+          },
+          "title": "Source Mpp Findings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "source_mpp_findings",
+        "source_format_limitations",
+        "conversion_defects_fixed_in_v2_2",
+        "engine_contract_decisions_required"
+      ],
+      "title": "SourceVsConversionAssessment",
+      "type": "object"
+    },
+    "TaskBaseline": {
+      "additionalProperties": false,
+      "properties": {
+        "exists": {
+          "title": "Exists",
+          "type": "boolean"
+        },
+        "finish": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Finish"
+        },
+        "start": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Start"
+        }
+      },
+      "required": [
+        "exists",
+        "start",
+        "finish"
+      ],
+      "title": "TaskBaseline",
+      "type": "object"
+    },
+    "TaskConstraint": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Date"
+        },
+        "type": {
+          "enum": [
+            "AS_SOON_AS_POSSIBLE",
+            "START_NO_EARLIER_THAN",
+            "FINISH_NO_EARLIER_THAN"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "date"
+      ],
+      "title": "TaskConstraint",
+      "type": "object"
+    },
+    "WeeklyPattern": {
+      "additionalProperties": false,
+      "properties": {
+        "FRIDAY": {
+          "$ref": "#/$defs/WorkingDay"
+        },
+        "MONDAY": {
+          "$ref": "#/$defs/WorkingDay"
+        },
+        "SATURDAY": {
+          "$ref": "#/$defs/WorkingDay"
+        },
+        "SUNDAY": {
+          "$ref": "#/$defs/WorkingDay"
+        },
+        "THURSDAY": {
+          "$ref": "#/$defs/WorkingDay"
+        },
+        "TUESDAY": {
+          "$ref": "#/$defs/WorkingDay"
+        },
+        "WEDNESDAY": {
+          "$ref": "#/$defs/WorkingDay"
+        }
+      },
+      "required": [
+        "SUNDAY",
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+        "SATURDAY"
+      ],
+      "title": "WeeklyPattern",
+      "type": "object"
+    },
+    "WorkingDay": {
+      "additionalProperties": false,
+      "properties": {
+        "day_type": {
+          "title": "Day Type",
+          "type": "string"
+        },
+        "intervals": {
+          "items": {
+            "$ref": "#/$defs/WorkingInterval"
+          },
+          "title": "Intervals",
+          "type": "array"
+        }
+      },
+      "required": [
+        "day_type",
+        "intervals"
+      ],
+      "title": "WorkingDay",
+      "type": "object"
+    },
+    "WorkingInterval": {
+      "additionalProperties": false,
+      "properties": {
+        "finish": {
+          "format": "time",
+          "title": "Finish",
+          "type": "string"
+        },
+        "start": {
+          "format": "time",
+          "title": "Start",
+          "type": "string"
+        }
+      },
+      "required": [
+        "start",
+        "finish"
+      ],
+      "title": "WorkingInterval",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "assignments": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Assignments",
+      "type": "array"
+    },
+    "calendars": {
+      "items": {
+        "$ref": "#/$defs/CanonicalCalendarV24"
+      },
+      "title": "Calendars",
+      "type": "array"
+    },
+    "capabilities": {
+      "$ref": "#/$defs/SourceCapabilities"
+    },
+    "dependencies": {
+      "items": {
+        "$ref": "#/$defs/CanonicalDependencyV24"
+      },
+      "maxItems": 25000,
+      "title": "Dependencies",
+      "type": "array"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "project": {
+      "$ref": "#/$defs/CanonicalProject"
+    },
+    "resources": {
+      "items": {
+        "$ref": "#/$defs/CanonicalResource"
+      },
+      "title": "Resources",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "canonical_schedule_v2.4",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "semantics": {
+      "$ref": "#/$defs/ScheduleSemanticsV24"
+    },
+    "snapshot_id": {
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "source": {
+      "$ref": "#/$defs/SourceDescriptor"
+    },
+    "statistics": {
+      "$ref": "#/$defs/CanonicalStatistics"
+    },
+    "tasks": {
+      "items": {
+        "$ref": "#/$defs/CanonicalTaskV23"
+      },
+      "maxItems": 5000,
+      "title": "Tasks",
+      "type": "array"
+    },
+    "validation": {
+      "$ref": "#/$defs/SourceValidation"
+    }
+  },
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "generated_at",
+    "source",
+    "semantics",
+    "project",
+    "statistics",
+    "capabilities",
+    "calendars",
+    "resources",
+    "tasks",
+    "dependencies",
+    "assignments",
+    "validation"
+  ],
+  "title": "CanonicalScheduleV24",
+  "type": "object"
+}

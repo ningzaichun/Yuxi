@@ -6,7 +6,13 @@ from collections.abc import Iterable
 
 from pydantic import ValidationError
 
-from .audit import ScheduleErrorDetail, ScheduleFieldError
+from yuxi.schedule.preflight import SchedulePreflightIssue
+
+from .audit import (
+    ScheduleErrorDetail,
+    ScheduleFieldError,
+    SchedulePreflightErrorDetail,
+)
 
 _ERROR_CODES = {
     "extra_forbidden": "UNKNOWN_FIELD",
@@ -16,6 +22,23 @@ _ERROR_CODES = {
     "timezone_aware": "INVALID_DATETIME",
     "too_long": "COLLECTION_LIMIT_EXCEEDED",
 }
+_CANONICAL_VARIANT_TAGS = {
+    "canonical_schedule_v2.2",
+    "canonical_schedule_v2.3",
+    "canonical_schedule_v2.4",
+    "canonical_schedule_v2.5",
+    "canonical_schedule_v2.6",
+    "canonical_schedule_v2.7",
+    "canonical_schedule_v2.8",
+}
+
+
+def preflight_issues_to_schedule_detail(
+    issues: tuple[SchedulePreflightIssue, ...],
+) -> SchedulePreflightErrorDetail:
+    return SchedulePreflightErrorDetail.model_validate(
+        {"errors": [issue.as_api_error() for issue in issues]}
+    )
 
 
 def validation_error_to_schedule_detail(error: ValidationError) -> ScheduleErrorDetail:
@@ -23,7 +46,7 @@ def validation_error_to_schedule_detail(error: ValidationError) -> ScheduleError
 
     errors = [
         ScheduleFieldError(
-            path=_json_pointer(item["loc"]),
+            path=_json_pointer(part for part in item["loc"] if part not in _CANONICAL_VARIANT_TAGS),
             code=_error_code(str(item["type"])),
             message=str(item["msg"]),
         )
@@ -31,7 +54,7 @@ def validation_error_to_schedule_detail(error: ValidationError) -> ScheduleError
     ]
     return ScheduleErrorDetail(
         code="SCHEDULE_CONTRACT_INVALID",
-        message="排期数据不符合 canonical_schedule_v2.2",
+        message="排期数据不符合声明的 Canonical Schedule 版本",
         errors=errors,
     )
 

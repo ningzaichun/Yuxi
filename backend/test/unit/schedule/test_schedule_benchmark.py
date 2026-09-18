@@ -2,9 +2,17 @@ from __future__ import annotations
 
 from yuxi.schedule.audit.engine import audit_schedule
 from yuxi.schedule.contracts.canonical_v2_2 import CanonicalScheduleV22
+from yuxi.schedule.contracts.canonical_v2_4 import CanonicalScheduleV24
+from yuxi.schedule.forward_engine import (
+    MULTI_CALENDAR_ENGINE_PROFILE_ID,
+    calculate_minimal_forward_schedule,
+)
 from yuxi.schedule.importers.canonical_v2_2 import import_canonical_schedule_v2_2
 
-from schedule_benchmark import build_schedule_benchmark_payload
+from schedule_benchmark import (
+    build_multi_calendar_schedule_benchmark_payload,
+    build_schedule_benchmark_payload,
+)
 
 
 def test_m4_5_benchmark_payload_is_valid_and_matches_calculated_facts() -> None:
@@ -34,3 +42,18 @@ def test_m4_5_benchmark_payload_is_valid_and_matches_calculated_facts() -> None:
         "DEPENDENCY_CYCLE",
         "ZERO_LAG_DATE_VIOLATION",
     }
+
+
+def test_multi_calendar_benchmark_payload_runs_profile_v11() -> None:
+    contract = CanonicalScheduleV24.model_validate(
+        build_multi_calendar_schedule_benchmark_payload()
+    )
+
+    result = calculate_minimal_forward_schedule(
+        contract,
+        engine_profile_id=MULTI_CALENDAR_ENGINE_PROFILE_ID,
+    )
+
+    assert result["status"] == "calculated"
+    assert result["engine_version"] == "11.0.0"
+    assert len(result["task_dates"]) == 1_000

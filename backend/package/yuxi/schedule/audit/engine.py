@@ -7,7 +7,7 @@ import json
 from collections import Counter
 from dataclasses import replace
 
-from yuxi.schedule.audit.context import AuditContext
+from yuxi.schedule.audit.context import AuditContext, AuditOptions
 from yuxi.schedule.audit.rules import RULES
 from yuxi.schedule.contracts.audit import AuditResult, IssueSummary
 from yuxi.schedule.domain.models import AuditExecution, AuditFinding, ScheduleSnapshot
@@ -21,8 +21,9 @@ def audit_schedule(
     *,
     schedule_snapshot_id: str,
     audit_run_id: str,
+    options: AuditOptions | None = None,
 ) -> AuditExecution:
-    context = AuditContext.build(schedule)
+    context = AuditContext.build(schedule, options)
     findings = [finding for rule in RULES for finding in rule(context)]
     normalized = tuple(sorted((_with_issue_key(item) for item in findings), key=_sort_key))
     counts = Counter(item.severity for item in normalized)

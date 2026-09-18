@@ -1,5 +1,16 @@
-const SOURCE_SCHEMA_VERSION = 'microsoft_project_interchange_mock_v1.1'
-const CANONICAL_SCHEMA_VERSION = 'canonical_schedule_v2.2'
+const SOURCE_SCHEMA_VERSIONS = new Set([
+  'microsoft_project_interchange_v1.1',
+  'microsoft_project_interchange_mock_v1.1'
+])
+const CANONICAL_SCHEMA_VERSIONS = new Set([
+  'canonical_schedule_v2.2',
+  'canonical_schedule_v2.3',
+  'canonical_schedule_v2.4',
+  'canonical_schedule_v2.5',
+  'canonical_schedule_v2.6',
+  'canonical_schedule_v2.7',
+  'canonical_schedule_v2.8'
+])
 
 export const MAX_SCHEDULE_JSON_BYTES = 10 * 1024 * 1024
 
@@ -10,7 +21,7 @@ export const parseScheduleDocument = (document, fileName = '') => {
   if (!document || typeof document !== 'object' || Array.isArray(document)) {
     throw new Error('排期文件根节点必须是 JSON 对象。')
   }
-  if (document.schema_version === SOURCE_SCHEMA_VERSION) {
+  if (SOURCE_SCHEMA_VERSIONS.has(document.schema_version)) {
     return {
       kind: 'import',
       document,
@@ -22,7 +33,7 @@ export const parseScheduleDocument = (document, fileName = '') => {
       summary: scheduleSummary(document)
     }
   }
-  if (document.schema_version === CANONICAL_SCHEMA_VERSION) {
+  if (CANONICAL_SCHEMA_VERSIONS.has(document.schema_version)) {
     return {
       kind: 'snapshot',
       document,
@@ -58,7 +69,10 @@ export const scheduleSubmissionErrorMessage = (error) => {
   if (status === 422 && detail?.errors?.length) {
     const errors = detail.errors
       .slice(0, 3)
-      .map((item) => `${item.path} ${item.message}`)
+      .map((item) => {
+        const location = item.path || item.object_ref || item.object_refs?.join('、') || '排期结构'
+        return `${location} ${item.message}`
+      })
       .join('；')
     const suffix = detail.errors.length > 3 ? `；另有 ${detail.errors.length - 3} 项错误` : ''
     return `${detail.message || '排期数据校验失败'}：${errors}${suffix}`

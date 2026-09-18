@@ -15,7 +15,7 @@ from yuxi.schedule.audit.engine import audit_schedule
 from yuxi.schedule.contracts.dependency_decision import DependencyDecisionDraft
 from yuxi.schedule.contracts.envelope import ScheduleSnapshotSubmission
 from yuxi.schedule.contracts.import_v1 import ScheduleImportEnvelope
-from yuxi.schedule.importers import build_default_schedule_import_registry, import_canonical_schedule_v2_2
+from yuxi.schedule.importers import build_default_schedule_import_registry, import_canonical_schedule
 from yuxi.schedule.importers.registry import ScheduleImportAdapterRegistry
 from yuxi.schedule.storage import SCHEDULE_BUCKET, ScheduleSnapshotStore
 from yuxi.utils.datetime_utils import utc_now_naive
@@ -24,6 +24,10 @@ SUBMISSION_LEASE_SECONDS = 60
 SUBMISSION_POLL_INTERVAL_SECONDS = 0.05
 REVIEW_CONTEXT_ISSUE_LIMIT = 50
 REVIEW_CONTEXT_OBJECT_REF_LIMIT = 10
+DEPENDENCY_DECISION_RULE_IDS = {
+    "SUMMARY_TASK_DEPENDENCY",
+    "INACTIVE_TASK_DEPENDENCY",
+}
 
 
 class ScheduleConflictError(Exception):
@@ -119,7 +123,7 @@ class ScheduleAuditService:
 
         # Audit runs before external writes so a deterministic domain failure
         # cannot leave a reserved database row or an orphaned object.
-        schedule = import_canonical_schedule_v2_2(submission.snapshot)
+        schedule = import_canonical_schedule(submission.snapshot)
         execution = audit_schedule(
             schedule,
             schedule_snapshot_id=proposed_snapshot_id,
@@ -398,6 +402,7 @@ class ScheduleAuditService:
                 }
                 for task in source["tasks"]
                 if task["task_type"] == "activity"
+                and task.get("active", True)
                 and task["scheduling_mode"] == "automatic"
                 and task["duration_minutes"] > 0
             ],
@@ -471,24 +476,14 @@ class ScheduleAuditService:
                 key=lambda item: item["dependency_id"],
             ),
             "date_check_scope": {
-                "checked_rule": "仅 lag_minutes == 0 的 FS/SS/FF/SF 来源日期关系",
-                "non_zero_lag": "未检查，原因 LAG_CALENDAR_POLICY_UNSPECIFIED",
+                "checked_rule": "零 Lag 与冻结策略下的有符号 Lag FS/SS/FF/SF 来源日期关系",
+                "non_zero_lag": "正负 Lag 均按统一项目日历工作分钟检查；未冻结策略保持跳过",
             },
         }
 
     async def get_dependency_workbench(self, owner_uid: str, issue_id: str) -> dict[str, Any]:
-        issue, snapshot = await self._load_summary_dependency_issue(owner_uid, issue_id)
-        tasks_by_id = {task["task_id"]: task for task in snapshot["tasks"]}
-        dependency = next(item for item in snapshot["dependencies"] if item["dependency_id"] == issue.object_refs[0])
-        predecessor_ids = _subtree_task_ids(tasks_by_id, dependency["predecessor_task_id"])
-        successor_ids = _subtree_task_ids(tasks_by_id, dependency["successor_task_id"])
-        predecessor_candidates = _boundary_leaf_ids(
-            tasks_by_id, snapshot["dependencies"], predecessor_ids, boundary="exit"
-        )
-        successor_candidates = _boundary_leaf_ids(
-            tasks_by_id, snapshot["dependencies"], successor_ids, boundary="entry"
-        )
-        context_ids = predecessor_ids | successor_ids
+        issue, snapshot = await self._load_dependency_issue(owner_uid, issue_id)
+        scope = _dependency_workbench_scope(issue, snapshot)
         decision = await self._repository.get_dependency_decision(owner_uid, issue_id)
         candidate = (
             await self._repository.get_candidate_by_dependency_decision(owner_uid, decision.decision_id)
@@ -497,22 +492,34 @@ class ScheduleAuditService:
         )
         return {
             "issue": _issue_record(issue),
-            "source_dependency": dependency,
+            "source_dependency": scope["source_dependencies"][0],
+            "source_dependencies": scope["source_dependencies"],
             "predecessor": {
-                "root_task_id": dependency["predecessor_task_id"],
-                "tasks": [_workbench_task(task) for task in snapshot["tasks"] if task["task_id"] in predecessor_ids],
-                "candidate_task_ids": predecessor_candidates,
+                "root_task_id": scope["predecessor_root_task_id"],
+                "tasks": [
+                    _workbench_task(task)
+                    for task in snapshot["tasks"]
+                    if task["task_id"] in scope["predecessor_ids"]
+                ],
+                "candidate_task_ids": scope["predecessor_candidates"],
             },
             "successor": {
-                "root_task_id": dependency["successor_task_id"],
-                "tasks": [_workbench_task(task) for task in snapshot["tasks"] if task["task_id"] in successor_ids],
-                "candidate_task_ids": successor_candidates,
+                "root_task_id": scope["successor_root_task_id"],
+                "tasks": [
+                    _workbench_task(task)
+                    for task in snapshot["tasks"]
+                    if task["task_id"] in scope["successor_ids"]
+                ],
+                "candidate_task_ids": scope["successor_candidates"],
             },
             "direct_network": [
                 item
                 for item in snapshot["dependencies"]
-                if item["dependency_id"] != dependency["dependency_id"]
-                and (item["predecessor_task_id"] in context_ids or item["successor_task_id"] in context_ids)
+                if item["dependency_id"] not in scope["source_dependency_ids"]
+                and (
+                    item["predecessor_task_id"] in scope["context_ids"]
+                    or item["successor_task_id"] in scope["context_ids"]
+                )
             ],
             "decision": _dependency_decision_record(decision) if decision else None,
             "candidate": _dependency_candidate_summary(candidate) if candidate else None,
@@ -521,7 +528,7 @@ class ScheduleAuditService:
     async def save_dependency_decision(
         self, owner_uid: str, issue_id: str, draft: DependencyDecisionDraft
     ) -> dict[str, Any]:
-        issue, snapshot = await self._load_summary_dependency_issue(owner_uid, issue_id)
+        issue, snapshot = await self._load_dependency_issue(owner_uid, issue_id)
         self._validate_dependency_decision(issue, snapshot, draft, require_complete=False)
         try:
             record = await self._repository.save_dependency_decision(
@@ -534,7 +541,7 @@ class ScheduleAuditService:
         return _dependency_decision_record(record)
 
     async def confirm_dependency_decision(self, owner_uid: str, issue_id: str) -> dict[str, Any]:
-        issue, snapshot = await self._load_summary_dependency_issue(owner_uid, issue_id)
+        issue, snapshot = await self._load_dependency_issue(owner_uid, issue_id)
         record = await self._repository.get_dependency_decision(owner_uid, issue_id)
         if record is None:
             raise ScheduleDecisionInvalidError
@@ -554,9 +561,9 @@ class ScheduleAuditService:
             raise ScheduleDecisionInvalidError
         return _dependency_decision_record(confirmed)
 
-    async def _load_summary_dependency_issue(self, owner_uid: str, issue_id: str) -> tuple[Any, dict[str, Any]]:
+    async def _load_dependency_issue(self, owner_uid: str, issue_id: str) -> tuple[Any, dict[str, Any]]:
         issue = await self._repository.get_issue(owner_uid, issue_id)
-        if issue is None or issue.rule_id != "SUMMARY_TASK_DEPENDENCY" or not issue.object_refs:
+        if issue is None or issue.rule_id not in DEPENDENCY_DECISION_RULE_IDS or not issue.object_refs:
             raise ScheduleNotFoundError
         record = await self._repository.get_ready(owner_uid, issue.schedule_snapshot_id)
         if record is None:
@@ -566,7 +573,7 @@ class ScheduleAuditService:
         except Exception as exc:
             raise ScheduleDependencyError from exc
         dependency_ids = {item["dependency_id"] for item in snapshot["dependencies"]}
-        if issue.object_refs[0] not in dependency_ids:
+        if not set(issue.object_refs) <= dependency_ids:
             raise ScheduleDependencyError
         return issue, snapshot
 
@@ -582,16 +589,9 @@ class ScheduleAuditService:
             if require_complete and not draft.reason.strip():
                 raise ScheduleDecisionInvalidError
             return
-        tasks_by_id = {task["task_id"]: task for task in snapshot["tasks"]}
-        dependency = next(item for item in snapshot["dependencies"] if item["dependency_id"] == issue.object_refs[0])
-        predecessor_ids = _subtree_task_ids(tasks_by_id, dependency["predecessor_task_id"])
-        successor_ids = _subtree_task_ids(tasks_by_id, dependency["successor_task_id"])
-        allowed_predecessors = set(
-            _boundary_leaf_ids(tasks_by_id, snapshot["dependencies"], predecessor_ids, boundary="exit")
-        )
-        allowed_successors = set(
-            _boundary_leaf_ids(tasks_by_id, snapshot["dependencies"], successor_ids, boundary="entry")
-        )
+        scope = _dependency_workbench_scope(issue, snapshot)
+        allowed_predecessors = set(scope["predecessor_candidates"])
+        allowed_successors = set(scope["successor_candidates"])
         if (
             not set(draft.predecessor_task_ids) <= allowed_predecessors
             or not set(draft.successor_task_ids) <= allowed_successors
@@ -750,8 +750,12 @@ def _rule_context(rule_id: str) -> dict[str, str]:
         "OPEN_START": "叶子任务没有前置关系。",
         "OPEN_FINISH": "叶子任务没有后续关系。",
         "SUMMARY_TASK_DEPENDENCY": "依赖涉及汇总任务。",
+        "INACTIVE_TASK_DEPENDENCY": "依赖涉及 inactive 任务，必须显式选择活动叶子关系。",
         "ZERO_LAG_DATE_VIOLATION": "零 Lag 关系不满足来源日期锚点。",
-        "LAG_CALENDAR_POLICY_UNSPECIFIED": "非零 Lag 的工作日历策略未冻结，因此未执行日期合规检查。",
+        "LAG_DATE_VIOLATION": "非零 Lag 关系不满足统一项目日历工作分钟锚点。",
+        "LAG_CALENDAR_POLICY_UNSPECIFIED": (
+            "存在未检查的非零 Lag 关系（策略未冻结或日历口径不支持），未执行日期合规检查。"
+        ),
     }
     return {
         "rule_id": rule_id,
@@ -773,6 +777,92 @@ def _subtree_task_ids(tasks_by_id: dict[str, dict[str, Any]], root_task_id: str)
         task_ids.update(children)
 
 
+def _dependency_workbench_scope(issue: Any, snapshot: dict[str, Any]) -> dict[str, Any]:
+    tasks_by_id = {task["task_id"]: task for task in snapshot["tasks"]}
+    source_dependency_ids = set(issue.object_refs)
+    source_dependencies = [
+        dependency
+        for dependency in snapshot["dependencies"]
+        if dependency["dependency_id"] in source_dependency_ids
+    ]
+    if issue.rule_id == "SUMMARY_TASK_DEPENDENCY":
+        dependency = source_dependencies[0]
+        predecessor_roots = [dependency["predecessor_task_id"]]
+        successor_roots = [dependency["successor_task_id"]]
+    else:
+        inactive_task_ids = {
+            task_id
+            for task_id in issue.evidence.get("inactive_task_ids", [])
+            if task_id in tasks_by_id and not tasks_by_id[task_id].get("active", True)
+        }
+        predecessor_roots = sorted(
+            {
+                dependency["predecessor_task_id"]
+                for dependency in source_dependencies
+                if dependency["successor_task_id"] in inactive_task_ids
+                and tasks_by_id[dependency["predecessor_task_id"]].get("active", True)
+            }
+        )
+        successor_roots = sorted(
+            {
+                dependency["successor_task_id"]
+                for dependency in source_dependencies
+                if dependency["predecessor_task_id"] in inactive_task_ids
+                and tasks_by_id[dependency["successor_task_id"]].get("active", True)
+            }
+        )
+        if not predecessor_roots or not successor_roots:
+            predecessor_roots = predecessor_roots or sorted(inactive_task_ids)
+            successor_roots = successor_roots or sorted(inactive_task_ids)
+
+    predecessor_ids = set().union(
+        *(_subtree_task_ids(tasks_by_id, task_id) for task_id in predecessor_roots)
+    )
+    successor_ids = set().union(
+        *(_subtree_task_ids(tasks_by_id, task_id) for task_id in successor_roots)
+    )
+    predecessor_candidates = sorted(
+        {
+            task_id
+            for root_id in predecessor_roots
+            for task_id in _boundary_leaf_ids(
+                tasks_by_id,
+                snapshot["dependencies"],
+                _subtree_task_ids(tasks_by_id, root_id),
+                boundary="exit",
+            )
+        }
+    )
+    successor_candidates = sorted(
+        {
+            task_id
+            for root_id in successor_roots
+            for task_id in _boundary_leaf_ids(
+                tasks_by_id,
+                snapshot["dependencies"],
+                _subtree_task_ids(tasks_by_id, root_id),
+                boundary="entry",
+            )
+        }
+    )
+    inactive_context_ids = {
+        task_id
+        for task_id in issue.evidence.get("inactive_task_ids", [])
+        if task_id in tasks_by_id
+    }
+    return {
+        "source_dependency_ids": source_dependency_ids,
+        "source_dependencies": source_dependencies,
+        "predecessor_root_task_id": predecessor_roots[0],
+        "successor_root_task_id": successor_roots[0],
+        "predecessor_ids": predecessor_ids,
+        "successor_ids": successor_ids,
+        "predecessor_candidates": predecessor_candidates,
+        "successor_candidates": successor_candidates,
+        "context_ids": predecessor_ids | successor_ids | inactive_context_ids,
+    }
+
+
 def _boundary_leaf_ids(
     tasks_by_id: dict[str, dict[str, Any]],
     dependencies: list[dict[str, Any]],
@@ -780,7 +870,12 @@ def _boundary_leaf_ids(
     *,
     boundary: str,
 ) -> list[str]:
-    leaf_ids = {task_id for task_id in task_ids if tasks_by_id[task_id]["task_type"] != "summary"}
+    leaf_ids = {
+        task_id
+        for task_id in task_ids
+        if tasks_by_id[task_id]["task_type"] != "summary"
+        and tasks_by_id[task_id].get("active", True)
+    }
     if boundary == "entry":
         connected = {
             item["successor_task_id"]
@@ -804,6 +899,7 @@ def _workbench_task(task: dict[str, Any]) -> dict[str, Any]:
         "wbs": task["wbs"],
         "outline_level": task["outline_level"],
         "task_type": task["task_type"],
+        "active": task.get("active", True),
     }
 
 
