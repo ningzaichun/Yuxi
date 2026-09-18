@@ -108,7 +108,7 @@ git push origin feature/amazing-feature
 示例：
 
 ```bash
-uv run pytest backend/test/unit
+uv run --project backend --group test --env-file .env pytest backend/test/unit
 ```
 
 测试脚本建议放在 `backend/test` 下。

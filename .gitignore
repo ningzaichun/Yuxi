@@ -11,6 +11,7 @@ __pycache__/
 ### Vue gitignore
 dist
 node_modules
+.pnpm-store/
 
 ### common gitignore
 .DS_Store

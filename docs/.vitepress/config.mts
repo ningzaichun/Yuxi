@@ -9,7 +9,7 @@ export default defineConfig({
   description: "语析",
   base: '/Yuxi/',
   head: [['link', { rel: 'icon', type: 'image/png', href: '/Yuxi/k-ai-favicon.png' }]],
-  srcExclude: ['project_analysis/**'],
+  srcExclude: ['project_analysis/**', 'vibe/**'],
   ignoreDeadLinks: [
     /localhost/,
     /CONTRIBUTING$/,

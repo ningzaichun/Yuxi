@@ -13,7 +13,7 @@
 
 - `backend/test/integration`
   - 真实 API 集成测试
-  - 依赖 `docker compose up -d` 后的运行环境
+  - 依赖宿主机 API 与开发用远程基础设施；启动方式见[本地开发指南](./local-development.md)
   - 统一通过真实 HTTP 接口验证认证、权限、参数和副作用
 
 - `backend/test/e2e`
@@ -131,39 +131,41 @@
 
 ## 9. 运行方式
 
-启动环境：
+单元测试不需要启动服务。集成测试和 E2E 按[本地开发指南](./local-development.md)启动宿主机 API、Worker、Web 与本机 Sandbox Provisioner，不要同时启动完整 Compose 中的同名服务。
 
-```bash
-docker compose up -d
-docker ps
-docker logs api-dev --tail 100
+以下命令均从仓库根目录运行。集成测试和 E2E 开始前检查开发环境，并查看 API/Worker 所在终端日志：
+
+```powershell
+.\scripts\split-deploy\Test-HostDev.ps1
 ```
 
 运行单元测试：
 
 ```bash
-docker compose exec api uv run --group test pytest test/unit -m "not slow"
+uv run --project backend --group test pytest backend/test/unit -m "not slow"
 ```
 
 运行集成测试：
 
 ```bash
-docker compose exec api uv run --group test pytest test/integration
+uv run --project backend --group test --env-file .env pytest backend/test/integration
 ```
 
 运行 E2E：
 
 ```bash
-docker compose exec api uv run --group test pytest test/e2e -m e2e
+uv run --project backend --group test --env-file .env pytest backend/test/e2e -m e2e
 ```
 
 运行全部测试：
 
 ```bash
-docker compose exec api uv run --group test pytest test
+uv run --project backend --group test --env-file .env pytest backend/test
 ```
 
-也可以使用：
+集成测试与 E2E 使用本地 `.env` 中的测试配置，具体变量见对应层级的 `conftest.py`。凭据不得写入测试文件或文档。
+
+只有主动选择完整 Docker Compose 开发环境时，才使用以下容器测试入口；它们会执行 `docker compose exec api`，不适用于默认宿主机开发环境：
 
 ```bash
 backend/test/run_tests.sh unit

@@ -77,4 +77,4 @@ Yuxi 是一个面向 RAG、知识图谱和多智能体工作流的知识库平�
 - **权限**：前端路由守卫提供页面级跳转，后端认证与权限检查仍是最终边界。
 - **状态与存储**：Postgres 存业务与知识库元数据，LangGraph checkpoint 使用独立连接池或 SQLite fallback，Redis 承载运行事件和取消信号，MinIO/本地 `saves`/沙盒目录承载文件。
 - **文档处理**：上传文件先进入解析和分块边界，再进入知识库实现；解析插件和知识库实现应保持可替换。
-- **观测与调试**：开发阶段优先使用 `docker logs api-dev --tail 100`、worker 日志和现有测试分层定位问题；Langfuse 相关逻辑集中在服务层和智能体运行配置附近。
+- **观测与调试**：开发阶段优先查看宿主机 API/Worker 终端日志，Sandbox 问题查看 `docker logs sandbox-provisioner` 和对应 Runtime 容器日志，并结合现有测试分层定位问题；Langfuse 相关逻辑集中在服务层和智能体运行配置附近。
